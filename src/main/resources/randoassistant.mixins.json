@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.bawnorton.randoassistant.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "BlockMixin",
+    "LivingEntityMixin",
+    "MinecraftServerMixin",
+    "ServerWorldAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+	}
+}
