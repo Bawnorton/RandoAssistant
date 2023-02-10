@@ -11,8 +11,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import org.lwjgl.glfw.GLFW;
 
@@ -63,8 +61,12 @@ public class RandoAssistantClient implements ClientModInitializer {
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while(keyBinding.wasPressed()) {
-				for(Map.Entry<Identifier, List<ItemStack>> entry : RandoAssistant.getCurrentLootTables()) {
-					RandoAssistant.LOGGER.info("Dropped stacks for {}: {}", entry.getKey(), entry.getValue());
+				LootTableMap lootTableMap = RandoAssistant.getCurrentLootTables();
+				for(Map.Entry<String, List<String>> lootEntry: lootTableMap.getSerializedLootTableMap().entrySet()) {
+					RandoAssistant.LOGGER.info("Loot table: " + lootEntry.getKey());
+					for(String item: lootEntry.getValue()) {
+						RandoAssistant.LOGGER.info("Item: " + item);
+					}
 				}
 			}
 		});

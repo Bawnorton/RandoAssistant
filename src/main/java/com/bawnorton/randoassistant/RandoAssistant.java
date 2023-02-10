@@ -5,6 +5,8 @@ import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.block.Block;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContext;
@@ -28,13 +30,6 @@ public class RandoAssistant implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LOGGER.info("RandoAssistant Initialised");
-
-		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
-			if (world.isClient) return;
-			Identifier lootTableId = state.getBlock().getLootTableId();
-			if (lootTableId == null) return;
-			addLootTable(state.getBlock().getLootTableId());
-		});
 	}
 
 	public static LootTableMap getCurrentLootTables() {
@@ -45,14 +40,11 @@ public class RandoAssistant implements ModInitializer {
 		LOOT_TABLES.put(currentServer, lootTables);
 	}
 
-	public static void addLootTable(Identifier lootTableId) {
-		LootTable lootTable = currentServer.getLootManager().getTable(lootTableId);
-		LootContext lootContext = new LootContext.Builder(currentServer.getWorld(World.OVERWORLD)).build(LootContextType.create().build());
-		List<ItemStack> drops = lootTable.generateLoot(lootContext);
-		addLootTable(lootTableId, drops);
+	public static void addLootTable(Block block, List<ItemStack> table) {
+		RandoAssistant.LOOT_TABLES.get(currentServer).addLootTable(block, table);
 	}
 
-	public static void addLootTable(Identifier lootTableId, List<ItemStack> table) {
-		RandoAssistant.LOOT_TABLES.get(currentServer).addLootTable(lootTableId, table);
+	public static void addLootTable(EntityType<?> entityType, List<ItemStack> table) {
+		RandoAssistant.LOOT_TABLES.get(currentServer).addLootTable(entityType, table);
 	}
 }
