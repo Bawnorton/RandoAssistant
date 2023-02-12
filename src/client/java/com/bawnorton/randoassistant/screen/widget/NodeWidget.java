@@ -25,18 +25,16 @@ import org.joml.Vector3f;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Objects;
 
 public class NodeWidget extends DrawableHelper {
-    private static int SIZE;
     private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
-
+    public static NodeWidget selectedNode;
+    private static int SIZE;
     private final int x;
     private final int y;
-    private Rectangle2D.Float bounds;
-    private boolean hovered;
     private final LootTableGraph.Vertex node;
-
-    public static NodeWidget selectedNode;
+    private Rectangle2D.Float bounds;
 
     public NodeWidget(LootTableGraph.Vertex node, Point2D location) {
         this.node = node;
@@ -87,15 +85,15 @@ public class NodeWidget extends DrawableHelper {
         DiffuseLighting.enableGuiDepthLighting();
     }
 
-    public Tooltip render(MatrixStack matrices, int x, int y, float scale, int mouseX, int mouseY) {
+    public Tooltip render(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
         Tooltip tooltip = null;
 
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
 
         bounds = new Rectangle2D.Float(x - SIZE / 2f - 5, y - SIZE / 2f - 5, SIZE, SIZE);
-        hovered = bounds.contains(mouseX, mouseY);
-        if(hovered) {
+        boolean hovered = bounds.contains(mouseX, mouseY);
+        if (hovered) {
             RenderSystem.setShaderColor(0.75F, 0.75F, 0.75F, 1F);
             tooltip = Tooltip.of(node.getTooltip());
         } else if (node.isHighlightedAsTarget()) {
@@ -110,12 +108,12 @@ public class NodeWidget extends DrawableHelper {
 
         this.drawTexture(matrices, x - SIZE / 2 - 5, y - SIZE / 2 - 5, 0, 128 + 26, SIZE, SIZE);
 
-        if(node.isItem()) {
+        if (node.isItem()) {
             ItemStack icon = new ItemStack(node.getItem());
             MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
         } else if (node.isBlock()) {
             Block block = node.getBlock();
-            if(block instanceof FlowerPotBlock flowerPotBlock) {
+            if (block instanceof FlowerPotBlock flowerPotBlock) {
                 ItemStack icon = new ItemStack(flowerPotBlock.getContent().asItem());
                 ItemStack pot = new ItemStack(Items.FLOWER_POT);
                 MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
@@ -138,21 +136,21 @@ public class NodeWidget extends DrawableHelper {
                 MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
             } else {
                 ItemStack icon = new ItemStack(block.asItem());
-                if(icon.getItem() == Items.AIR) icon = new ItemStack(Items.BARRIER);
+                if (icon.getItem() == Items.AIR) icon = new ItemStack(Items.BARRIER);
                 MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
             }
         } else if (node.isEntity()) {
             EntityType<?> entityType = node.getEntityType();
             MinecraftClient client = MinecraftClient.getInstance();
-            drawEntity(x - 5, y + 2, (LivingEntity) entityType.create(client.world));
+            drawEntity(x - 5, y + 2, (LivingEntity) Objects.requireNonNull(entityType.create(client.world)));
         }
         return tooltip;
     }
 
     public InputResult handleMouseDown(int x, int y) {
-        if(bounds == null) return InputResult.IGNORED;
-        if(bounds.contains(x, y)) {
-            if(selectedNode != null) {
+        if (bounds == null) return InputResult.IGNORED;
+        if (bounds.contains(x, y)) {
+            if (selectedNode != null) {
                 selectedNode.unhighlightChildren();
                 selectedNode.unhighlightParents();
             }

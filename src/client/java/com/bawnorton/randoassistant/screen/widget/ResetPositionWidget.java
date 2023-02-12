@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.screen.widget;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.minecraft.client.MinecraftClient;
@@ -18,8 +17,7 @@ import java.awt.geom.Rectangle2D;
 public class ResetPositionWidget extends DrawableHelper {
     private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
     Rectangle2D.Float bounds;
-    GraphDisplay graphDisplay;
-    private final int SIZE = 26;
+    final GraphDisplay graphDisplay;
 
     public ResetPositionWidget(GraphDisplay graphDisplay) {
         super();
@@ -29,6 +27,7 @@ public class ResetPositionWidget extends DrawableHelper {
     public Tooltip render(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
+        int SIZE = 26;
         bounds = new Rectangle2D.Float(x - SIZE / 2f - 5, y - SIZE / 2f - 5, SIZE, SIZE);
         Tooltip tooltip = null;
         if (bounds.contains(mouseX, mouseY)) {

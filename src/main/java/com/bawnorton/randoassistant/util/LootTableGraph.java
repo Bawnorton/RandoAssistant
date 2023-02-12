@@ -119,8 +119,8 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         return getChildren(vertex, new HashSet<>(), new HashSet<>());
     }
 
-    public class Vertex implements graph.elements.Vertex {
-        private LootTableType type;
+    public class Vertex implements grapher.graph.elements.Vertex {
+        private final LootTableType type;
         private boolean highlightAsParent = false;
         private boolean highlightAsChild = false;
         private boolean highlightAsTarget = false;
@@ -174,28 +174,13 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             return type.isBlock ? type.getBlock() : type.isItem ? type.getItem() : type.getEntityType();
         }
 
-        @Override
-        public void setSize(Dimension dimension) {
-        }
-
-        @Override
-        public void setContent(Object o) {
-            if(o instanceof Block) {
-                type = new LootTableType((Block) o);
-            } else if (o instanceof Item) {
-                type = new LootTableType((Item) o);
-            } else if (o instanceof EntityType) {
-                type = new LootTableType((EntityType<?>) o);
-            }
-        }
-
         public Text getTooltip() {
             if(type.isBlock) {
-                return type.getBlock().getName();
+                return Objects.requireNonNull(type.getBlock()).getName();
             } else if (type.isItem) {
-                return type.getItem().getName();
+                return Objects.requireNonNull(type.getItem()).getName();
             } else {
-                return type.getEntityType().getName();
+                return Objects.requireNonNull(type.getEntityType()).getName();
             }
         }
 
@@ -264,9 +249,9 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         }
     }
 
-    public static class Edge extends DefaultEdge implements graph.elements.Edge<Vertex> {
-        private Vertex origin;
-        private Vertex destination;
+    public static class Edge extends DefaultEdge implements grapher.graph.elements.Edge<Vertex> {
+        private final Vertex origin;
+        private final Vertex destination;
 
         public Edge(Vertex origin, Vertex destination) {
             this.origin = origin;
@@ -286,25 +271,6 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         @Override
         public Vertex getDestination() {
             return destination;
-        }
-
-        @Override
-        public void setOrigin(Vertex vertex) {
-            origin = vertex;
-        }
-
-        @Override
-        public void setDestination(Vertex vertex) {
-            destination = vertex;
-        }
-
-        @Override
-        public int getWeight() {
-            return 0;
-        }
-
-        @Override
-        public void setWeight(int i) {
         }
 
         @Override

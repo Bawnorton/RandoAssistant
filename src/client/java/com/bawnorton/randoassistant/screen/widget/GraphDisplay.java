@@ -3,7 +3,7 @@ package com.bawnorton.randoassistant.screen.widget;
 import com.bawnorton.randoassistant.util.LootTableGraph;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.lambdaurora.spruceui.util.ScissorManager;
-import graph.drawing.Drawing;
+import grapher.graph.drawing.Drawing;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.minecraft.client.MinecraftClient;
@@ -18,18 +18,18 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class GraphDisplay extends WWidget {
     private final Map<LootTableGraph.Edge, List<Point2D>> edgeLocations;
     private final List<NodeWidget> nodeWidgets = new ArrayList<>();
     private final Rectangle2D.Float bounds;
     private final ResetPositionWidget resetPositionWidget;
+    private final int initialOffsetX = 35;
+    private final int initialOffsetY = 90;
     public float xOffset = 0;
     public float yOffset = 0;
     private float scale = 1;
-
-    private final int initialOffsetX = 35;
-    private final int initialOffsetY = 90;
 
     public GraphDisplay(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
         edgeLocations = drawing.getEdgeMappings();
@@ -42,7 +42,7 @@ public class GraphDisplay extends WWidget {
         this.height = screenHeight;
         bounds = new Rectangle2D.Float(0, 0, width, height);
 
-        for (LootTableGraph.Edge edge: edgeLocations.keySet()) {
+        for (LootTableGraph.Edge edge : edgeLocations.keySet()) {
             LootTableGraph.Vertex source = edge.getOrigin();
             LootTableGraph.Vertex target = edge.getDestination();
             Point2D sourceLocation = edgeLocations.get(edge).get(0);
@@ -78,24 +78,24 @@ public class GraphDisplay extends WWidget {
     public void inputChanged(String query) {
         NodeWidget bestMatch = null;
         int bestMatchNum = 0;
-        for (NodeWidget nodeWidget: nodeWidgets) {
+        for (NodeWidget nodeWidget : nodeWidgets) {
             nodeWidget.unhighlightParents();
             nodeWidget.unhighlightChildren();
             String tooltip = nodeWidget.getNode().getTooltip().getString().toLowerCase();
             int distance = levenshteinDistance(tooltip, query.toLowerCase());
-            if(distance < 5 && (bestMatch == null || distance < bestMatchNum)) {
+            if (distance < 5 && (bestMatch == null || distance < bestMatchNum)) {
                 bestMatch = nodeWidget;
                 bestMatchNum = distance;
             }
         }
 
-        if(query.isEmpty()) {
+        if (query.isEmpty()) {
             resetOffset();
             return;
         }
-        if(bestMatch != null) {
-            xOffset = - bestMatch.getX() - initialOffsetX + MinecraftClient.getInstance().getWindow().getWidth() / 4f;
-            yOffset = - bestMatch.getY() - initialOffsetY + MinecraftClient.getInstance().getWindow().getHeight() / 4f;
+        if (bestMatch != null) {
+            xOffset = -bestMatch.getX() - initialOffsetX + MinecraftClient.getInstance().getWindow().getWidth() / 4f;
+            yOffset = -bestMatch.getY() - initialOffsetY + MinecraftClient.getInstance().getWindow().getHeight() / 4f;
             bestMatch.highlightParents();
             bestMatch.highlightChildren();
             NodeWidget.selectedNode = bestMatch;
@@ -105,7 +105,7 @@ public class GraphDisplay extends WWidget {
 
     public void reduceHorizontalDistance() {
         double averageNodeWidth = 10;
-        for(LootTableGraph.Edge edge: edgeLocations.keySet()) {
+        for (LootTableGraph.Edge edge : edgeLocations.keySet()) {
             List<Point2D> points = edgeLocations.get(edge);
             Point2D source = points.get(0);
             Point2D target = points.get(1);
@@ -118,9 +118,9 @@ public class GraphDisplay extends WWidget {
     public InputResult onMouseDown(int x, int y, int button) {
         InputResult result = InputResult.IGNORED;
         for (NodeWidget value : nodeWidgets) {
-            if(button == 1) result = value.handleMouseDown(x, y);
+            if (button == 1) result = value.handleMouseDown(x, y);
         }
-        if(result == InputResult.IGNORED) {
+        if (result == InputResult.IGNORED) {
             result = resetPositionWidget.handleMouseDown(x, y);
         }
         return result;
@@ -136,8 +136,8 @@ public class GraphDisplay extends WWidget {
     @Override
     public InputResult onMouseScroll(int x, int y, double amount) {
         scale += amount / 10;
-        if(scale < 0.5) scale = 0.5f;
-        if(scale > 2) scale = 2;
+        if (scale < 0.5) scale = 0.5f;
+        if (scale > 2) scale = 2;
         return InputResult.PROCESSED;
     }
 
@@ -159,18 +159,23 @@ public class GraphDisplay extends WWidget {
         bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         int width = 1;
 
-        if(x1 > x2) {
+        if (x1 > x2) {
             bufferBuilder.vertex(matrix, x2 + width, y2 + width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x1 + width, y1 + width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x1 - width, y1 - width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x2 - width, y2 - width, 0).color(colour).next();
+        } else if (x1 < x2 && y2 > y1) {
+            bufferBuilder.vertex(matrix, x1 + width, y1 - width, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x1 - width, y1 + width, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x2 - width, y2 + width, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x2 + width, y2 - width, 0).color(colour).next();
         } else if (x1 < x2) {
             bufferBuilder.vertex(matrix, x1 - width, y1 + width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x2 - width, y2 + width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x2 + width, y2 - width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x1 + width, y1 - width, 0).color(colour).next();
         } else {
-            if(y1 > y2) {
+            if (y1 > y2) {
                 bufferBuilder.vertex(matrix, x2 + width, y2, 0).color(colour).next();
                 bufferBuilder.vertex(matrix, x2 - width, y2, 0).color(colour).next();
                 bufferBuilder.vertex(matrix, x1 - width, y1, 0).color(colour).next();
@@ -232,12 +237,12 @@ public class GraphDisplay extends WWidget {
     private ArrayList<Tooltip> renderGraphNodes(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
         ArrayList<Tooltip> tooltips = new ArrayList<>();
 
-        for(NodeWidget widget : nodeWidgets) {
+        for (NodeWidget widget : nodeWidgets) {
             int posX = (int) (x + widget.getX() + xOffset);
             int posY = (int) (y + widget.getY() + yOffset);
 
-            if(bounds.contains(posX, posY)) {
-                tooltips.add(widget.render(matrices, posX, posY, scale, mouseX, mouseY));
+            if (bounds.contains(posX, posY)) {
+                tooltips.add(widget.render(matrices, posX, posY, mouseX, mouseY));
             }
         }
         return tooltips;
@@ -257,7 +262,7 @@ public class GraphDisplay extends WWidget {
 
         for (Tooltip tooltip : tooltips) {
             if (tooltip != null) {
-                MinecraftClient.getInstance().currentScreen.renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), mouseX, mouseY);
+                Objects.requireNonNull(MinecraftClient.getInstance().currentScreen).renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), mouseX, mouseY);
             }
         }
         ScissorManager.popScaleFactor();

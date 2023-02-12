@@ -1,21 +1,13 @@
 package com.bawnorton.randoassistant;
 
 import com.bawnorton.randoassistant.util.LootTableMap;
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.CandleBlock;
 import net.minecraft.block.CandleCakeBlock;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -26,10 +18,7 @@ import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextType;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +32,8 @@ public class RandoAssistant implements ModInitializer {
 	public static MinecraftServer currentServer;
 
 	private static final Map<MinecraftServer, LootTableMap> LOOT_TABLES = new HashMap<>();
-	public static Map<CandleCakeBlock, CandleBlock> CANDLE_CAKE_MAP = new HashMap<>();
+	public static final Map<CandleCakeBlock, CandleBlock> CANDLE_CAKE_MAP = new HashMap<>();
+	public static boolean graphChanged = true;
 
 	@Override
 	public void onInitialize() {
@@ -60,10 +50,12 @@ public class RandoAssistant implements ModInitializer {
 
 	public static void addLootTable(Block block, List<ItemStack> table) {
 		RandoAssistant.LOOT_TABLES.get(currentServer).addLootTable(block, table);
+		graphChanged = true;
 	}
 
 	public static void addLootTable(EntityType<?> entityType, List<ItemStack> table) {
 		RandoAssistant.LOOT_TABLES.get(currentServer).addLootTable(entityType, table);
+		graphChanged = true;
 	}
 
 	public static void addAllLootTables(PlayerEntity player) {
