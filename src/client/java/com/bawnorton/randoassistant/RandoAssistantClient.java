@@ -18,12 +18,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 
 public class RandoAssistantClient implements ClientModInitializer {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-	private static final File ASSISTANT_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("RandoAssistant").toFile();
+	public static final File ASSISTANT_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("RandoAssistant").toFile();
 
 	@Override
 	public void onInitializeClient() {
@@ -61,13 +60,7 @@ public class RandoAssistantClient implements ClientModInitializer {
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while(keyBinding.wasPressed()) {
-				LootTableMap lootTableMap = RandoAssistant.getCurrentLootTables();
-				for(Map.Entry<String, List<String>> lootEntry: lootTableMap.getSerializedLootTableMap().entrySet()) {
-					RandoAssistant.LOGGER.info("Loot table: " + lootEntry.getKey());
-					for(String item: lootEntry.getValue()) {
-						RandoAssistant.LOGGER.info("Item: " + item);
-					}
-				}
+				RandoAssistant.addAllLootTables(client.player);
 			}
 		});
 	}

@@ -3,7 +3,10 @@
   "package": "com.bawnorton.randoassistant.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AbstractPlantPartBlockInvoker",
+    "AttachedStemBlockAccessor",
     "BlockMixin",
+    "CandleCakeBlockMixin",
     "LivingEntityMixin",
     "MinecraftServerMixin",
     "ServerWorldAccessor"

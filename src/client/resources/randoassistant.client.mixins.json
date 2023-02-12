@@ -1,14 +1,12 @@
 {
-	"required": true,
-	"package": "com.bawnorton.randoassistant.mixin.client",
-	"compatibilityLevel": "JAVA_17",
-	"client": [
-		"InventoryScreenMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"mixins": [
-		"RecipeBookWidgetAccessor"
-	]
+  "required": true,
+  "package": "com.bawnorton.randoassistant.mixin.client",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "InventoryScreenMixin",
+    "WorldEntryMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

@@ -37,7 +37,13 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/InventoryScreen;addDrawableChild(Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;", shift = At.Shift.AFTER))
     private void onInit(CallbackInfo ci) {
         lootButton = new TexturedButtonWidget(this.x + 126, this.height / 2 - 22, 20, 18, 0, 0, 19, LOOT_BUTTON_TEXTURE, (button) -> {
-            MinecraftClient.getInstance().setScreen(new CottonClientScreen(new LootTableScreen()));
+            MinecraftClient.getInstance().setScreen(new CottonClientScreen(new LootTableScreen()) {
+                @Override
+                public void close() {
+                    super.close();
+                    MinecraftClient.getInstance().setScreen(new InventoryScreen(client.player));
+                }
+            });
             mouseDown = true;
         });
         addDrawableChild(lootButton);
