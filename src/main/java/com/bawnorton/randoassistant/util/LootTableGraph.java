@@ -39,7 +39,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
     @Override
     public Edge addEdge(Vertex sourceVertex, Vertex targetVertex) {
         try {
-            if(super.addEdge(sourceVertex, targetVertex) == null) {
+            if (super.addEdge(sourceVertex, targetVertex) == null) {
                 return null;
             }
             Edge edge = new Edge(sourceVertex, targetVertex);
@@ -69,8 +69,8 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
     }
 
     private Vertex getOrCreateNode(Vertex node) {
-        for(Vertex vertex: vertexSet()) {
-            if(vertex.equals(node)) {
+        for (Vertex vertex : vertexSet()) {
+            if (vertex.equals(node)) {
                 return vertex;
             }
         }
@@ -80,7 +80,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
     public void addLootTable(EntityType<?> entityType, List<Item> items) {
         Vertex root = getOrCreateNode(new Vertex(entityType));
-        for(Item item: items) {
+        for (Item item : items) {
             Vertex vertex = getOrCreateNode(new Vertex(item));
             addEdge(root, vertex);
             addVertex(vertex);
@@ -90,7 +90,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
     public void addLootTable(Block block, List<Item> items) {
         Vertex root = getOrCreateNode(new Vertex(block));
-        for(Item item: items) {
+        for (Item item : items) {
             Vertex vertex = getOrCreateNode(new Vertex(item));
             addEdge(root, vertex);
             addVertex(vertex);
@@ -99,11 +99,11 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
     }
 
     private Set<Vertex> getParents(Vertex vertex, Set<Vertex> visited, Set<Vertex> parents) {
-        if(visited.contains(vertex)) {
+        if (visited.contains(vertex)) {
             return parents;
         }
         visited.add(vertex);
-        for(Edge edge: incomingEdgesOf(vertex)) {
+        for (Edge edge : incomingEdgesOf(vertex)) {
             Vertex parent = getEdgeSource(edge);
             parents.add(parent);
             getParents(parent, visited, parents);
@@ -116,11 +116,11 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
     }
 
     private Set<Vertex> getChildren(Vertex vertex, Set<Vertex> visited, Set<Vertex> children) {
-        if(visited.contains(vertex)) {
+        if (visited.contains(vertex)) {
             return children;
         }
         visited.add(vertex);
-        for(Edge edge: outgoingEdgesOf(vertex)) {
+        for (Edge edge : outgoingEdgesOf(vertex)) {
             Vertex child = getEdgeTarget(edge);
             children.add(child);
             getChildren(child, visited, children);
@@ -137,10 +137,10 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
     }
 
     public void updateDrawing(int retries) {
-        if(isDrawing && retries == 0) {
+        if (isDrawing && retries == 0) {
             return;
         }
-        if(retries > 3) {
+        if (retries > 3) {
             RandoAssistant.LOGGER.error("Failed to draw graph after 3 retries");
             failedToDraw = true;
             errorMessage = "Failed to draw graph after 3 retries";
@@ -203,9 +203,9 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
     @SuppressWarnings("BusyWait") // not applicable here as no resource is being waited on
     public void afterDrawing(Runnable runnable) {
         Thread thread = new Thread(() -> {
-            while(isDrawing) {
+            while (isDrawing) {
                 try {
-                    if(failedToDraw) return;
+                    if (failedToDraw) return;
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -214,6 +214,121 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             runnable.run();
         });
         thread.start();
+    }
+
+    public static class Edge extends DefaultEdge implements grapher.graph.elements.Edge<Vertex> {
+        private final Vertex origin;
+        private final Vertex destination;
+
+        public Edge(Vertex origin, Vertex destination) {
+            this.origin = origin;
+            this.destination = destination;
+        }
+
+        public Edge() {
+            this.origin = null;
+            this.destination = null;
+        }
+
+        @Override
+        public Vertex getOrigin() {
+            return origin;
+        }
+
+        @Override
+        public Vertex getDestination() {
+            return destination;
+        }
+
+        @Override
+        public String toString() {
+            return (origin != null ? origin.toString() : null) + " -> " + (destination != null ? destination.toString() : null);
+        }
+    }
+
+    private static class LootTableType {
+        private final Block block;
+        private final Item item;
+        private final EntityType<?> entityType;
+        private final boolean isBlock;
+        private final boolean isItem;
+        private final boolean isEntity;
+
+        public LootTableType(Block block, Item item, EntityType<?> entityType) {
+            if (block == null && item != null) {
+                block = Block.getBlockFromItem(item);
+                if (block.asItem() == Items.AIR) block = null;
+            } else if (block != null && item == null) {
+                item = block.asItem();
+                if (item == Items.AIR) item = null;
+            }
+
+            this.isBlock = block != null;
+            this.isItem = item != null;
+            this.isEntity = entityType != null;
+
+            this.block = block;
+            this.item = item;
+            this.entityType = entityType;
+        }
+
+        public LootTableType(Block block) {
+            this(block, null, null);
+        }
+
+        public LootTableType(Item item) {
+            this(null, item, null);
+        }
+
+        public LootTableType(EntityType<?> entityType) {
+            this(null, null, entityType);
+        }
+
+        public Block getBlock() {
+            if (!isBlock) return null;
+            return block;
+        }
+
+        public Item getItem() {
+            if (!isItem) return null;
+            return item;
+        }
+
+        public EntityType<?> getEntityType() {
+            if (!isEntity) return null;
+            return entityType;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof LootTableType other) {
+                if (isBlock) {
+                    return other.isBlock && block.equals(other.block);
+                } else if (isItem) {
+                    return other.isItem && item.equals(other.item);
+                } else if (isEntity) {
+                    return other.isEntity && entityType.equals(other.entityType);
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            if (isBlock) {
+                return Registries.BLOCK.getId(block).toString().hashCode();
+            } else if (isItem) {
+                return Registries.ITEM.getId(item).toString().hashCode();
+            } else if (isEntity) {
+                return Registries.ENTITY_TYPE.getId(entityType).toString().hashCode();
+            }
+            return 0;
+        }
+
+        @Override
+        public String toString() {
+            return "LootTableType{" + (isBlock ? "block=" + block : isItem ? "item=" + item : isEntity ? "entityType=" + entityType : null) + '}';
+        }
     }
 
     public class Vertex implements grapher.graph.elements.Vertex {
@@ -247,17 +362,17 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         }
 
         public Item getItem() {
-            if(type.isItem) return type.getItem();
+            if (type.isItem) return type.getItem();
             return null;
         }
 
         public Block getBlock() {
-            if(type.isBlock) return type.getBlock();
+            if (type.isBlock) return type.getBlock();
             return null;
         }
 
         public EntityType<?> getEntityType() {
-            if(type.isEntity) return type.getEntityType();
+            if (type.isEntity) return type.getEntityType();
             return null;
         }
 
@@ -272,7 +387,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         }
 
         public Text getTooltip() {
-            if(type.isBlock) {
+            if (type.isBlock) {
                 return Objects.requireNonNull(type.getBlock()).getName();
             } else if (type.isItem) {
                 return Objects.requireNonNull(type.getItem()).getName();
@@ -283,7 +398,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
         @Override
         public boolean equals(Object obj) {
-            if(obj instanceof Vertex other) {
+            if (obj instanceof Vertex other) {
                 return type.equals(other.type);
             }
             return false;
@@ -343,121 +458,6 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
         public boolean isHighlightedAsTarget() {
             return highlightAsTarget;
-        }
-    }
-
-    public static class Edge extends DefaultEdge implements grapher.graph.elements.Edge<Vertex> {
-        private final Vertex origin;
-        private final Vertex destination;
-
-        public Edge(Vertex origin, Vertex destination) {
-            this.origin = origin;
-            this.destination = destination;
-        }
-
-        public Edge() {
-            this.origin = null;
-            this.destination = null;
-        }
-
-        @Override
-        public Vertex getOrigin() {
-            return origin;
-        }
-
-        @Override
-        public Vertex getDestination() {
-            return destination;
-        }
-
-        @Override
-        public String toString() {
-            return (origin != null ? origin.toString() : null) + " -> " + (destination != null ? destination.toString() : null);
-        }
-    }
-
-    private static class LootTableType {
-        private final Block block;
-        private final Item item;
-        private final EntityType<?> entityType;
-        private final boolean isBlock;
-        private final boolean isItem;
-        private final boolean isEntity;
-
-        public LootTableType(Block block, Item item, EntityType<?> entityType) {
-            if(block == null && item != null) {
-                block = Block.getBlockFromItem(item);
-                if(block.asItem() == Items.AIR) block = null;
-            } else if(block != null && item == null) {
-                item = block.asItem();
-                if(item == Items.AIR) item = null;
-            }
-
-            this.isBlock = block != null;
-            this.isItem = item != null;
-            this.isEntity = entityType != null;
-
-            this.block = block;
-            this.item = item;
-            this.entityType = entityType;
-        }
-
-        public LootTableType(Block block) {
-            this(block, null, null);
-        }
-
-        public LootTableType(Item item) {
-            this(null, item, null);
-        }
-
-        public LootTableType(EntityType<?> entityType) {
-            this(null, null, entityType);
-        }
-
-        public Block getBlock() {
-            if(!isBlock) return null;
-            return block;
-        }
-
-        public Item getItem() {
-            if(!isItem) return null;
-            return item;
-        }
-
-        public EntityType<?> getEntityType() {
-            if(!isEntity) return null;
-            return entityType;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if(obj instanceof LootTableType other) {
-                if(isBlock) {
-                    return other.isBlock && block.equals(other.block);
-                } else if(isItem) {
-                    return other.isItem && item.equals(other.item);
-                } else if(isEntity) {
-                    return other.isEntity && entityType.equals(other.entityType);
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            if(isBlock) {
-                return Registries.BLOCK.getId(block).toString().hashCode();
-            } else if(isItem) {
-                return Registries.ITEM.getId(item).toString().hashCode();
-            } else if(isEntity) {
-                return Registries.ENTITY_TYPE.getId(entityType).toString().hashCode();
-            }
-            return 0;
-        }
-
-        @Override
-        public String toString() {
-            return "LootTableType{" + (isBlock ? "block=" + block : isItem ? "item=" + item : isEntity ? "entityType=" + entityType : null) + '}';
         }
     }
 }

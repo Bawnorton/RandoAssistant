@@ -45,20 +45,24 @@ public class LootTableScreen extends LightweightGuiDescription {
                     }
                     return;
                 }
-                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new LootTableScreen()));
+                drawGraph(graph.getDrawing());
             });
         } else {
-            GraphDisplayWidget graphDisplayWidget = new GraphDisplayWidget(drawing);
-            SearchBarWidget searchBar = new SearchBarWidget(graphDisplayWidget);
-
-            clearPanel();
-            panel.add(graphDisplayWidget, 0, 0);
-            panel.add(searchBar, 40, 40, MinecraftClient.getInstance().getWindow().getScaledWidth() - 80, 20);
+            drawGraph(drawing);
         }
     }
 
+    private void drawGraph(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
+        GraphDisplayWidget graphDisplayWidget = new GraphDisplayWidget(drawing);
+        SearchBarWidget searchBar = new SearchBarWidget(graphDisplayWidget);
+
+        clearPanel();
+        panel.add(graphDisplayWidget, 0, 0);
+        panel.add(searchBar, 40, 40, MinecraftClient.getInstance().getWindow().getScaledWidth() - 80, 20);
+    }
+
     private void clearPanel() {
-        for(WWidget widget : panel.streamChildren().toList()) {
+        for (WWidget widget : panel.streamChildren().toList()) {
             panel.remove(widget);
         }
     }

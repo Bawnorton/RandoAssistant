@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.screen.widget;
 
-import io.github.cottonmc.cotton.gui.client.LibGui;
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import net.minecraft.client.MinecraftClient;
@@ -19,16 +18,16 @@ public class CenteredLabelWidget extends WLabel {
         this.yOffset = yOffset;
     }
 
+    public CenteredLabelWidget(String text) {
+        this(text, 0);
+    }
+
     public int x() {
         return MinecraftClient.getInstance().getWindow().getScaledWidth() / 2 - this.width / 2;
     }
 
     public int y() {
         return MinecraftClient.getInstance().getWindow().getScaledHeight() / 2 - this.height / 2 + yOffset;
-    }
-
-    public CenteredLabelWidget(String text) {
-        this(text, 0);
     }
 
     @Override

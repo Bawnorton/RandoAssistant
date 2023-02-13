@@ -21,7 +21,7 @@ public abstract class LivingEntityMixin {
 
     @Inject(method = "dropLoot", at = @At(value = "INVOKE", target = "Lnet/minecraft/loot/LootTable;generateLoot(Lnet/minecraft/loot/context/LootContext;Ljava/util/function/Consumer;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
     private void onDropLoot(DamageSource source, boolean causedByPlayer, CallbackInfo ci, Identifier identifier, LootTable lootTable, LootContext.Builder builder) {
-        if(causedByPlayer) {
+        if (causedByPlayer) {
             List<ItemStack> drops = lootTable.generateLoot(builder.build(LootContextTypes.ENTITY));
             RandoAssistant.addLootTable(((LivingEntity) (Object) this).getType(), drops);
         }

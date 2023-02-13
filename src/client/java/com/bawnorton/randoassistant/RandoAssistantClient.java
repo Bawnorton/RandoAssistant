@@ -30,12 +30,6 @@ public class RandoAssistantClient implements ClientModInitializer {
     public static final File ASSISTANT_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("RandoAssistant").toFile();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    @Override
-    public void onInitializeClient() {
-        initDir();
-        initEvents();
-    }
-
     private static void initDir() {
         try {
             if (!Files.exists(ASSISTANT_DIRECTORY.toPath())) {
@@ -45,6 +39,12 @@ public class RandoAssistantClient implements ClientModInitializer {
         } catch (IOException e) {
             RandoAssistant.LOGGER.error("Failed to create RandoAssistant directory", e);
         }
+    }
+
+    @Override
+    public void onInitializeClient() {
+        initDir();
+        initEvents();
     }
 
     @SuppressWarnings("unchecked")
@@ -85,7 +85,7 @@ public class RandoAssistantClient implements ClientModInitializer {
                         RandoAssistant.addAllLootTables(Objects.requireNonNull(client.player));
                     }
                     MinecraftClient.getInstance().setScreen(null);
-                }, Text.of("Add all loot tables?"), Text.of("This will cause the game to lag for a few seconds.")));
+                }, Text.of("Add all loot tables?"), Text.of("This may cause the game client and world to lag briefly.")));
             }
             while (resetKeyBinding.wasPressed()) {
                 MinecraftClient.getInstance().setScreen(new ConfirmScreen((result) -> {
@@ -101,7 +101,7 @@ public class RandoAssistantClient implements ClientModInitializer {
     private Path getLootTablePath() throws IOException {
         String[] name = new String[]{((ServerWorldAccessor) Objects.requireNonNull(RandoAssistant.currentServer.getWorld(World.OVERWORLD))).getWorldProperties().getLevelName()};
         RandoAssistant.currentServer.getSaveProperties().getDataConfiguration().dataPacks().getEnabled().forEach((file) -> {
-            if(file.contains("random_loot")) {
+            if (file.contains("random_loot")) {
                 Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
                 Matcher matcher = pattern.matcher(file);
                 if (matcher.find()) name[0] = matcher.group();

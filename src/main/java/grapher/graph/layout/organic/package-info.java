@@ -1,6 +1,6 @@
 /**
  * Layouters which call different organic layout algorithms.
- * @author Renata
  *
+ * @author Renata
  */
 package grapher.graph.layout.organic;

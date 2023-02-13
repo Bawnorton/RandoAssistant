@@ -37,6 +37,26 @@ public class LootTableMap {
         this(new HashMap<>(), new HashMap<>());
     }
 
+    public static LootTableMap fromSerialized(Map<String, List<String>> serializedLootTableMap) {
+        Map<Block, List<Item>> blockLootTables = new HashMap<>();
+        Map<EntityType<?>, List<Item>> entityLootTables = new HashMap<>();
+
+        if (serializedLootTableMap == null) return new LootTableMap(blockLootTables, entityLootTables);
+        for (Map.Entry<String, List<String>> entry : serializedLootTableMap.entrySet()) {
+            Identifier identifier = new Identifier(entry.getKey());
+            List<Item> lootTable = new ArrayList<>();
+            for (String type : entry.getValue()) {
+                lootTable.add(Registries.ITEM.get(new Identifier(type)));
+            }
+            if (Registries.BLOCK.get(identifier) == Blocks.AIR) {
+                entityLootTables.put(Registries.ENTITY_TYPE.get(identifier), lootTable);
+            } else {
+                blockLootTables.put(Registries.BLOCK.get(identifier), lootTable);
+            }
+        }
+        return new LootTableMap(blockLootTables, entityLootTables);
+    }
+
     private void initSerializedLootTable() {
         for (Map.Entry<Block, List<Item>> entry : blockLootTables.entrySet()) {
             Block block = entry.getKey();
@@ -58,37 +78,17 @@ public class LootTableMap {
         }
     }
 
-    public static LootTableMap fromSerialized(Map<String, List<String>> serializedLootTableMap) {
-        Map<Block, List<Item>> blockLootTables = new HashMap<>();
-        Map<EntityType<?>, List<Item>> entityLootTables = new HashMap<>();
-
-        if(serializedLootTableMap == null) return new LootTableMap(blockLootTables, entityLootTables);
-        for (Map.Entry<String, List<String>> entry : serializedLootTableMap.entrySet()) {
-            Identifier identifier = new Identifier(entry.getKey());
-            List<Item> lootTable = new ArrayList<>();
-            for(String type: entry.getValue()) {
-                lootTable.add(Registries.ITEM.get(new Identifier(type)));
-            }
-            if(Registries.BLOCK.get(identifier) == Blocks.AIR) {
-                entityLootTables.put(Registries.ENTITY_TYPE.get(identifier), lootTable);
-            } else {
-                blockLootTables.put(Registries.BLOCK.get(identifier), lootTable);
-            }
-        }
-        return new LootTableMap(blockLootTables, entityLootTables);
-    }
-
     private void processLootTable(List<ItemStack> in, List<Item> out) {
         for (ItemStack itemStack : in) {
             Item item = itemStack.getItem();
             boolean found = false;
             for (Item oldItemStack : out) {
-                if(oldItemStack == item) {
+                if (oldItemStack == item) {
                     found = true;
                     break;
                 }
             }
-            if(!found) {
+            if (!found) {
                 out.add(itemStack.getItem());
             }
         }
@@ -99,12 +99,12 @@ public class LootTableMap {
             Item item = itemStack.getItem();
             boolean found = false;
             for (Item oldItemStack : out) {
-                if(oldItemStack == item) {
+                if (oldItemStack == item) {
                     found = true;
                     break;
                 }
             }
-            if(!found) {
+            if (!found) {
                 return true;
             }
         }
@@ -114,7 +114,7 @@ public class LootTableMap {
     public void addLootTable(Block block, List<ItemStack> lootTable) {
         List<Item> oldLootTable;
         boolean changed;
-        if(blockLootTables.containsKey(block)) {
+        if (blockLootTables.containsKey(block)) {
             oldLootTable = blockLootTables.get(block);
             changed = lootTableChanged(lootTable, oldLootTable);
             processLootTable(lootTable, oldLootTable);
@@ -125,7 +125,7 @@ public class LootTableMap {
             }
             changed = true;
         }
-        if(changed) {
+        if (changed) {
             blockLootTables.put(block, oldLootTable);
             lootTableGraph.addLootTable(block, oldLootTable);
             serializedLootTableMap.put(Registries.BLOCK.getId(block).toString(), new ArrayList<>());
@@ -138,7 +138,7 @@ public class LootTableMap {
     public void addLootTable(EntityType<?> entityType, List<ItemStack> lootTable) {
         List<Item> oldLootTable;
         boolean changed;
-        if(entityLootTables.containsKey(entityType)) {
+        if (entityLootTables.containsKey(entityType)) {
             oldLootTable = entityLootTables.get(entityType);
             changed = lootTableChanged(lootTable, oldLootTable);
             processLootTable(lootTable, oldLootTable);
@@ -149,7 +149,7 @@ public class LootTableMap {
             }
             changed = true;
         }
-        if(changed) {
+        if (changed) {
             entityLootTables.put(entityType, oldLootTable);
             lootTableGraph.addLootTable(entityType, oldLootTable);
             serializedLootTableMap.put(Registries.ENTITY_TYPE.getId(entityType).toString(), new ArrayList<>());

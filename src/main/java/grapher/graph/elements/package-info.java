@@ -1,6 +1,6 @@
 /**
  * Basic graph elements.
- * @author Renata
  *
+ * @author Renata
  */
 package grapher.graph.elements;

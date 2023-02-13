@@ -18,112 +18,113 @@ import java.util.Map;
 
 /**
  * Contains general code used for calling JGraphX layout algorithms
- * @author Renata
+ *
  * @param <V> The vertex type
- * @param <E> The edge type 
+ * @param <E> The edge type
+ * @author Renata
  */
 public abstract class AbstractJGraphXLayouter<V extends Vertex, E extends Edge<V>> extends AbstractLayouter<V, E> {
 
 
-	/**
-	 * JGraphX layout algorithm
-	 */
-	protected mxGraphLayout layouter;
-	/**
-	 * JGraphX graph which has to be instantiated
-	 */
-	protected mxGraph jGraphXGraph;
-	/**
-	 * Maps vertices of the supplied graph to vertices of the JGraphX graph
-	 */
-	protected final Map<V, Object> verticesMap = new HashMap<>();
-	/**
-	 * Maps edges of the supplied graph to edges of the JGraphX graph
-	 */
-	protected final Map<E, Object> edgesMap = new HashMap<>();
+    /**
+     * Maps vertices of the supplied graph to vertices of the JGraphX graph
+     */
+    protected final Map<V, Object> verticesMap = new HashMap<>();
+    /**
+     * Maps edges of the supplied graph to edges of the JGraphX graph
+     */
+    protected final Map<E, Object> edgesMap = new HashMap<>();
+    /**
+     * JGraphX layout algorithm
+     */
+    protected mxGraphLayout layouter;
+    /**
+     * JGraphX graph which has to be instantiated
+     */
+    protected mxGraph jGraphXGraph;
 
-	/**
-	 * Converts the given graph into a JGraphX graph
-	 */
-	protected void createJGraphXGraph(Graph<V,E> graph){
-		jGraphXGraph = new mxGraph();
-		jGraphXGraph.getModel().beginUpdate();
-		Object parent = jGraphXGraph.getDefaultParent();
-		mxIGraphModel model = jGraphXGraph.getModel();
-		try{
-			for (V v : graph.getVertices()){
-				Dimension size;
-				if (v.getSize() == null)
-					size = new Dimension(10, 10);
-				else
-					size = v.getSize();
-				
-				Object jgraphxVertex = jGraphXGraph.insertVertex(parent, null, v, 0, 0,
-						size.getWidth(), size.getHeight());
-				model.getGeometry(jgraphxVertex).setHeight(size.getHeight());
-				model.getGeometry(jgraphxVertex).setWidth(size.getWidth()); //Doesn't make much difference...
-				verticesMap.put(v, jgraphxVertex);
-			}
-			for (E e : graph.getEdges()){
-				Object v1 = verticesMap.get(e.getOrigin());
-				Object v2 = verticesMap.get(e.getDestination());
-				Object jGraphXEdge = jGraphXGraph.insertEdge(parent, null, null, v1, v2);
-				edgesMap.put(e,  jGraphXEdge);
-			}
-		}
-		finally{
-			jGraphXGraph.getModel().endUpdate();
-		}
-	}
+    /**
+     * Converts the given graph into a JGraphX graph
+     */
+    protected void createJGraphXGraph(Graph<V, E> graph) {
+        jGraphXGraph = new mxGraph();
+        jGraphXGraph.getModel().beginUpdate();
+        Object parent = jGraphXGraph.getDefaultParent();
+        mxIGraphModel model = jGraphXGraph.getModel();
+        try {
+            for (V v : graph.getVertices()) {
+                Dimension size;
+                if (v.getSize() == null)
+                    size = new Dimension(10, 10);
+                else
+                    size = v.getSize();
 
-	public Drawing<V,E> layout(Graph<V,E> graph, GraphLayoutProperties layoutProperties){
-		createJGraphXGraph(graph);
-		initLayouter(layoutProperties);
-		return createDrawing();
-	}
+                Object jgraphxVertex = jGraphXGraph.insertVertex(parent, null, v, 0, 0,
+                        size.getWidth(), size.getHeight());
+                model.getGeometry(jgraphxVertex).setHeight(size.getHeight());
+                model.getGeometry(jgraphxVertex).setWidth(size.getWidth()); //Doesn't make much difference...
+                verticesMap.put(v, jgraphxVertex);
+            }
+            for (E e : graph.getEdges()) {
+                Object v1 = verticesMap.get(e.getOrigin());
+                Object v2 = verticesMap.get(e.getDestination());
+                Object jGraphXEdge = jGraphXGraph.insertEdge(parent, null, null, v1, v2);
+                edgesMap.put(e, jGraphXEdge);
+            }
+        } finally {
+            jGraphXGraph.getModel().endUpdate();
+        }
+    }
 
-	/**
-	 * Executes the layout algorithm and creates the drawing of the graph
-	 * (mappings of its vertices and edges to their positions)
-	 * @return Drawing of the graph
-	 */
-	protected Drawing<V,E> createDrawing(){
+    public Drawing<V, E> layout(Graph<V, E> graph, GraphLayoutProperties layoutProperties) {
+        createJGraphXGraph(graph);
+        initLayouter(layoutProperties);
+        return createDrawing();
+    }
 
-		Object parent = jGraphXGraph.getDefaultParent();
-		layouter.execute(parent);
-		Drawing<V, E> drawing = new Drawing<>();
+    /**
+     * Executes the layout algorithm and creates the drawing of the graph
+     * (mappings of its vertices and edges to their positions)
+     *
+     * @return Drawing of the graph
+     */
+    protected Drawing<V, E> createDrawing() {
 
-		mxIGraphModel model = jGraphXGraph.getModel();
-		for (V v : verticesMap.keySet()){
-			mxGeometry geometry = model.getGeometry(verticesMap.get(v));
-			drawing.setVertexPosition(v, geometry.getPoint());
-		}
+        Object parent = jGraphXGraph.getDefaultParent();
+        layouter.execute(parent);
+        Drawing<V, E> drawing = new Drawing<>();
 
-		if (positionsEdges){
-			for (E e : edgesMap.keySet()){
-				mxGeometry geometry = model.getGeometry(edgesMap.get(e));
-				if (geometry != null && geometry.getPoints() != null){
-					List<Point2D> points = new ArrayList<>();
-					Point2D originPoint = drawing.getVertexMappings().get(e.getOrigin());
-					points.add(new Point2D.Double(originPoint.getX(), originPoint.getY()));
-					for (int i = 1; i < geometry.getPoints().size() - 1; i++)
-						points.add(geometry.getPoints().get(i).getPoint());
-					Point2D destinationPoint = drawing.getVertexMappings().get(e.getDestination());
-					points.add(new Point2D.Double(destinationPoint.getX(), destinationPoint.getY()));
-					drawing.getEdgeMappings().put(e,points);
-				}
-			}
-			
-			return drawing;
-		}
+        mxIGraphModel model = jGraphXGraph.getModel();
+        for (V v : verticesMap.keySet()) {
+            mxGeometry geometry = model.getGeometry(verticesMap.get(v));
+            drawing.setVertexPosition(v, geometry.getPoint());
+        }
+
+        if (positionsEdges) {
+            for (E e : edgesMap.keySet()) {
+                mxGeometry geometry = model.getGeometry(edgesMap.get(e));
+                if (geometry != null && geometry.getPoints() != null) {
+                    List<Point2D> points = new ArrayList<>();
+                    Point2D originPoint = drawing.getVertexMappings().get(e.getOrigin());
+                    points.add(new Point2D.Double(originPoint.getX(), originPoint.getY()));
+                    for (int i = 1; i < geometry.getPoints().size() - 1; i++)
+                        points.add(geometry.getPoints().get(i).getPoint());
+                    Point2D destinationPoint = drawing.getVertexMappings().get(e.getDestination());
+                    points.add(new Point2D.Double(destinationPoint.getX(), destinationPoint.getY()));
+                    drawing.getEdgeMappings().put(e, points);
+                }
+            }
+
+            return drawing;
+        }
 
 
-		return drawing;
-	}
-	
-	/**
-	 * Initializes the appropriate algorithm (layouter)
-	 */
-	protected abstract void initLayouter(GraphLayoutProperties layoutProperties);
+        return drawing;
+    }
+
+    /**
+     * Initializes the appropriate algorithm (layouter)
+     */
+    protected abstract void initLayouter(GraphLayoutProperties layoutProperties);
 
 }

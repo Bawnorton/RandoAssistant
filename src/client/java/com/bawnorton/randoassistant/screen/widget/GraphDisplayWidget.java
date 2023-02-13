@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.screen.widget;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.util.LootTableGraph;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.lambdaurora.spruceui.util.ScissorManager;
@@ -61,7 +60,7 @@ public class GraphDisplayWidget extends WWidget {
 
     // binary search for the closest node to the query
     private NodeWidget getClosestNode(String query) {
-        if(query.isEmpty()) return null;
+        if (query.isEmpty()) return null;
         query = query.toLowerCase().replaceAll("\\s+", "");
         int low = 0;
         int high = nodeWidgets.size() - 1;
@@ -145,7 +144,12 @@ public class GraphDisplayWidget extends WWidget {
         bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         int width = 1;
 
-        if (x1 > x2) {
+        if (y2 < y1) {
+            bufferBuilder.vertex(matrix, x1 - width, y1 - width, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x1 + width, y1 + width, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x2 + width, y2 + width, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x2 - width, y2 - width, 0).color(colour).next();
+        } else if (x1 > x2) {
             bufferBuilder.vertex(matrix, x2 + width, y2 + width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x1 + width, y1 + width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x1 - width, y1 - width, 0).color(colour).next();
@@ -161,17 +165,10 @@ public class GraphDisplayWidget extends WWidget {
             bufferBuilder.vertex(matrix, x2 + width, y2 - width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x1 + width, y1 - width, 0).color(colour).next();
         } else {
-            if (y1 > y2) {
-                bufferBuilder.vertex(matrix, x2 + width, y2, 0).color(colour).next();
-                bufferBuilder.vertex(matrix, x2 - width, y2, 0).color(colour).next();
-                bufferBuilder.vertex(matrix, x1 - width, y1, 0).color(colour).next();
-                bufferBuilder.vertex(matrix, x1 + width, y1, 0).color(colour).next();
-            } else {
-                bufferBuilder.vertex(matrix, x1 + width, y1, 0).color(colour).next();
-                bufferBuilder.vertex(matrix, x1 - width, y1, 0).color(colour).next();
-                bufferBuilder.vertex(matrix, x2 - width, y2, 0).color(colour).next();
-                bufferBuilder.vertex(matrix, x2 + width, y2, 0).color(colour).next();
-            }
+            bufferBuilder.vertex(matrix, x1 + width, y1, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x1 - width, y1, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x2 - width, y2, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x2 + width, y2, 0).color(colour).next();
         }
 
         Tessellator.getInstance().draw();
@@ -197,6 +194,17 @@ public class GraphDisplayWidget extends WWidget {
         RenderSystem.disableBlend();
     }
 
+    private void drawLine(MatrixStack matrices, int x, int y, LootTableGraph.Edge edge, int colour) {
+        List<Point2D> points = edgeLocations.get(edge);
+        Point2D point1 = points.get(0);
+        Point2D point2 = points.get(1);
+        int x1 = (int) ((point1.getX() + x + xOffset));
+        int y1 = (int) ((point1.getY() + y + yOffset));
+        int x2 = (int) ((point2.getX() + x + xOffset));
+        int y2 = (int) ((point2.getY() + y + yOffset));
+        drawLine(matrices, x1, y1, x2, y2, colour);
+    }
+
     private void renderLines(MatrixStack matrices, int x, int y) {
         for (LootTableGraph.Edge edge : edgeLocations.keySet()) {
             LootTableGraph.Vertex dest = edge.getDestination();
@@ -207,17 +215,6 @@ public class GraphDisplayWidget extends WWidget {
                 drawLine(matrices, x, y, edge, -16776961);
             }
         }
-    }
-
-    private void drawLine(MatrixStack matrices, int x, int y, LootTableGraph.Edge edge, int colour) {
-        List<Point2D> points = edgeLocations.get(edge);
-        Point2D point1 = points.get(0);
-        Point2D point2 = points.get(1);
-        int x1 = (int) ((point1.getX() + x + xOffset));
-        int y1 = (int) ((point1.getY() + y + yOffset));
-        int x2 = (int) ((point2.getX() + x + xOffset));
-        int y2 = (int) ((point2.getY() + y + yOffset));
-        drawLine(matrices, x1, y1, x2, y2, colour);
     }
 
     private ArrayList<Tooltip> renderGraphNodes(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {

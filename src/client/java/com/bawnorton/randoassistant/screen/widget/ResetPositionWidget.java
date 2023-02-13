@@ -16,8 +16,8 @@ import java.awt.geom.Rectangle2D;
 
 public class ResetPositionWidget extends DrawableHelper {
     private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
-    Rectangle2D.Float bounds;
     final GraphDisplayWidget graphDisplayWidget;
+    Rectangle2D.Float bounds;
 
     public ResetPositionWidget(GraphDisplayWidget graphDisplayWidget) {
         super();
