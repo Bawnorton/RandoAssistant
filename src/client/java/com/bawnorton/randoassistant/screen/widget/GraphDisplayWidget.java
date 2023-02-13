@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.screen.widget;
 
+import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.util.LootTableGraph;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.lambdaurora.spruceui.util.ScissorManager;
@@ -15,14 +16,12 @@ import org.joml.Vector2f;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
-public class GraphDisplay extends WWidget {
+public class GraphDisplayWidget extends WWidget {
     private final Map<LootTableGraph.Edge, List<Point2D>> edgeLocations;
     private final List<NodeWidget> nodeWidgets = new ArrayList<>();
+    private final Map<NodeWidget, String> queryNodeMap = new HashMap<>();
     private final Rectangle2D.Float bounds;
     private final ResetPositionWidget resetPositionWidget;
     private final int initialOffsetX = 35;
@@ -31,9 +30,8 @@ public class GraphDisplay extends WWidget {
     public float yOffset = 0;
     private float scale = 1;
 
-    public GraphDisplay(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
+    public GraphDisplayWidget(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
         edgeLocations = drawing.getEdgeMappings();
-        reduceHorizontalDistance();
 
         MinecraftClient client = MinecraftClient.getInstance();
         int screenWidth = client.getWindow().getScaledWidth();
@@ -51,42 +49,43 @@ public class GraphDisplay extends WWidget {
             nodeWidgets.add(new NodeWidget(target, targetLocation));
         }
         nodeWidgets.sort((o1, o2) -> {
-            String o1Tooltip = o1.getNode().getTooltip().toString().toLowerCase();
-            String o2Tooltip = o2.getNode().getTooltip().toString().toLowerCase();
+            String o1Tooltip = o1.getNode().getTooltip().getString().toLowerCase().replaceAll("\\s+", "");
+            String o2Tooltip = o2.getNode().getTooltip().getString().toLowerCase().replaceAll("\\s+", "");
+            queryNodeMap.put(o1, o1Tooltip);
+            queryNodeMap.put(o2, o2Tooltip);
             return o1Tooltip.compareTo(o2Tooltip);
         });
 
         resetPositionWidget = new ResetPositionWidget(this);
     }
 
-    public static int levenshteinDistance(String a, String b) {
-        int[] costs = new int[b.length() + 1];
-        for (int j = 0; j < costs.length; j++)
-            costs[j] = j;
-        for (int i = 1; i <= a.length(); i++) {
-            costs[0] = i;
-            int nw = i - 1;
-            for (int j = 1; j <= b.length(); j++) {
-                int cj = Math.min(1 + Math.min(costs[j], costs[j - 1]), a.charAt(i - 1) == b.charAt(j - 1) ? nw : nw + 1);
-                nw = costs[j];
-                costs[j] = cj;
+    // binary search for the closest node to the query
+    private NodeWidget getClosestNode(String query) {
+        if(query.isEmpty()) return null;
+        query = query.toLowerCase().replaceAll("\\s+", "");
+        int low = 0;
+        int high = nodeWidgets.size() - 1;
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            String midVal = queryNodeMap.get(nodeWidgets.get(mid));
+            int cmp = midVal.compareTo(query);
+            if (cmp < 0) {
+                low = mid + 1;
+            } else if (cmp > 0) {
+                high = mid - 1;
+            } else {
+                return nodeWidgets.get(mid);
             }
         }
-        return costs[b.length()];
+        return null;
     }
 
     public void inputChanged(String query) {
         NodeWidget bestMatch = null;
-        int bestMatchNum = 0;
         for (NodeWidget nodeWidget : nodeWidgets) {
             nodeWidget.unhighlightParents();
             nodeWidget.unhighlightChildren();
-            String tooltip = nodeWidget.getNode().getTooltip().getString().toLowerCase();
-            int distance = levenshteinDistance(tooltip, query.toLowerCase());
-            if (distance < 5 && (bestMatch == null || distance < bestMatchNum)) {
-                bestMatch = nodeWidget;
-                bestMatchNum = distance;
-            }
+            bestMatch = getClosestNode(query);
         }
 
         if (query.isEmpty()) {
@@ -99,18 +98,6 @@ public class GraphDisplay extends WWidget {
             bestMatch.highlightParents();
             bestMatch.highlightChildren();
             NodeWidget.selectedNode = bestMatch;
-        }
-    }
-
-
-    public void reduceHorizontalDistance() {
-        double averageNodeWidth = 10;
-        for (LootTableGraph.Edge edge : edgeLocations.keySet()) {
-            List<Point2D> points = edgeLocations.get(edge);
-            Point2D source = points.get(0);
-            Point2D target = points.get(1);
-            source.setLocation(source.getX() / averageNodeWidth, source.getY());
-            target.setLocation(target.getX() / averageNodeWidth, target.getY());
         }
     }
 

@@ -6,10 +6,10 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 public class SearchBarWidget extends WTextField {
-    public SearchBarWidget(GraphDisplay graphDisplay) {
+    public SearchBarWidget(GraphDisplayWidget graphDisplayWidget) {
         super(Text.of("Search..."));
         this.setEditable(true);
-        this.setChangedListener(graphDisplay::inputChanged);
+        this.setChangedListener(graphDisplayWidget::inputChanged);
         setMaxLength(100);
     }
 

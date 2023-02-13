@@ -18,12 +18,23 @@ public class LootTableMap {
 
     private final Map<Block, List<Item>> blockLootTables;
     private final Map<EntityType<?>, List<Item>> entityLootTables;
+    private final LootTableGraph lootTableGraph;
 
-    public LootTableMap(Map<Block, List<Item>> blockLootTables, Map<EntityType<?>, List<Item>> entityLootTables) {
+    private LootTableMap(Map<Block, List<Item>> blockLootTables, Map<EntityType<?>, List<Item>> entityLootTables) {
         this.blockLootTables = blockLootTables;
         this.entityLootTables = entityLootTables;
         this.serializedLootTableMap = new HashMap<>();
+        this.lootTableGraph = new LootTableGraph();
+
+        blockLootTables.forEach(lootTableGraph::addLootTable);
+        entityLootTables.forEach(lootTableGraph::addLootTable);
+        lootTableGraph.afterDrawing(lootTableGraph::updateDrawing);
+
         initSerializedLootTable();
+    }
+
+    public LootTableMap() {
+        this(new HashMap<>(), new HashMap<>());
     }
 
     private void initSerializedLootTable() {
@@ -67,81 +78,92 @@ public class LootTableMap {
         return new LootTableMap(blockLootTables, entityLootTables);
     }
 
+    private void processLootTable(List<ItemStack> in, List<Item> out) {
+        for (ItemStack itemStack : in) {
+            Item item = itemStack.getItem();
+            boolean found = false;
+            for (Item oldItemStack : out) {
+                if(oldItemStack == item) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                out.add(itemStack.getItem());
+            }
+        }
+    }
 
-    public Map<String, List<String>> getSerializedLootTableMap() {
-        return serializedLootTableMap;
+    private boolean lootTableChanged(List<ItemStack> in, List<Item> out) {
+        for (ItemStack itemStack : in) {
+            Item item = itemStack.getItem();
+            boolean found = false;
+            for (Item oldItemStack : out) {
+                if(oldItemStack == item) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void addLootTable(Block block, List<ItemStack> lootTable) {
         List<Item> oldLootTable;
+        boolean changed;
         if(blockLootTables.containsKey(block)) {
             oldLootTable = blockLootTables.get(block);
-            for (ItemStack itemStack : lootTable) {
-                Item item = itemStack.getItem();
-                boolean found = false;
-                for (Item oldItemStack : oldLootTable) {
-                    if(oldItemStack == item) {
-                        found = true;
-                        break;
-                    }
-                }
-                if(!found) {
-                    oldLootTable.add(itemStack.getItem());
-                }
-            }
+            changed = lootTableChanged(lootTable, oldLootTable);
+            processLootTable(lootTable, oldLootTable);
         } else {
             oldLootTable = new ArrayList<>();
             for (ItemStack itemStack : lootTable) {
                 oldLootTable.add(itemStack.getItem());
             }
+            changed = true;
         }
-        blockLootTables.put(block, oldLootTable);
-        serializedLootTableMap.put(Registries.BLOCK.getId(block).toString(), new ArrayList<>());
-        for (Item item : blockLootTables.get(block)) {
-            serializedLootTableMap.get(Registries.BLOCK.getId(block).toString()).add(Registries.ITEM.getId(item).toString());
+        if(changed) {
+            blockLootTables.put(block, oldLootTable);
+            lootTableGraph.addLootTable(block, oldLootTable);
+            serializedLootTableMap.put(Registries.BLOCK.getId(block).toString(), new ArrayList<>());
+            for (Item item : blockLootTables.get(block)) {
+                serializedLootTableMap.get(Registries.BLOCK.getId(block).toString()).add(Registries.ITEM.getId(item).toString());
+            }
         }
     }
 
     public void addLootTable(EntityType<?> entityType, List<ItemStack> lootTable) {
         List<Item> oldLootTable;
+        boolean changed;
         if(entityLootTables.containsKey(entityType)) {
             oldLootTable = entityLootTables.get(entityType);
-            for (ItemStack itemStack : lootTable) {
-                Item item = itemStack.getItem();
-                boolean found = false;
-                for (Item oldItemStack : oldLootTable) {
-                    if(oldItemStack == item) {
-                        found = true;
-                        break;
-                    }
-                }
-                if(!found) {
-                    oldLootTable.add(itemStack.getItem());
-                }
-            }
+            changed = lootTableChanged(lootTable, oldLootTable);
+            processLootTable(lootTable, oldLootTable);
         } else {
             oldLootTable = new ArrayList<>();
             for (ItemStack itemStack : lootTable) {
                 oldLootTable.add(itemStack.getItem());
             }
+            changed = true;
         }
-        entityLootTables.put(entityType, oldLootTable);
-        serializedLootTableMap.put(Registries.ENTITY_TYPE.getId(entityType).toString(), new ArrayList<>());
-        for (Item item : entityLootTables.get(entityType)) {
-            serializedLootTableMap.get(Registries.ENTITY_TYPE.getId(entityType).toString()).add(Registries.ITEM.getId(item).toString());
+        if(changed) {
+            entityLootTables.put(entityType, oldLootTable);
+            lootTableGraph.addLootTable(entityType, oldLootTable);
+            serializedLootTableMap.put(Registries.ENTITY_TYPE.getId(entityType).toString(), new ArrayList<>());
+            for (Item item : entityLootTables.get(entityType)) {
+                serializedLootTableMap.get(Registries.ENTITY_TYPE.getId(entityType).toString()).add(Registries.ITEM.getId(item).toString());
+            }
         }
     }
 
-    public LootTableGraph toGraph() {
-        LootTableGraph graph = new LootTableGraph();
-        for (Map.Entry<Block, List<Item>> entry : blockLootTables.entrySet()) {
-            Block block = entry.getKey();
-            graph.addLootTable(block, entry.getValue());
-        }
-        for (Map.Entry<EntityType<?>, List<Item>> entry : entityLootTables.entrySet()) {
-            EntityType<?> entityType = entry.getKey();
-            graph.addLootTable(entityType, entry.getValue());
-        }
-        return graph;
+    public Map<String, List<String>> getSerializedLootTableMap() {
+        return serializedLootTableMap;
+    }
+
+    public LootTableGraph getGraph() {
+        return lootTableGraph;
     }
 }

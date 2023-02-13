@@ -36,19 +36,7 @@ public class Drawing<V extends Vertex, E extends Edge<V>> {
 		edgeMappings = new HashMap<>();
 	}
 
-	/**
-	 * Creates a drawing with the provided edge and vertex mappings
-	 * @param vertexMappings Map consisting of vertices and their positions
-	 * @param edgeMappings Map consisting of edges and their positions
-	 */
-	public Drawing(Map<V, Point2D> vertexMappings,
-			Map<E, List<Point2D>> edgeMappings) {
-		super();
-		this.vertexMappings = vertexMappings;
-		this.edgeMappings = edgeMappings;
-	}
 
-	
 	/**
 	 * Once positions of vertices are calculated, this method
 	 * sets positions of edges (their nodes).

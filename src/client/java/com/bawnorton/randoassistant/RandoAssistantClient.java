@@ -23,14 +23,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RandoAssistantClient implements ClientModInitializer {
     public static final File ASSISTANT_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("RandoAssistant").toFile();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    @SuppressWarnings("unchecked")
     @Override
     public void onInitializeClient() {
+        initDir();
+        initEvents();
+    }
+
+    private static void initDir() {
         try {
             if (!Files.exists(ASSISTANT_DIRECTORY.toPath())) {
                 RandoAssistant.LOGGER.info("Creating RandoAssistant directory");
@@ -39,10 +45,13 @@ public class RandoAssistantClient implements ClientModInitializer {
         } catch (IOException e) {
             RandoAssistant.LOGGER.error("Failed to create RandoAssistant directory", e);
         }
+    }
 
+    @SuppressWarnings("unchecked")
+    private void initEvents() {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             try {
-                Files.write(getLootTablePath(), GSON.toJson(RandoAssistant.getCurrentLootTables().getSerializedLootTableMap()).getBytes());
+                Files.write(getLootTablePath(), GSON.toJson(RandoAssistant.LOOT_TABLES.getSerializedLootTableMap()).getBytes());
             } catch (Exception e) {
                 RandoAssistant.LOGGER.error("Failed to save loot tables to json", e);
             }
@@ -50,34 +59,55 @@ public class RandoAssistantClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             try {
-                RandoAssistant.setCurrentLootTables(LootTableMap.fromSerialized(GSON.fromJson(Files.newBufferedReader(getLootTablePath()), Map.class)));
+                RandoAssistant.LOOT_TABLES = LootTableMap.fromSerialized(GSON.fromJson(Files.newBufferedReader(getLootTablePath()), Map.class));
             } catch (Exception e) {
                 RandoAssistant.LOGGER.error("Failed to load loot tables from json", e);
             }
         });
 
-        KeyBinding keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        KeyBinding revealKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.randoassistant.reveal",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_K,
                 "category.randoassistant"
         ));
+        KeyBinding resetKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.randoassistant.reset",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_J,
+                "category.randoassistant"
+        ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (keyBinding.wasPressed()) {
+            while (revealKeyBinding.wasPressed()) {
                 MinecraftClient.getInstance().setScreen(new ConfirmScreen((result) -> {
                     if (result) {
                         RandoAssistant.addAllLootTables(Objects.requireNonNull(client.player));
                     }
                     MinecraftClient.getInstance().setScreen(null);
-                }, Text.of("Add all loot tables?"), Text.of("This will add all loot tables to the current loot table map and cannot be undone.")));
+                }, Text.of("Add all loot tables?"), Text.of("This will cause the game to lag for a few seconds.")));
+            }
+            while (resetKeyBinding.wasPressed()) {
+                MinecraftClient.getInstance().setScreen(new ConfirmScreen((result) -> {
+                    if (result) {
+                        RandoAssistant.LOOT_TABLES = new LootTableMap();
+                    }
+                    MinecraftClient.getInstance().setScreen(null);
+                }, Text.of("Reset all loot tables?"), Text.of("This will clear all loot tables from the graph.")));
             }
         });
     }
 
     private Path getLootTablePath() throws IOException {
-        String name = ((ServerWorldAccessor) Objects.requireNonNull(RandoAssistant.currentServer.getWorld(World.OVERWORLD))).getWorldProperties().getLevelName();
-        Path path = ASSISTANT_DIRECTORY.toPath().resolve(name + ".json");
+        String[] name = new String[]{((ServerWorldAccessor) Objects.requireNonNull(RandoAssistant.currentServer.getWorld(World.OVERWORLD))).getWorldProperties().getLevelName()};
+        RandoAssistant.currentServer.getSaveProperties().getDataConfiguration().dataPacks().getEnabled().forEach((file) -> {
+            if(file.contains("random_loot")) {
+                Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+                Matcher matcher = pattern.matcher(file);
+                if (matcher.find()) name[0] = matcher.group();
+            }
+        });
+        Path path = ASSISTANT_DIRECTORY.toPath().resolve(name[0] + ".json");
         if (!Files.exists(path)) {
             Files.createFile(path);
         }

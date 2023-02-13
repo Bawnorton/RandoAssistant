@@ -1,21 +1,20 @@
 package grapher.graph.layout;
 
+import com.mxgraph.layout.mxGraphLayout;
+import com.mxgraph.model.mxGeometry;
+import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.view.mxGraph;
 import grapher.graph.drawing.Drawing;
 import grapher.graph.elements.Edge;
 import grapher.graph.elements.Graph;
 import grapher.graph.elements.Vertex;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.mxgraph.layout.mxGraphLayout;
-import com.mxgraph.model.mxGeometry;
-import com.mxgraph.model.mxIGraphModel;
-import com.mxgraph.view.mxGraph;
 
 /**
  * Contains general code used for calling JGraphX layout algorithms

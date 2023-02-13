@@ -17,11 +17,11 @@ import java.awt.geom.Rectangle2D;
 public class ResetPositionWidget extends DrawableHelper {
     private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
     Rectangle2D.Float bounds;
-    final GraphDisplay graphDisplay;
+    final GraphDisplayWidget graphDisplayWidget;
 
-    public ResetPositionWidget(GraphDisplay graphDisplay) {
+    public ResetPositionWidget(GraphDisplayWidget graphDisplayWidget) {
         super();
-        this.graphDisplay = graphDisplay;
+        this.graphDisplayWidget = graphDisplayWidget;
     }
 
     public Tooltip render(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
@@ -47,7 +47,7 @@ public class ResetPositionWidget extends DrawableHelper {
 
     public InputResult handleMouseDown(int x, int y) {
         if (bounds != null && bounds.contains(x, y)) {
-            graphDisplay.resetOffset();
+            graphDisplayWidget.resetOffset();
             return InputResult.PROCESSED;
         }
         return InputResult.IGNORED;

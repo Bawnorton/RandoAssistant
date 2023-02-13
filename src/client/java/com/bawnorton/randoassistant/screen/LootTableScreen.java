@@ -1,69 +1,65 @@
 package com.bawnorton.randoassistant.screen;
 
 import com.bawnorton.randoassistant.RandoAssistant;
-import com.bawnorton.randoassistant.screen.widget.GraphDisplay;
+import com.bawnorton.randoassistant.screen.widget.CenteredButtonWidget;
+import com.bawnorton.randoassistant.screen.widget.CenteredLabelWidget;
+import com.bawnorton.randoassistant.screen.widget.GraphDisplayWidget;
 import com.bawnorton.randoassistant.screen.widget.SearchBarWidget;
 import com.bawnorton.randoassistant.util.LootTableGraph;
 import grapher.graph.drawing.Drawing;
-import grapher.graph.exception.CannotBeAppliedException;
-import grapher.graph.layout.GraphLayoutProperties;
-import grapher.graph.layout.LayoutAlgorithms;
-import grapher.graph.layout.Layouter;
-import grapher.graph.layout.PropertyEnums;
+import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
+import io.github.cottonmc.cotton.gui.widget.WWidget;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import net.minecraft.client.MinecraftClient;
 
-import java.util.List;
-
 public class LootTableScreen extends LightweightGuiDescription {
-    private static GraphDisplay cacheDisplay;
+    private final WPlainPanel panel;
 
     public LootTableScreen() {
-        GraphDisplay graphDisplay = cacheDisplay;
-        if (RandoAssistant.graphChanged) {
-            Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing = getDrawing();
-            if (drawing == null) return;
-            graphDisplay = new GraphDisplay(drawing);
-            cacheDisplay = graphDisplay;
-            RandoAssistant.graphChanged = false;
-        }
+        LootTableGraph graph = RandoAssistant.LOOT_TABLES.getGraph();
+        Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing = graph.getDrawing();
 
-        SearchBarWidget searchBar = new SearchBarWidget(graphDisplay);
-
-        WPlainPanel panel = new WPlainPanel();
+        panel = new WPlainPanel();
         setRootPanel(panel);
         setFullscreen(true);
         panel.setInsets(Insets.NONE);
-        panel.add(graphDisplay, 0, 0);
-        panel.add(searchBar, 40, 40, MinecraftClient.getInstance().getWindow().getScaledWidth() - 80, 20);
         panel.setBackgroundPainter(((matrices, left, top, panel1) -> {
         }));
+        CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
+        panel.add(drawingLabel, drawingLabel.x(), drawingLabel.y());
+
+        if (drawing == null) {
+            graph.afterDrawing(() -> {
+                if (graph.didFailToDraw()) {
+                    clearPanel();
+                    CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph");
+                    CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason:" + graph.getErrorMessage(), 20);
+                    panel.add(failedLabel, failedLabel.x(), failedLabel.y());
+                    panel.add(reasonLabel, reasonLabel.x(), reasonLabel.y());
+                    if (!graph.getErrorMessage().contains("Null")) {
+                        CenteredButtonWidget retryButton = new CenteredButtonWidget("Retry", 40);
+                        retryButton.setOnClick(() -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new LootTableScreen())));
+                        panel.add(retryButton, retryButton.x(), retryButton.y());
+                    }
+                    return;
+                }
+                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new LootTableScreen()));
+            });
+        } else {
+            GraphDisplayWidget graphDisplayWidget = new GraphDisplayWidget(drawing);
+            SearchBarWidget searchBar = new SearchBarWidget(graphDisplayWidget);
+
+            clearPanel();
+            panel.add(graphDisplayWidget, 0, 0);
+            panel.add(searchBar, 40, 40, MinecraftClient.getInstance().getWindow().getScaledWidth() - 80, 20);
+        }
     }
 
-    private Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> getDrawing() {
-        double levelGap = 40;
-        double nodeGap = 40;
-        double heirarchyGap = 0;
-
-        LootTableGraph graph = RandoAssistant.getCurrentLootTables().toGraph();
-
-        LayoutAlgorithms algorithm = LayoutAlgorithms.HIERARCHICAL;
-
-        GraphLayoutProperties layoutProperties = new GraphLayoutProperties();
-        layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTER_HIERARCHY_SPACING, heirarchyGap);
-        layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTER_RANK_CELL_SPACING, levelGap);
-        layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTRA_CELL_SPACING, nodeGap);
-
-        List<LootTableGraph.Vertex> vertices = graph.getVertices();
-        List<LootTableGraph.Edge> edges = graph.getEdges();
-        Layouter<LootTableGraph.Vertex, LootTableGraph.Edge> layouter = new Layouter<>(vertices, edges, algorithm, layoutProperties);
-        try {
-            return layouter.layout();
-        } catch (CannotBeAppliedException e) {
-            RandoAssistant.LOGGER.error("Could not layout graph", e);
-            return null;
+    private void clearPanel() {
+        for(WWidget widget : panel.streamChildren().toList()) {
+            panel.remove(widget);
         }
     }
 
