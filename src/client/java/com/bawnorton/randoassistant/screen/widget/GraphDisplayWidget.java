@@ -138,37 +138,23 @@ public class GraphDisplayWidget extends WWidget {
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
+        RenderSystem.disableCull();
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
         bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         int width = 1;
 
-        if (y2 < y1) {
-            bufferBuilder.vertex(matrix, x1 - width, y1 - width, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x1 + width, y1 + width, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x2 + width, y2 + width, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x2 - width, y2 - width, 0).color(colour).next();
-        } else if (x1 > x2) {
+        if (x1 >= x2) {
             bufferBuilder.vertex(matrix, x2 + width, y2 + width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x1 + width, y1 + width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x1 - width, y1 - width, 0).color(colour).next();
             bufferBuilder.vertex(matrix, x2 - width, y2 - width, 0).color(colour).next();
-        } else if (x1 < x2 && y2 > y1) {
-            bufferBuilder.vertex(matrix, x1 + width, y1 - width, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x1 - width, y1 + width, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x2 - width, y2 + width, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x2 + width, y2 - width, 0).color(colour).next();
-        } else if (x1 < x2) {
-            bufferBuilder.vertex(matrix, x1 - width, y1 + width, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x2 - width, y2 + width, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x2 + width, y2 - width, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x1 + width, y1 - width, 0).color(colour).next();
         } else {
-            bufferBuilder.vertex(matrix, x1 + width, y1, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x1 - width, y1, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x2 - width, y2, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, x2 + width, y2, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x1 - width, y1 + width, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x2 - width, y2 + width, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x2 + width, y2 - width, 0).color(colour).next();
+            bufferBuilder.vertex(matrix, x1 + width, y1 - width, 0).color(colour).next();
         }
 
         Tessellator.getInstance().draw();
@@ -192,6 +178,7 @@ public class GraphDisplayWidget extends WWidget {
         Tessellator.getInstance().draw();
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
+        RenderSystem.enableCull();
     }
 
     private void drawLine(MatrixStack matrices, int x, int y, LootTableGraph.Edge edge, int colour) {
