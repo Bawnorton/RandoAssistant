@@ -10,14 +10,15 @@ Open the GUI with the red book in the inventory.
   - Blue paths are paths to blocks / entities that are dropped by the selected item.
 - There is a search bar at the top of the GUI. 
   - Type in the name of a block or entity to search for it and the graph will center on it.
-    - This uses levenshtein distance to find the closest match.
+  - Search is exact and case-insensitive.
 - There is a repositioning button in the bottom left which will reposition the graph back to the origin.
 - GUI scales with minecraft's GUI scale setting.
-  - Attempted to scale the GUI with the scroll wheel but it caused too many issues with rendering.
+  - Attempted to scale the GUI with the scroll wheel, but it caused too many issues with rendering.
 
-### Reveal All Drops
-Press `k` to reveal all drops. This will fill the graph with all blocks and entities that have a drop.
-- Warning: This will take a while to render and can cause a client side lag.
+### Keybinds
+Press `k` to reveal all drops. This will fill the graph with all blocks and entities that have a drop.<br>
+Press `j` to remove all drops from the graph. 
+
 
 ## Dependencies
 - [Minecraft Fabric 1.19.3](https://fabricmc.net/)
