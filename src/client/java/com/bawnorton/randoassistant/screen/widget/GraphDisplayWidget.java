@@ -68,13 +68,12 @@ public class GraphDisplayWidget extends WWidget {
         while (low <= high) {
             int mid = (low + high) / 2;
             String midVal = queryNodeMap.get(nodeWidgets.get(mid));
-            int cmp = midVal.compareTo(query);
-            if (cmp < 0) {
-                low = mid + 1;
-            } else if (cmp > 0) {
-                high = mid - 1;
-            } else {
+            if (midVal.startsWith(query)) {
                 return nodeWidgets.get(mid);
+            } else if (midVal.compareTo(query) < 0) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
             }
         }
         return null;
