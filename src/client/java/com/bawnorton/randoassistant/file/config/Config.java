@@ -15,6 +15,12 @@ public class Config {
     @Expose @SerializedName("search_type")
     public SearchType searchType = SearchType.EXACT;
 
+    @Expose @SerializedName("child_depth")
+    public Integer childDepth = 100;
+
+    @Expose @SerializedName("parent_depth")
+    public Integer parentDepth = 100;
+
     private Config() {
     }
 

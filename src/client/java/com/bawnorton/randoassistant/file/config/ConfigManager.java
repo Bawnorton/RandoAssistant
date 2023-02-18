@@ -20,6 +20,8 @@ public class ConfigManager {
         if (config.debug == null) config.debug = false;
         if (config.searchType == null) config.searchType = Config.SearchType.EXACT;
         if (config.showInteractionLines == null) config.showInteractionLines = false;
+        if (config.childDepth == null) config.childDepth = 100;
+        if (config.parentDepth == null) config.parentDepth = 100;
 
         Config.update(config);
         save();

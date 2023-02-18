@@ -197,7 +197,7 @@ public class NodeWidget extends DrawableHelper implements Searchable {
         }
         selectedNode = this;
         selectedNode.node.highlightAsTarget();
-        selectedNode.node.highlightChildren();
-        selectedNode.node.highlightParents();
+        selectedNode.node.highlightChildren(Config.getInstance().childDepth);
+        selectedNode.node.highlightParents(Config.getInstance().parentDepth);
     }
 }

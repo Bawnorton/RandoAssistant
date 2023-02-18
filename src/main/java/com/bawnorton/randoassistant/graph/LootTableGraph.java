@@ -104,38 +104,38 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         graphDrawer.updateDrawing();
     }
 
-    private Set<Vertex> getParents(Vertex vertex, Set<Vertex> visited, Set<Vertex> parents) {
-        if (visited.contains(vertex)) {
+    private Set<Vertex> getParents(Vertex vertex, Set<Vertex> visited, Set<Vertex> parents, int depth, int maxDepth) {
+        if (visited.contains(vertex) || depth > maxDepth) {
             return parents;
         }
         visited.add(vertex);
         for (Edge edge : incomingEdgesOf(vertex)) {
             Vertex parent = getEdgeSource(edge);
             parents.add(parent);
-            getParents(parent, visited, parents);
+            getParents(parent, visited, parents, ++depth, maxDepth);
         }
         return parents;
     }
 
-    public Set<Vertex> getParents(Vertex vertex) {
-        return getParents(vertex, new HashSet<>(), new HashSet<>());
+    public Set<Vertex> getParents(Vertex vertex, int depth) {
+        return getParents(vertex, new HashSet<>(), new HashSet<>(), 0, depth);
     }
 
-    private Set<Vertex> getChildren(Vertex vertex, Set<Vertex> visited, Set<Vertex> children) {
-        if (visited.contains(vertex)) {
+    private Set<Vertex> getChildren(Vertex vertex, Set<Vertex> visited, Set<Vertex> children, int depth, int maxDepth) {
+        if (visited.contains(vertex) || depth > maxDepth) {
             return children;
         }
         visited.add(vertex);
         for (Edge edge : outgoingEdgesOf(vertex)) {
             Vertex child = getEdgeTarget(edge);
             children.add(child);
-            getChildren(child, visited, children);
+            getChildren(child, visited, children, ++depth, maxDepth);
         }
         return children;
     }
 
-    public Set<Vertex> getChildren(Vertex vertex) {
-        return getChildren(vertex, new HashSet<>(), new HashSet<>());
+    public Set<Vertex> getChildren(Vertex vertex, int depth) {
+        return getChildren(vertex, new HashSet<>(), new HashSet<>(), 0, depth);
     }
 
     public GraphDrawer getDrawer() {
@@ -350,12 +350,12 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
                     '}';
         }
 
-        public Iterable<Vertex> getParents() {
-            return LootTableGraph.this.getParents(this);
+        public Iterable<Vertex> getParents(int depth) {
+            return LootTableGraph.this.getParents(this, depth);
         }
 
-        public Iterable<Vertex> getChildren() {
-            return LootTableGraph.this.getChildren(this);
+        public Iterable<Vertex> getChildren(int depth) {
+            return LootTableGraph.this.getChildren(this, depth);
         }
 
         public void highlightAsParent() {
@@ -441,8 +441,8 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             return highlightAsCraftingResult;
         }
 
-        public void highlightParents() {
-            getParents().forEach(Vertex::highlightAsParent);
+        public void highlightParents(int depth) {
+            getParents(depth).forEach(Vertex::highlightAsParent);
             highlighted.forEach(node -> {
                 List<Item> items = RandoAssistant.interactionMap.getIngredients(node.getItem());
                 if (items != null) {
@@ -457,8 +457,8 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             });
         }
 
-        public void highlightChildren() {
-            getChildren().forEach(Vertex::highlightAsChild);
+        public void highlightChildren(int depth) {
+            getChildren(depth).forEach(Vertex::highlightAsChild);
             highlighted.forEach(node -> {
                 List<Item> items = RandoAssistant.interactionMap.getIngredients(node.getItem());
                 if (items != null) {
