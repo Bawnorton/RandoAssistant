@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.screen.widget.drawable;
 
+import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.screen.widget.GraphDisplayWidget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
@@ -23,7 +24,7 @@ public class ResetPositionWidget extends DrawableHelper {
     private final GraphDisplayWidget graphDisplayWidget;
     private final Rectangle2D.Float bounds;
     private final int x;
-    private final int y;
+    private int y;
 
     public ResetPositionWidget(int x, int y, GraphDisplayWidget graphDisplayWidget) {
         this.graphDisplayWidget = graphDisplayWidget;
@@ -33,12 +34,15 @@ public class ResetPositionWidget extends DrawableHelper {
     }
 
     public Tooltip render(MatrixStack matrices, int mouseX, int mouseY) {
+        y = MinecraftClient.getInstance().getWindow().getScaledHeight() - SIZE;
+        bounds.setRect(x - SIZE / 2f - 5, y - SIZE / 2f - 5, SIZE, SIZE);
+
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
         Tooltip tooltip = null;
         if (bounds.contains(mouseX, mouseY)) {
             RenderSystem.setShaderColor(0.75F, 0.75F, 0.75F, 1F);
-            tooltip = Tooltip.of(Text.of("Reset Position"));
+            tooltip = Tooltip.of(Text.of("Reset Position and Scale"));
         } else {
             RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
         }

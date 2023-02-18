@@ -7,6 +7,8 @@ import com.bawnorton.randoassistant.keybind.KeybindManager;
 import net.fabricmc.api.ClientModInitializer;
 
 public class RandoAssistantClient implements ClientModInitializer {
+    public static Wrapper<Double> SCALE = Wrapper.ofNothing();
+    public static Wrapper<Double> ACTUAL_SCALE = Wrapper.ofNothing();
 
     @Override
     public void onInitializeClient() {
