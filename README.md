@@ -8,12 +8,14 @@ Open the GUI with the red book in the inventory.
 - Paths connect nodes to each other and when a node is selected, it's paths will render.
   - Red paths are paths to blocks / entities that drop the selected item.
   - Blue paths are paths to blocks / entities that are dropped by the selected item.
+  - Yellow paths are paths to blocks / items that are gotten from crafting / interacting with the selected item.
 - There is a search bar at the top of the GUI. 
   - Type in the name of a block or entity to search for it and the graph will center on it.
-  - Search is exact and case-insensitive.
-- There is a repositioning button in the bottom left which will reposition the graph back to the origin.
-- GUI scales with minecraft's GUI scale setting.
-  - Attempted to scale the GUI with the scroll wheel, but it caused too many issues with rendering.
+  - Search is either "exact", "contains" or "fuzzy". Search ignores whitespaces and is case-insensitive.
+- There is a repositioning button in the bottom left which will reposition and scale the graph back to the origin.
+- Zooming
+  - Use the scroll wheel to zoom in and out.
+  - This uses minecraft's gui scale setting and will reset back when the ui is closed.
 
 ### Keybinds
 Press `k` to reveal all drops. This will fill the graph with all blocks and entities that have a drop.<br>
