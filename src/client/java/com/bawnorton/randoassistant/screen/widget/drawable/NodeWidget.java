@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.screen.widget.drawable;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.file.config.Config;
 import com.bawnorton.randoassistant.mixin.AbstractPlantPartBlockInvoker;
 import com.bawnorton.randoassistant.mixin.AttachedStemBlockAccessor;
 import com.bawnorton.randoassistant.search.Searchable;
@@ -20,6 +21,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -96,9 +98,22 @@ public class NodeWidget extends DrawableHelper implements Searchable {
         boolean hovered = bounds.contains(mouseX, mouseY);
         if (hovered) {
             RenderSystem.setShaderColor(0.75F, 0.75F, 0.75F, 1F);
-            tooltip = Tooltip.of(node.getTooltip());
+            if(Config.getInstance().debug) {
+                tooltip = Tooltip.of(Text.of(
+                        "Tooltip: " + node.getTooltip().getString() + "\n"
+                                + "Target: " + node.isHighlightedAsTarget() + "\n"
+                                + "CResult: " + node.isHighlightedAsCraftingResult() + "\n"
+                                + "CIngredient: " + node.isHighlightedAsCraftingIngredient() + "\n"
+                                + "Parent: " + node.isHighlightedAsParent() + "\n"
+                                + "Child: " + node.isHighlightedAsChild()
+                ));
+            } else {
+                tooltip = Tooltip.of(node.getTooltip());
+            }
         } else if (node.isHighlightedAsTarget()) {
             RenderSystem.setShaderColor(0.1F, 1F, 0.1F, 1F);
+        } else if (node.isHighlightedAsCraftingResult() || node.isHighlightedAsCraftingIngredient()) {
+            RenderSystem.setShaderColor(1F, 1F, 0.1F, 1F);
         } else if (node.isHighlightedAsParent()) {
             RenderSystem.setShaderColor(1F, 0.1F, 0.1F, 1F);
         } else if (node.isHighlightedAsChild()) {
@@ -170,34 +185,9 @@ public class NodeWidget extends DrawableHelper implements Searchable {
         return y;
     }
 
-    public void highlightParents() {
-        node.highlightAsTarget();
-        node.highlightAsParent();
-        node.getParents().forEach(LootTableGraph.Vertex::highlightAsParent);
-    }
-
-    public void unhighlightParents() {
-        node.unhighlightAsTarget();
-        node.unhighlightAsParent();
-        node.getParents().forEach(LootTableGraph.Vertex::unhighlightAsParent);
-    }
-
-    public void highlightChildren() {
-        node.highlightAsTarget();
-        node.highlightAsChild();
-        node.getChildren().forEach(LootTableGraph.Vertex::highlightAsChild);
-    }
-
-    public void unhighlightChildren() {
-        node.unhighlightAsTarget();
-        node.unhighlightAsChild();
-        node.getChildren().forEach(LootTableGraph.Vertex::unhighlightAsChild);
-    }
-
     public static void deselect() {
         if(selectedNode == null) return;
-        selectedNode.unhighlightChildren();
-        selectedNode.unhighlightParents();
+        selectedNode.node.unhighlightConnected();
     }
 
     public void select() {
@@ -206,7 +196,8 @@ public class NodeWidget extends DrawableHelper implements Searchable {
             deselect();
         }
         selectedNode = this;
-        selectedNode.highlightChildren();
-        selectedNode.highlightParents();
+        selectedNode.node.highlightAsTarget();
+        selectedNode.node.highlightChildren();
+        selectedNode.node.highlightParents();
     }
 }

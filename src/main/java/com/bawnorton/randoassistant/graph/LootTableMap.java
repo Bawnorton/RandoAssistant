@@ -30,7 +30,6 @@ public class LootTableMap {
         blockLootTables.forEach(lootTableGraph::addLootTable);
         entityLootTables.forEach(lootTableGraph::addLootTable);
         lootTableGraph.getDrawer().enable();
-        lootTableGraph.getDrawer().updateDrawing();
 
         initSerializedLootTable();
     }

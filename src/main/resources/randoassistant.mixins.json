@@ -5,10 +5,12 @@
   "mixins": [
     "AbstractPlantPartBlockInvoker",
     "AttachedStemBlockAccessor",
+    "AxeItemMixin",
     "BlockMixin",
     "CandleCakeBlockMixin",
     "LivingEntityMixin",
     "MinecraftServerMixin",
+    "RecipeUnlockerMixin",
     "ServerWorldAccessor"
   ],
   "injectors": {

@@ -6,6 +6,12 @@ import com.google.gson.annotations.SerializedName;
 public class Config {
     private static Config INSTANCE;
 
+    @Expose @SerializedName("debug")
+    public Boolean debug = false;
+
+    @Expose @SerializedName("show_interaction_lines")
+    public Boolean showInteractionLines;
+
     @Expose @SerializedName("search_type")
     public SearchType searchType = SearchType.EXACT;
 

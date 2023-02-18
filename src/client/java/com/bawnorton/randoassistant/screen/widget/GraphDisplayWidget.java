@@ -12,11 +12,15 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Pair;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
 import java.awt.geom.Point2D;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GraphDisplayWidget extends WWidget {
     private final MinecraftClient client = MinecraftClient.getInstance();
@@ -30,7 +34,7 @@ public class GraphDisplayWidget extends WWidget {
 
     public float xOffset = 0;
     public float yOffset = 0;
-
+    public boolean displayCraftingLines = true;
 
     public GraphDisplayWidget(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
         edgeLocations = drawing.getEdgeMappings();
@@ -46,6 +50,7 @@ public class GraphDisplayWidget extends WWidget {
             nodeWidgets.add(new NodeWidget(source, sourceLocation));
             nodeWidgets.add(new NodeWidget(target, targetLocation));
         }
+
 
         resetPositionWidget = new ResetPositionWidget(40, client.getWindow().getScaledHeight() - 26, this);
     }
@@ -96,7 +101,7 @@ public class GraphDisplayWidget extends WWidget {
 
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
         bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        int width = 1;
+        int width = y1 > y2 ? -1 : 1;
 
         if (x1 >= x2) {
             bufferBuilder.vertex(matrix, x2 + width, y2 + width, 0).color(colour).next();
@@ -149,9 +154,11 @@ public class GraphDisplayWidget extends WWidget {
         for (LootTableGraph.Edge edge : edgeLocations.keySet()) {
             LootTableGraph.Vertex dest = edge.getDestination();
             LootTableGraph.Vertex origin = edge.getOrigin();
-            if (dest.isHighlightedAsParent() && origin.isHighlightedAsParent()) {
+            if (dest.isHighlightedAsCraftingResult() && origin.isHighlightedAsCraftingIngredient()) {
+                if(displayCraftingLines) drawLine(matrices, x, y, edge, -256);
+            } else if ((dest.isHighlightedAsParent() || dest.isHighlightedAsTarget()) && origin.isHighlightedAsParent()) {
                 drawLine(matrices, x, y, edge, -65536);
-            } else if (dest.isHighlightedAsChild() && origin.isHighlightedAsChild()) {
+            } else if (dest.isHighlightedAsChild() && (origin.isHighlightedAsChild() || origin.isHighlightedAsTarget())) {
                 drawLine(matrices, x, y, edge, -16776961);
             }
         }

@@ -18,12 +18,14 @@ import java.util.*;
 public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, LootTableGraph.Edge> {
     private final List<Edge> edges;
     private final List<Vertex> vertices;
+    private final Map<Item, Vertex> itemVertexMap;
     private final GraphDrawer graphDrawer;
 
     public LootTableGraph() {
         super(Edge.class);
         edges = new ArrayList<>();
         vertices = new ArrayList<>();
+        itemVertexMap = new HashMap<>();
         graphDrawer = new GraphDrawer(this);
     }
 
@@ -46,6 +48,9 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
     public boolean addVertex(Vertex vertex) {
         if (super.addVertex(vertex)) {
             vertices.add(vertex);
+            if (vertex.getItem() != null) {
+                itemVertexMap.put(vertex.getItem(), vertex);
+            }
             return true;
         }
         return false;
@@ -89,6 +94,16 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         graphDrawer.updateDrawing();
     }
 
+    public void addCraftingRecipe(Item item, List<Item> ingredients) {
+        Vertex root = getOrCreateNode(new Vertex(item));
+        for (Item ingredient : ingredients) {
+            Vertex vertex = getOrCreateNode(new Vertex(ingredient));
+            addEdge(vertex, root);
+            addVertex(vertex);
+        }
+        graphDrawer.updateDrawing();
+    }
+
     private Set<Vertex> getParents(Vertex vertex, Set<Vertex> visited, Set<Vertex> parents) {
         if (visited.contains(vertex)) {
             return parents;
@@ -125,6 +140,10 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
     public GraphDrawer getDrawer() {
         return graphDrawer;
+    }
+
+    public Vertex getVertex(Item item) {
+        return itemVertexMap.get(item);
     }
 
     public static class Edge extends DefaultEdge implements grapher.graph.elements.Edge<Vertex> {
@@ -243,10 +262,14 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
     }
 
     public class Vertex implements grapher.graph.elements.Vertex {
+        private static final Set<Vertex> highlighted = new HashSet<>();
+
         private final LootTableType type;
         private boolean highlightAsParent = false;
         private boolean highlightAsChild = false;
         private boolean highlightAsTarget = false;
+        private boolean highlightAsCraftingIngredient = false;
+        private boolean highlightAsCraftingResult = false;
 
         public Vertex(Block block) {
             this.type = new LootTableType(block);
@@ -337,6 +360,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
         public void highlightAsParent() {
             highlightAsParent = true;
+            highlighted.add(this);
         }
 
         public void unhighlightAsParent() {
@@ -349,6 +373,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
         public void highlightAsChild() {
             highlightAsChild = true;
+            highlighted.add(this);
         }
 
         public void unhighlightAsChild() {
@@ -361,6 +386,25 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
         public void highlightAsTarget() {
             highlightAsTarget = true;
+            highlighted.add(this);
+            for(Map.Entry<Item, List<Item>> entry: RandoAssistant.interactionMap.getMap()) {
+                if(entry.getKey().equals(getItem())) {
+                    for(Item item: entry.getValue()) {
+                        Vertex vertex = RandoAssistant.lootTableMap.getGraph().getVertex(item);
+                        if(vertex != null) {
+                            vertex.highlightAsCraftingResult();
+                        }
+                    }
+                }
+                for(Item item: entry.getValue()) {
+                    if(item.equals(getItem())) {
+                        Vertex vertex = RandoAssistant.lootTableMap.getGraph().getVertex(item);
+                        if(vertex != null) {
+                            vertex.highlightAsCraftingIngredient();
+                        }
+                    }
+                }
+            }
         }
 
         public void unhighlightAsTarget() {
@@ -369,6 +413,75 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
         public boolean isHighlightedAsTarget() {
             return highlightAsTarget;
+        }
+
+        public void highlightAsCraftingIngredient() {
+            highlightAsCraftingIngredient = true;
+            highlighted.add(this);
+        }
+
+        public void unhighlightAsCraftingIngredient() {
+            highlightAsCraftingIngredient = false;
+        }
+
+        public boolean isHighlightedAsCraftingIngredient() {
+            return highlightAsCraftingIngredient;
+        }
+
+        public void highlightAsCraftingResult() {
+            highlightAsCraftingResult = true;
+            highlighted.add(this);
+        }
+
+        public void unhighlightAsCraftingResult() {
+            highlightAsCraftingResult = false;
+        }
+
+        public boolean isHighlightedAsCraftingResult() {
+            return highlightAsCraftingResult;
+        }
+
+        public void highlightParents() {
+            getParents().forEach(Vertex::highlightAsParent);
+            highlighted.forEach(node -> {
+                List<Item> items = RandoAssistant.interactionMap.getIngredients(node.getItem());
+                if (items != null) {
+                    node.highlightAsCraftingResult();
+                    items.forEach(item -> {
+                        Vertex vertex = LootTableGraph.this.getVertex(item);
+                        if (vertex != null && vertex.isHighlightedAsParent()) {
+                            vertex.highlightAsCraftingIngredient();
+                        }
+                    });
+                }
+            });
+        }
+
+        public void highlightChildren() {
+            getChildren().forEach(Vertex::highlightAsChild);
+            highlighted.forEach(node -> {
+                List<Item> items = RandoAssistant.interactionMap.getIngredients(node.getItem());
+                if (items != null) {
+                    node.highlightAsCraftingResult();
+                    items.forEach(item -> {
+                        Vertex vertex = LootTableGraph.this.getVertex(item);
+                        if (vertex != null && vertex.isHighlightedAsChild()) {
+                            vertex.highlightAsCraftingIngredient();
+                        }
+                    });
+                }
+            });
+        }
+
+        public void unhighlightConnected() {
+            highlighted.forEach(vertex -> {
+                vertex.unhighlightAsParent();
+                vertex.unhighlightAsChild();
+                vertex.unhighlightAsTarget();
+                vertex.unhighlightAsCraftingIngredient();
+                vertex.unhighlightAsCraftingResult();
+            });
+            highlighted.clear();
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant;
 
+import com.bawnorton.randoassistant.graph.InteractionMap;
 import com.bawnorton.randoassistant.graph.LootTableMap;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.block.CandleBlock;
@@ -20,7 +21,6 @@ import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +32,7 @@ public class RandoAssistant implements ModInitializer {
     public static final Map<CandleCakeBlock, CandleBlock> CANDLE_CAKE_MAP = new HashMap<>();
     public static MinecraftServer currentServer;
     public static LootTableMap lootTableMap;
+    public static InteractionMap interactionMap;
 
     public static void addAllLootTables(PlayerEntity player) {
         LootManager lootManager = currentServer.getLootManager();

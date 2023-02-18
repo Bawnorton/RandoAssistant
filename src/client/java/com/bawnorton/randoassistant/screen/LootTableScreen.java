@@ -11,6 +11,7 @@ import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.Window;
 
 public class LootTableScreen extends LightweightGuiDescription {
     private final WPlainPanel panel;
@@ -54,12 +55,16 @@ public class LootTableScreen extends LightweightGuiDescription {
     private void drawGraph(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
         GraphDisplayWidget graphDisplayWidget = new GraphDisplayWidget(drawing);
         SearchBarWidget searchBar = new SearchBarWidget(graphDisplayWidget);
+        InteractionLinesToggleWidget interactionLinesToggleWidget = new InteractionLinesToggleWidget(graphDisplayWidget);
         SearchTypeWidget searchTypeWidget = new SearchTypeWidget(searchBar);
+
+        Window window = MinecraftClient.getInstance().getWindow();
 
         clearPanel();
         panel.add(graphDisplayWidget, 0, 0);
-        panel.add(searchBar, 40, 40, MinecraftClient.getInstance().getWindow().getScaledWidth() - 220, 20);
-        panel.add(searchTypeWidget, MinecraftClient.getInstance().getWindow().getScaledWidth() - 160, 40, 120, 20);
+        panel.add(searchBar, 40, 40, window.getScaledWidth() - 220, 20);
+        panel.add(searchTypeWidget, window.getScaledWidth() - 160, 40, 120, 20);
+        panel.add(interactionLinesToggleWidget, window.getScaledWidth() - 160, window.getScaledHeight() - 40, 120, 20);
     }
 
     private void clearPanel() {

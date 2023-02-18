@@ -17,7 +17,9 @@ public class ConfigManager {
     public static void loadConfig() {
         Config config = load();
 
+        if (config.debug == null) config.debug = false;
         if (config.searchType == null) config.searchType = Config.SearchType.EXACT;
+        if (config.showInteractionLines == null) config.showInteractionLines = false;
 
         Config.update(config);
         save();

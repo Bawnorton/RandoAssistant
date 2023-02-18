@@ -31,6 +31,24 @@ public class FileManager {
     }
 
     public static Path getLootTablePath() throws IOException {
+        String name = getFileName();
+        Path path = ASSISTANT_DIRECTORY.toPath().resolve(name + ".json");
+        if (!Files.exists(path)) {
+            Files.createFile(path);
+        }
+        return path;
+    }
+
+    public static Path getCraftingPath() throws IOException {
+        String name = getFileName();
+        Path path = ASSISTANT_DIRECTORY.toPath().resolve(name + "_crafting.json");
+        if (!Files.exists(path)) {
+            Files.createFile(path);
+        }
+        return path;
+    }
+
+    private static String getFileName() {
         String[] name = new String[]{((ServerWorldAccessor) Objects.requireNonNull(RandoAssistant.currentServer.getWorld(World.OVERWORLD))).getWorldProperties().getLevelName()};
         RandoAssistant.currentServer.getSaveProperties().getDataConfiguration().dataPacks().getEnabled().forEach((file) -> {
             if (file.contains("random_loot")) {
@@ -39,10 +57,6 @@ public class FileManager {
                 if (matcher.find()) name[0] = matcher.group();
             }
         });
-        Path path = ASSISTANT_DIRECTORY.toPath().resolve(name[0] + ".json");
-        if (!Files.exists(path)) {
-            Files.createFile(path);
-        }
-        return path;
+        return name[0];
     }
 }
