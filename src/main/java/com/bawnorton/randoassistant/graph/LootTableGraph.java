@@ -1,12 +1,6 @@
-package com.bawnorton.randoassistant.util;
+package com.bawnorton.randoassistant.graph;
 
 import com.bawnorton.randoassistant.RandoAssistant;
-import grapher.graph.drawing.Drawing;
-import grapher.graph.exception.CannotBeAppliedException;
-import grapher.graph.layout.GraphLayoutProperties;
-import grapher.graph.layout.LayoutAlgorithms;
-import grapher.graph.layout.Layouter;
-import grapher.graph.layout.PropertyEnums;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -17,7 +11,6 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.*;
 
@@ -25,15 +18,13 @@ import java.util.*;
 public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, LootTableGraph.Edge> {
     private final List<Edge> edges;
     private final List<Vertex> vertices;
-    private Drawing<Vertex, Edge> drawing;
-    private boolean isDrawing = false;
-    private boolean failedToDraw = false;
-    private String errorMessage = "";
+    private final GraphDrawer graphDrawer;
 
     public LootTableGraph() {
         super(Edge.class);
         edges = new ArrayList<>();
         vertices = new ArrayList<>();
+        graphDrawer = new GraphDrawer(this);
     }
 
     @Override
@@ -85,7 +76,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             addEdge(root, vertex);
             addVertex(vertex);
         }
-        updateDrawing();
+        graphDrawer.updateDrawing();
     }
 
     public void addLootTable(Block block, List<Item> items) {
@@ -95,7 +86,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             addEdge(root, vertex);
             addVertex(vertex);
         }
-        updateDrawing();
+        graphDrawer.updateDrawing();
     }
 
     private Set<Vertex> getParents(Vertex vertex, Set<Vertex> visited, Set<Vertex> parents) {
@@ -132,88 +123,8 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         return getChildren(vertex, new HashSet<>(), new HashSet<>());
     }
 
-    public void updateDrawing() {
-        updateDrawing(0);
-    }
-
-    public void updateDrawing(int retries) {
-        if (isDrawing && retries == 0) {
-            return;
-        }
-        if (retries > 3) {
-            RandoAssistant.LOGGER.error("Failed to draw graph after 3 retries");
-            failedToDraw = true;
-            errorMessage = "Failed to draw graph after 3 retries";
-            return;
-        }
-        isDrawing = true;
-        failedToDraw = false;
-        Thread drawingThread = new Thread(() -> {
-            double levelGap = 40;
-            double nodeGap = 40;
-            double heirarchyGap = 0;
-
-            LayoutAlgorithms algorithm = LayoutAlgorithms.HIERARCHICAL;
-
-            GraphLayoutProperties layoutProperties = new GraphLayoutProperties();
-            layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTER_HIERARCHY_SPACING, heirarchyGap);
-            layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTER_RANK_CELL_SPACING, levelGap);
-            layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTRA_CELL_SPACING, nodeGap);
-
-            List<Vertex> vertices = Collections.synchronizedList(new ArrayList<>(getVertices()));
-            List<Edge> edges = Collections.synchronizedList(new ArrayList<>(getEdges()));
-
-            Layouter<Vertex, Edge> layouter = new Layouter<>(vertices, edges, algorithm, layoutProperties);
-            try {
-                drawing = layouter.layout();
-            } catch (CannotBeAppliedException e) {
-                RandoAssistant.LOGGER.error("Could not layout graph", e);
-                errorMessage = e.getMessage();
-                failedToDraw = true;
-            } catch (NullPointerException e) {
-                RandoAssistant.LOGGER.error("NullPointerException while trying to layout graph. Not fatal, trying again", e);
-                errorMessage = "NullPointerException while trying to layout graph. Not fatal, trying again";
-                updateDrawing(retries + 1);
-            }
-            // scale down the drawing width so it better fits in the screen
-            for (LootTableGraph.Edge edge : drawing.getEdgeMappings().keySet()) {
-                List<Point2D> points = drawing.getEdgeMappings().get(edge);
-                Point2D source = points.get(0);
-                Point2D target = points.get(1);
-                source.setLocation(source.getX() / 10, source.getY());
-                target.setLocation(target.getX() / 10, target.getY());
-            }
-            isDrawing = false;
-        });
-        drawingThread.start();
-    }
-
-    public Drawing<Vertex, Edge> getDrawing() {
-        return isDrawing ? null : drawing;
-    }
-
-    public boolean didFailToDraw() {
-        return failedToDraw;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    @SuppressWarnings("BusyWait") // not applicable here as no resource is being waited on
-    public void afterDrawing(Runnable runnable) {
-        Thread thread = new Thread(() -> {
-            while (isDrawing) {
-                try {
-                    if (failedToDraw) return;
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            runnable.run();
-        });
-        thread.start();
+    public GraphDrawer getDrawer() {
+        return graphDrawer;
     }
 
     public static class Edge extends DefaultEdge implements grapher.graph.elements.Edge<Vertex> {

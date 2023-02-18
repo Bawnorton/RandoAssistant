@@ -3,7 +3,8 @@ package com.bawnorton.randoassistant.screen.widget;
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.mixin.AbstractPlantPartBlockInvoker;
 import com.bawnorton.randoassistant.mixin.AttachedStemBlockAccessor;
-import com.bawnorton.randoassistant.util.LootTableGraph;
+import com.bawnorton.randoassistant.search.Searchable;
+import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.minecraft.block.*;
@@ -27,9 +28,9 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Objects;
 
-public class NodeWidget extends DrawableHelper {
+public class NodeWidget extends DrawableHelper implements Searchable {
     private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
-    public static NodeWidget selectedNode;
+    private static NodeWidget selectedNode;
     private static int SIZE;
     private final int x;
     private final int y;
@@ -150,16 +151,15 @@ public class NodeWidget extends DrawableHelper {
     public InputResult handleMouseDown(int x, int y) {
         if (bounds == null) return InputResult.IGNORED;
         if (bounds.contains(x, y)) {
-            if (selectedNode != null) {
-                selectedNode.unhighlightChildren();
-                selectedNode.unhighlightParents();
-            }
-            selectedNode = this;
-            selectedNode.highlightChildren();
-            selectedNode.highlightParents();
+            this.select();
             return InputResult.PROCESSED;
         }
         return InputResult.IGNORED;
+    }
+
+    @Override
+    public String getSearchableString() {
+        return node.getTooltip().getString();
     }
 
     public int getX() {
@@ -168,10 +168,6 @@ public class NodeWidget extends DrawableHelper {
 
     public int getY() {
         return y;
-    }
-
-    public LootTableGraph.Vertex getNode() {
-        return node;
     }
 
     public void highlightParents() {
@@ -196,5 +192,21 @@ public class NodeWidget extends DrawableHelper {
         node.unhighlightAsTarget();
         node.unhighlightAsChild();
         node.getChildren().forEach(LootTableGraph.Vertex::unhighlightAsChild);
+    }
+
+    public static void deselect() {
+        if(selectedNode == null) return;
+        selectedNode.unhighlightChildren();
+        selectedNode.unhighlightParents();
+    }
+
+    public void select() {
+        if(this == selectedNode) return;
+        if (selectedNode != null) {
+            deselect();
+        }
+        selectedNode = this;
+        selectedNode.highlightChildren();
+        selectedNode.highlightParents();
     }
 }

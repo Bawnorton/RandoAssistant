@@ -1,7 +1,9 @@
 package com.bawnorton.randoassistant;
 
+import com.bawnorton.randoassistant.config.Config;
+import com.bawnorton.randoassistant.config.ConfigManager;
 import com.bawnorton.randoassistant.mixin.ServerWorldAccessor;
-import com.bawnorton.randoassistant.util.LootTableMap;
+import com.bawnorton.randoassistant.graph.LootTableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.api.ClientModInitializer;
@@ -30,6 +32,13 @@ public class RandoAssistantClient implements ClientModInitializer {
     public static final File ASSISTANT_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("RandoAssistant").toFile();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+    @Override
+    public void onInitializeClient() {
+        ConfigManager.loadConfig();
+        initDir();
+        initEvents();
+    }
+
     private static void initDir() {
         try {
             if (!Files.exists(ASSISTANT_DIRECTORY.toPath())) {
@@ -41,17 +50,12 @@ public class RandoAssistantClient implements ClientModInitializer {
         }
     }
 
-    @Override
-    public void onInitializeClient() {
-        initDir();
-        initEvents();
-    }
-
     @SuppressWarnings("unchecked")
     private void initEvents() {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            ConfigManager.saveConfig();
             try {
-                Files.write(getLootTablePath(), GSON.toJson(RandoAssistant.LOOT_TABLES.getSerializedLootTableMap()).getBytes());
+                Files.write(getLootTablePath(), GSON.toJson(RandoAssistant.lootTableMap.getSerializedLootTableMap()).getBytes());
             } catch (Exception e) {
                 RandoAssistant.LOGGER.error("Failed to save loot tables to json", e);
             }
@@ -59,7 +63,7 @@ public class RandoAssistantClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             try {
-                RandoAssistant.LOOT_TABLES = LootTableMap.fromSerialized(GSON.fromJson(Files.newBufferedReader(getLootTablePath()), Map.class));
+                RandoAssistant.lootTableMap = LootTableMap.fromSerialized(GSON.fromJson(Files.newBufferedReader(getLootTablePath()), Map.class));
             } catch (Exception e) {
                 RandoAssistant.LOGGER.error("Failed to load loot tables from json", e);
             }
@@ -90,7 +94,7 @@ public class RandoAssistantClient implements ClientModInitializer {
             while (resetKeyBinding.wasPressed()) {
                 MinecraftClient.getInstance().setScreen(new ConfirmScreen((result) -> {
                     if (result) {
-                        RandoAssistant.LOOT_TABLES = new LootTableMap();
+                        RandoAssistant.lootTableMap = new LootTableMap();
                     }
                     MinecraftClient.getInstance().setScreen(null);
                 }, Text.of("Reset all loot tables?"), Text.of("This will clear all loot tables from the graph.")));

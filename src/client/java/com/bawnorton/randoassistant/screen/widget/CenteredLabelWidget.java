@@ -8,7 +8,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
-public class CenteredLabelWidget extends WLabel {
+public class CenteredLabelWidget extends WLabel implements CenteredWidget {
     private final int yOffset;
 
     public CenteredLabelWidget(String text, int yOffset) {
@@ -20,14 +20,6 @@ public class CenteredLabelWidget extends WLabel {
 
     public CenteredLabelWidget(String text) {
         this(text, 0);
-    }
-
-    public int x() {
-        return MinecraftClient.getInstance().getWindow().getScaledWidth() / 2 - this.width / 2;
-    }
-
-    public int y() {
-        return MinecraftClient.getInstance().getWindow().getScaledHeight() / 2 - this.height / 2 + yOffset;
     }
 
     @Override
@@ -44,5 +36,10 @@ public class CenteredLabelWidget extends WLabel {
 
         Style hoveredTextStyle = getTextStyleAt(mouseX, mouseY);
         ScreenDrawing.drawTextHover(matrices, hoveredTextStyle, x + mouseX, y + mouseY);
+    }
+
+    @Override
+    public int getYOffset() {
+        return yOffset;
     }
 }

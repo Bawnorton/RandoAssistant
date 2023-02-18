@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.screen.widget;
 
-import com.bawnorton.randoassistant.util.LootTableGraph;
+import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.lambdaurora.spruceui.util.ScissorManager;
 import grapher.graph.drawing.Drawing;
@@ -18,26 +18,24 @@ import java.awt.geom.Rectangle2D;
 import java.util.*;
 
 public class GraphDisplayWidget extends WWidget {
+    private final MinecraftClient client = MinecraftClient.getInstance();
     private final Map<LootTableGraph.Edge, List<Point2D>> edgeLocations;
     private final List<NodeWidget> nodeWidgets = new ArrayList<>();
-    private final Map<NodeWidget, String> queryNodeMap = new HashMap<>();
-    private final Rectangle2D.Float bounds;
     private final ResetPositionWidget resetPositionWidget;
+
     private final int initialOffsetX = 35;
     private final int initialOffsetY = 90;
+    private float scale = 1;
+
     public float xOffset = 0;
     public float yOffset = 0;
-    private float scale = 1;
+
 
     public GraphDisplayWidget(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
         edgeLocations = drawing.getEdgeMappings();
 
-        MinecraftClient client = MinecraftClient.getInstance();
-        int screenWidth = client.getWindow().getScaledWidth();
-        int screenHeight = client.getWindow().getScaledHeight();
-        this.width = screenWidth;
-        this.height = screenHeight;
-        bounds = new Rectangle2D.Float(0, 0, width, height);
+        this.width = client.getWindow().getScaledWidth();
+        this.height = client.getWindow().getScaledHeight();
 
         for (LootTableGraph.Edge edge : edgeLocations.keySet()) {
             LootTableGraph.Vertex source = edge.getOrigin();
@@ -47,56 +45,8 @@ public class GraphDisplayWidget extends WWidget {
             nodeWidgets.add(new NodeWidget(source, sourceLocation));
             nodeWidgets.add(new NodeWidget(target, targetLocation));
         }
-        nodeWidgets.sort((o1, o2) -> {
-            String o1Tooltip = o1.getNode().getTooltip().getString().toLowerCase().replaceAll("\\s+", "");
-            String o2Tooltip = o2.getNode().getTooltip().getString().toLowerCase().replaceAll("\\s+", "");
-            queryNodeMap.put(o1, o1Tooltip);
-            queryNodeMap.put(o2, o2Tooltip);
-            return o1Tooltip.compareTo(o2Tooltip);
-        });
 
-        resetPositionWidget = new ResetPositionWidget(this);
-    }
-
-    // binary search for the closest node to the query
-    private NodeWidget getClosestNode(String query) {
-        if (query.isEmpty()) return null;
-        query = query.toLowerCase().replaceAll("\\s+", "");
-        int low = 0;
-        int high = nodeWidgets.size() - 1;
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            String midVal = queryNodeMap.get(nodeWidgets.get(mid));
-            if (midVal.startsWith(query)) {
-                return nodeWidgets.get(mid);
-            } else if (midVal.compareTo(query) < 0) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-        return null;
-    }
-
-    public void inputChanged(String query) {
-        NodeWidget bestMatch = null;
-        for (NodeWidget nodeWidget : nodeWidgets) {
-            nodeWidget.unhighlightParents();
-            nodeWidget.unhighlightChildren();
-            bestMatch = getClosestNode(query);
-        }
-
-        if (query.isEmpty()) {
-            resetOffset();
-            return;
-        }
-        if (bestMatch != null) {
-            xOffset = -bestMatch.getX() - initialOffsetX + MinecraftClient.getInstance().getWindow().getWidth() / 4f;
-            yOffset = -bestMatch.getY() - initialOffsetY + MinecraftClient.getInstance().getWindow().getHeight() / 4f;
-            bestMatch.highlightParents();
-            bestMatch.highlightChildren();
-            NodeWidget.selectedNode = bestMatch;
-        }
+        resetPositionWidget = new ResetPositionWidget(40, client.getWindow().getScaledHeight() - 26, this);
     }
 
     @Override
@@ -105,9 +55,7 @@ public class GraphDisplayWidget extends WWidget {
         for (NodeWidget value : nodeWidgets) {
             if (button == 1) result = value.handleMouseDown(x, y);
         }
-        if (result == InputResult.IGNORED) {
-            result = resetPositionWidget.handleMouseDown(x, y);
-        }
+        if(result == InputResult.IGNORED) result = resetPositionWidget.handleMouseDown(x, y);
         return result;
     }
 
@@ -131,6 +79,10 @@ public class GraphDisplayWidget extends WWidget {
         yOffset = 0;
     }
 
+    public void centerOnNode(NodeWidget nodeWidget) {
+        xOffset = client.getWindow().getScaledWidth() / 2f - initialOffsetX - nodeWidget.getX();
+        yOffset = client.getWindow().getScaledHeight() / 2f - initialOffsetY - nodeWidget.getY();
+    }
 
     private void drawLine(MatrixStack matrices, int x1, int y1, int x2, int y2, int colour) {
         Matrix4f matrix = matrices.peek().getPositionMatrix();
@@ -211,7 +163,7 @@ public class GraphDisplayWidget extends WWidget {
             int posX = (int) (x + widget.getX() + xOffset);
             int posY = (int) (y + widget.getY() + yOffset);
 
-            if (bounds.contains(posX, posY)) {
+            if (isWithinBounds(posX, posY)) {
                 tooltips.add(widget.render(matrices, posX, posY, mouseX, mouseY));
             }
         }
@@ -222,19 +174,23 @@ public class GraphDisplayWidget extends WWidget {
     public void paint(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
         super.paint(matrices, x, y, mouseX, mouseY);
 
-        ScissorManager.pushScaleFactor(MinecraftClient.getInstance().getWindow().getScaleFactor());
-
-        bounds.setRect(x, y, getWidth(), getHeight());
+        ScissorManager.pushScaleFactor(client.getWindow().getScaleFactor());
 
         renderLines(matrices, x + initialOffsetX - 6, y + initialOffsetY);
         ArrayList<Tooltip> tooltips = renderGraphNodes(matrices, x + initialOffsetX, y + initialOffsetY, mouseX, mouseY);
-        tooltips.add(resetPositionWidget.render(matrices, 40, MinecraftClient.getInstance().getWindow().getScaledHeight() - 40, mouseX, mouseY));
+        tooltips.add(resetPositionWidget.render(matrices, mouseX, mouseY));
 
         for (Tooltip tooltip : tooltips) {
             if (tooltip != null) {
-                Objects.requireNonNull(MinecraftClient.getInstance().currentScreen).renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), mouseX, mouseY);
+                assert client.currentScreen != null;
+                client.currentScreen.renderOrderedTooltip(matrices, tooltip.getLines(client), mouseX, mouseY);
+                break;
             }
         }
         ScissorManager.popScaleFactor();
+    }
+
+    public List<NodeWidget> getNodes() {
+        return nodeWidgets;
     }
 }

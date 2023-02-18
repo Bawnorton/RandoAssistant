@@ -4,7 +4,7 @@ import io.github.cottonmc.cotton.gui.widget.WButton;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
-public class CenteredButtonWidget extends WButton {
+public class CenteredButtonWidget extends WButton implements CenteredWidget {
     private final int yOffset;
 
     public CenteredButtonWidget(String text, int yOffset) {
@@ -14,11 +14,8 @@ public class CenteredButtonWidget extends WButton {
         this.yOffset = yOffset;
     }
 
-    public int x() {
-        return MinecraftClient.getInstance().getWindow().getScaledWidth() / 2 - this.width / 2;
-    }
-
-    public int y() {
-        return MinecraftClient.getInstance().getWindow().getScaledHeight() / 2 - this.height / 2 + yOffset;
+    @Override
+    public int getYOffset() {
+        return yOffset;
     }
 }

@@ -1,4 +1,4 @@
-package com.bawnorton.randoassistant.util;
+package com.bawnorton.randoassistant.graph;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -26,9 +26,11 @@ public class LootTableMap {
         this.serializedLootTableMap = new HashMap<>();
         this.lootTableGraph = new LootTableGraph();
 
+        lootTableGraph.getDrawer().disable();
         blockLootTables.forEach(lootTableGraph::addLootTable);
         entityLootTables.forEach(lootTableGraph::addLootTable);
-        lootTableGraph.afterDrawing(lootTableGraph::updateDrawing);
+        lootTableGraph.getDrawer().enable();
+        lootTableGraph.getDrawer().updateDrawing();
 
         initSerializedLootTable();
     }
