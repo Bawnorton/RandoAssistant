@@ -1,4 +1,4 @@
-package com.bawnorton.randoassistant.config;
+package com.bawnorton.randoassistant.file.config;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

@@ -1,8 +1,6 @@
 package com.bawnorton.randoassistant.search;
 
-import com.bawnorton.randoassistant.RandoAssistant;
-import com.bawnorton.randoassistant.config.Config;
-import com.bawnorton.randoassistant.config.ConfigManager;
+import com.bawnorton.randoassistant.file.config.Config;
 
 import java.util.*;
 

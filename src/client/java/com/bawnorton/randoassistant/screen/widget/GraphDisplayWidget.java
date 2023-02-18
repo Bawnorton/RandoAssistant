@@ -1,6 +1,8 @@
 package com.bawnorton.randoassistant.screen.widget;
 
 import com.bawnorton.randoassistant.graph.LootTableGraph;
+import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
+import com.bawnorton.randoassistant.screen.widget.drawable.ResetPositionWidget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.lambdaurora.spruceui.util.ScissorManager;
 import grapher.graph.drawing.Drawing;
@@ -14,7 +16,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.*;
 
 public class GraphDisplayWidget extends WWidget {

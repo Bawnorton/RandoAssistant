@@ -1,4 +1,4 @@
-package com.bawnorton.randoassistant.screen.widget;
+package com.bawnorton.randoassistant.screen.widget.drawable;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.mixin.AbstractPlantPartBlockInvoker;

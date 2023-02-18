@@ -3,8 +3,7 @@
   "package": "com.bawnorton.randoassistant.mixin.client",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "InventoryScreenMixin",
-    "WorldEntryMixin"
+    "InventoryScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

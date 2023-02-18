@@ -1,4 +1,4 @@
-package com.bawnorton.randoassistant.config;
+package com.bawnorton.randoassistant.file.config;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.google.gson.Gson;

@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.screen.widget;
 
+import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
 import com.bawnorton.randoassistant.search.SearchManager;
 import io.github.cottonmc.cotton.gui.widget.WTextField;
 import net.minecraft.client.gui.DrawableHelper;
