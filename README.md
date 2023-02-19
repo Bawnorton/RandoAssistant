@@ -1,6 +1,6 @@
 # Random Drop Assistant
 
-This is a mod that provides a hierachial drop tracking graph for Minecraft with random drops.
+This is a mod that provides a hierarchical drop tracking graph for Minecraft with random drops.
 
 ## GUI
 Open the GUI with the red book in the inventory. 
