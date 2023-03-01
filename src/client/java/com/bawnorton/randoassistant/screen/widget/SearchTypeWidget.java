@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.screen.widget;
 
-import com.bawnorton.randoassistant.file.config.Config;
+import com.bawnorton.randoassistant.config.Config;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.minecraft.client.MinecraftClient;
@@ -8,11 +8,6 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-
-import java.awt.geom.Rectangle2D;
-
-import static com.bawnorton.randoassistant.RandoAssistantClient.ACTUAL_SCALE;
-import static com.bawnorton.randoassistant.RandoAssistantClient.SCALE;
 
 public class SearchTypeWidget extends WButton {
     private final SearchBarWidget searchBarWidget;
@@ -43,9 +38,9 @@ public class SearchTypeWidget extends WButton {
         super.paint(matrices, x, y, mouseX, mouseY);
 
         Tooltip tooltip = Tooltip.of(Text.of(switch (searchBarWidget.getManager().getSearchType()) {
-            case EXACT -> "Search by starts with exact query (quickest)";
-            case FUZZY -> "Search by closest name to query (slowest - not recommended for large graphs)";
-            case CONTAINS -> "Search by name contains query (slower)";
+            case EXACT -> "Search by starts with exact query";
+            case FUZZY -> "Search by closest name to query";
+            case CONTAINS -> "Search by name contains query";
         }));
 
         if (isWithinBounds(mouseX, mouseY)) {

@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.screen.widget;
 
-import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
 import com.bawnorton.randoassistant.search.SearchManager;
 import io.github.cottonmc.cotton.gui.widget.WTextField;
@@ -10,8 +9,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 import java.util.Optional;
-
-import static net.minecraft.entity.mob.ElderGuardianEntity.SCALE;
 
 public class SearchBarWidget extends WTextField {
     private static SearchManager<NodeWidget> searchManager;

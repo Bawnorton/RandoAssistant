@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.search;
 
-import com.bawnorton.randoassistant.file.config.Config;
+import com.bawnorton.randoassistant.config.Config;
 
 import java.util.*;
 
@@ -19,7 +19,6 @@ public class SearchManager<T extends Searchable> {
                 this.searchList.add(searchableString);
             }
         }
-        this.searchList.sort(String::compareTo);
         this.searchType = Config.getInstance().searchType;
     }
 
@@ -45,19 +44,10 @@ public class SearchManager<T extends Searchable> {
         return costs[b.length()];
     }
 
-    // binary search, return string that starts with query
-    private T binarySearch(String query) {
-        int low = 0;
-        int high = searchList.size() - 1;
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            if(searchList.get(mid).startsWith(query)) {
-                return searchMap.get(searchList.get(mid));
-            } else if(searchList.get(mid).compareTo(query) < 0) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
+    private T linearSearch(String query) {
+        for(String match : searchList) {
+            if(match.equals(query)) return searchMap.get(match);
+            if(match.startsWith(query)) return searchMap.get(match);
         }
         return null;
     }
@@ -66,7 +56,7 @@ public class SearchManager<T extends Searchable> {
         String adjustedQuery = filter(query);
         if(adjustedQuery == null) return Optional.empty();
         if(searchType == Config.SearchType.EXACT) {
-            return Optional.ofNullable(binarySearch(adjustedQuery));
+            return Optional.ofNullable(linearSearch(adjustedQuery));
         } else if (searchType == Config.SearchType.CONTAINS) {
             for(String match : searchList) {
                 if(match.contains(adjustedQuery)) {

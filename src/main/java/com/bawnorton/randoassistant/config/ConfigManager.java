@@ -1,4 +1,4 @@
-package com.bawnorton.randoassistant.file.config;
+package com.bawnorton.randoassistant.config;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.google.gson.Gson;
@@ -19,7 +19,6 @@ public class ConfigManager {
 
         if (config.debug == null) config.debug = false;
         if (config.searchType == null) config.searchType = Config.SearchType.EXACT;
-        if (config.showInteractionLines == null) config.showInteractionLines = false;
         if (config.childDepth == null) config.childDepth = 100;
         if (config.parentDepth == null) config.parentDepth = 100;
 

@@ -14,6 +14,7 @@ import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextType;
+import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;

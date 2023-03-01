@@ -63,6 +63,7 @@ public class ResetPositionWidget extends DrawableHelper {
     public InputResult handleMouseDown(int x, int y) {
         if (bounds.contains(x, y)) {
             graphDisplayWidget.resetOffset();
+            graphDisplayWidget.resetScale();
             return InputResult.PROCESSED;
         }
         return InputResult.IGNORED;

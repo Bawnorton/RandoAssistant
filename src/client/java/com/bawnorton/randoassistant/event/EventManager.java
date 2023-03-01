@@ -2,7 +2,7 @@ package com.bawnorton.randoassistant.event;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.file.FileManager;
-import com.bawnorton.randoassistant.file.config.ConfigManager;
+import com.bawnorton.randoassistant.config.ConfigManager;
 import com.bawnorton.randoassistant.graph.InteractionMap;
 import com.bawnorton.randoassistant.graph.LootTableMap;
 import com.bawnorton.randoassistant.keybind.KeybindManager;

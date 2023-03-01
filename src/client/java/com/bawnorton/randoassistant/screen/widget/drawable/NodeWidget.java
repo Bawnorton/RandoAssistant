@@ -1,9 +1,11 @@
 package com.bawnorton.randoassistant.screen.widget.drawable;
 
 import com.bawnorton.randoassistant.RandoAssistant;
-import com.bawnorton.randoassistant.file.config.Config;
+import com.bawnorton.randoassistant.RandoAssistantClient;
+import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.mixin.AbstractPlantPartBlockInvoker;
 import com.bawnorton.randoassistant.mixin.AttachedStemBlockAccessor;
+import com.bawnorton.randoassistant.screen.LootTableScreen;
 import com.bawnorton.randoassistant.search.Searchable;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -23,6 +25,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -34,8 +37,8 @@ public class NodeWidget extends DrawableHelper implements Searchable {
     private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
     private static NodeWidget selectedNode;
     private static int SIZE;
-    private final int x;
-    private final int y;
+    private int x;
+    private int y;
     private final LootTableGraph.Vertex node;
     private Rectangle2D.Float bounds;
 
@@ -185,6 +188,15 @@ public class NodeWidget extends DrawableHelper implements Searchable {
         return y;
     }
 
+    public void setPos(double x, double y) {
+        this.x = (int) x;
+        this.y = (int) y;
+    }
+
+    public LootTableGraph.Vertex getNode() {
+        return node;
+    }
+
     public static void deselect() {
         if(selectedNode == null) return;
         selectedNode.node.unhighlightConnected();
@@ -197,7 +209,21 @@ public class NodeWidget extends DrawableHelper implements Searchable {
         }
         selectedNode = this;
         selectedNode.node.highlightAsTarget();
-        selectedNode.node.highlightChildren(Config.getInstance().childDepth);
-        selectedNode.node.highlightParents(Config.getInstance().parentDepth);
+        if(!RandoAssistantClient.hideChildren) selectedNode.node.highlightChildren();
+        selectedNode.node.highlightParents(LootTableScreen.instance.topWidth, RandoAssistantClient.showLine);
+        LootTableScreen.instance.showOneLineWidget.setValue(-1);
+    }
+
+    public static void refreshSelectedNode() {
+        if(selectedNode == null) return;
+        selectedNode.node.unhighlightConnected();
+        selectedNode.node.highlightAsTarget();
+        if(!RandoAssistantClient.hideChildren) selectedNode.node.highlightChildren();
+        selectedNode.node.highlightParents(LootTableScreen.instance.topWidth, RandoAssistantClient.showLine);
+    }
+
+    @Nullable
+    public static NodeWidget getSelectedNode() {
+        return selectedNode;
     }
 }

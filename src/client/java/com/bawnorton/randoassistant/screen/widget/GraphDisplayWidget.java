@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.screen.widget;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
@@ -35,7 +34,6 @@ public class GraphDisplayWidget extends WWidget {
 
     public float xOffset = 0;
     public float yOffset = 0;
-    public boolean displayInteractionLines = true;
 
     public GraphDisplayWidget(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
         edgeLocations = drawing.getEdgeMappings();
@@ -73,7 +71,6 @@ public class GraphDisplayWidget extends WWidget {
         client.getWindow().setScaleFactor(SCALE.get());
         width = client.getWindow().getScaledWidth();
         height = client.getWindow().getScaledHeight();
-        RandoAssistant.LOGGER.info("Set Scale: " + SCALE);
         return super.onMouseScroll(x, y, amount);
     }
 
@@ -87,13 +84,17 @@ public class GraphDisplayWidget extends WWidget {
     public void resetOffset() {
         xOffset = 0;
         yOffset = 0;
-        RandoAssistantClient.SCALE.set(RandoAssistantClient.ACTUAL_SCALE.get());
-        client.getWindow().setScaleFactor(RandoAssistantClient.SCALE.get());
+    }
+
+    public void resetScale() {
+        SCALE.set(RandoAssistantClient.ACTUAL_SCALE.get());
+        client.getWindow().setScaleFactor(SCALE.get());
         width = client.getWindow().getScaledWidth();
         height = client.getWindow().getScaledHeight();
     }
 
     public void centerOnNode(NodeWidget nodeWidget) {
+        if(nodeWidget == null) return;
         xOffset = client.getWindow().getScaledWidth() / 2f - initialOffsetX - nodeWidget.getX();
         yOffset = client.getWindow().getScaledHeight() / 2f - initialOffsetY - nodeWidget.getY();
     }
@@ -163,7 +164,7 @@ public class GraphDisplayWidget extends WWidget {
             LootTableGraph.Vertex dest = edge.getDestination();
             LootTableGraph.Vertex origin = edge.getOrigin();
             if (dest.isHighlightedAsCraftingResult() && origin.isHighlightedAsCraftingIngredient()) {
-                if(displayInteractionLines) drawLine(matrices, x, y, edge, -256);
+                drawLine(matrices, x, y, edge, -256);
             } else if ((dest.isHighlightedAsParent() || dest.isHighlightedAsTarget()) && origin.isHighlightedAsParent()) {
                 drawLine(matrices, x, y, edge, -65536);
             } else if (dest.isHighlightedAsChild() && (origin.isHighlightedAsChild() || origin.isHighlightedAsTarget())) {

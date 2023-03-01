@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.graph;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.Wrapper;
 import grapher.graph.drawing.Drawing;
 import grapher.graph.exception.CannotBeAppliedException;
 import grapher.graph.layout.GraphLayoutProperties;
@@ -12,18 +13,19 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public class GraphDrawer {
     LootTableGraph graph;
 
     private Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing;
-    private Runnable onFinishedDrawing = () -> {
-    };
+
+    private Runnable onFinishedDrawing = () -> {};
+    private Runnable onFailedDrawing = () -> {};
 
     private boolean isDrawing = false;
     private boolean disabled = false;
-    private boolean failedToDraw = false;
     private String errorMessage = "";
 
     public GraphDrawer(LootTableGraph graph) {
@@ -31,21 +33,32 @@ public class GraphDrawer {
     }
 
     public void updateDrawing() {
-        if(!disabled) updateDrawing(0);
+        if(!disabled) {
+            updateDrawing(0, null, Wrapper.ofNothing(), -1);
+        }
     }
 
-    private void updateDrawing(int retries) {
+    public void updateDrawing(int line) {
+        if(!disabled) {
+            updateDrawing(0, null, Wrapper.ofNothing(), line);
+        }
+    }
+
+    public void updateDrawing(LootTableGraph.Vertex vertex, Wrapper<Integer> topWidth, int line) {
+        if(!disabled) {
+            updateDrawing(0, vertex, topWidth, line);
+        }
+    }
+
+    private void updateDrawing(int retries, LootTableGraph.Vertex vertex, Wrapper<Integer> topWidth, int line) {
         if (isDrawing && retries == 0) {
             return;
         }
-        if (retries > 3) {
-            RandoAssistant.LOGGER.error("Failed to draw graph after 3 retries");
-            failedToDraw = true;
-            errorMessage = "Failed to draw graph after 3 retries";
-            return;
+        if (retries >= 3) {
+            throw new RuntimeException("Failed to draw graph after 3 retries");
         }
         isDrawing = true;
-        failedToDraw = false;
+
         CompletableFuture.runAsync(() -> {
             double levelGap = 40;
             double nodeGap = 40;
@@ -58,20 +71,29 @@ public class GraphDrawer {
             layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTER_RANK_CELL_SPACING, levelGap);
             layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTRA_CELL_SPACING, nodeGap);
 
-            List<LootTableGraph.Vertex> vertices = Collections.synchronizedList(new ArrayList<>(graph.getVertices()));
-            List<LootTableGraph.Edge> edges = Collections.synchronizedList(new ArrayList<>(graph.getEdges()));
+            Set<LootTableGraph.Vertex> vertexSet;
+            Set<LootTableGraph.Edge> edgeSet;
+
+            if(vertex == null) {
+                vertexSet = graph.getVertices();
+                edgeSet = graph.getEdges();
+            } else {
+                vertexSet = vertex.getVerticesAssociatedWith(topWidth, line);
+                edgeSet = vertex.getEdgesAssociatedWithVertices(vertexSet);
+            }
+
+            List<LootTableGraph.Vertex> vertices = Collections.synchronizedList(new ArrayList<>(vertexSet));
+            List<LootTableGraph.Edge> edges = Collections.synchronizedList(new ArrayList<>(edgeSet));
 
             Layouter<LootTableGraph.Vertex, LootTableGraph.Edge> layouter = new Layouter<>(vertices, edges, algorithm, layoutProperties);
             try {
                 drawing = layouter.layout();
             } catch (CannotBeAppliedException e) {
-                RandoAssistant.LOGGER.error("Could not layout graph", e);
-                errorMessage = e.getMessage();
-                failedToDraw = true;
+                throw new RuntimeException(e);
             } catch (NullPointerException e) {
                 RandoAssistant.LOGGER.error("NullPointerException while trying to layout graph. Not fatal, trying again", e);
                 errorMessage = "NullPointerException while trying to layout graph. Not fatal, trying again";
-                updateDrawing(retries + 1);
+                updateDrawing(retries + 1, vertex, topWidth, line);
             }
             // scale down the drawing width so it better fits in the screen
             for (LootTableGraph.Edge edge : drawing.getEdgeMappings().keySet()) {
@@ -81,17 +103,18 @@ public class GraphDrawer {
                 source.setLocation(source.getX() / 10, source.getY());
                 target.setLocation(target.getX() / 10, target.getY());
             }
-            isDrawing = false;
         }).thenRun(() -> {
-            if(!failedToDraw) {
-                onFinishedDrawing.run();
-                onFinishedDrawing = () -> {};
-            }
-        }).exceptionally(throwable -> {
-            RandoAssistant.LOGGER.error("Failed to draw graph", throwable);
-            failedToDraw = true;
-            errorMessage = throwable.getMessage();
             isDrawing = false;
+            onFinishedDrawing.run();
+            onFinishedDrawing = () -> {};
+        }).exceptionally(throwable -> {
+            drawing = null;
+            isDrawing = false;
+            onFinishedDrawing = () -> {};
+            onFailedDrawing.run();
+            onFailedDrawing = () -> {};
+            errorMessage = throwable.getMessage();
+            RandoAssistant.LOGGER.error("Failed to draw graph", throwable);
             return null;
         });
     }
@@ -100,16 +123,13 @@ public class GraphDrawer {
         return isDrawing ? null : drawing;
     }
 
-    public boolean didFailToDraw() {
-        return failedToDraw;
-    }
-
     public String getErrorMessage() {
         return errorMessage;
     }
 
-    public void afterDrawing(Runnable runnable) {
-        onFinishedDrawing = runnable;
+    public void afterDrawing(Runnable onFinishedDrawing, Runnable onFailedDrawing) {
+        this.onFinishedDrawing = onFinishedDrawing;
+        this.onFailedDrawing = onFailedDrawing;
     }
 
     public void disable() {
