@@ -12,23 +12,20 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 public class HideChildrenWidget extends WButton {
-    private boolean isOn;
 
     public HideChildrenWidget() {
-        isOn = RandoAssistantClient.hideChildren;
-        this.setLabel(Text.of(isOn ? "Show Children" : "Hide Children"));
+        this.setLabel(Text.of(RandoAssistantClient.hideChildren ? "Show Children" : "Hide Children"));
     }
 
     @Override
     public InputResult onClick(int x, int y, int button) {
         InputResult result = super.onClick(x, y, button);
-        if (this.isOn) {
+        if (RandoAssistantClient.hideChildren) {
             this.setLabel(Text.of("Hide Children"));
         } else {
             this.setLabel(Text.of("Show Children"));
         }
-        this.isOn = !this.isOn;
-        RandoAssistantClient.hideChildren = this.isOn;
+        RandoAssistantClient.hideChildren = !RandoAssistantClient.hideChildren;
         NodeWidget.refreshSelectedNode();
         return result;
     }

@@ -47,7 +47,6 @@ public class SearchManager<T extends Searchable> {
     private T linearSearch(String query) {
         for(String match : searchList) {
             if(match.equals(query)) return searchMap.get(match);
-            if(match.startsWith(query)) return searchMap.get(match);
         }
         return null;
     }

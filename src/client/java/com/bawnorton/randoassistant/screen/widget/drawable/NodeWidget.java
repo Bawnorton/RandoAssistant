@@ -5,9 +5,11 @@ import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.mixin.AbstractPlantPartBlockInvoker;
 import com.bawnorton.randoassistant.mixin.AttachedStemBlockAccessor;
-import com.bawnorton.randoassistant.screen.LootTableScreen;
+import com.bawnorton.randoassistant.screen.widget.GraphDisplayWidget;
+import com.bawnorton.randoassistant.screen.widget.ShowOneLineWidget;
 import com.bawnorton.randoassistant.search.Searchable;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
+import com.bawnorton.randoassistant.util.Line;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.minecraft.block.*;
@@ -32,18 +34,20 @@ import org.joml.Vector3f;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Objects;
+import java.util.Set;
 
 public class NodeWidget extends DrawableHelper implements Searchable {
     private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
     private static NodeWidget selectedNode;
     private static int SIZE;
-    private int x;
-    private int y;
-    private final LootTableGraph.Vertex node;
-    private Rectangle2D.Float bounds;
 
-    public NodeWidget(LootTableGraph.Vertex node, Point2D location) {
-        this.node = node;
+    private final LootTableGraph.Vertex vertex;
+    private Rectangle2D.Float bounds;
+    private final int x;
+    private final int y;
+
+    public NodeWidget(LootTableGraph.Vertex vertex, Point2D location) {
+        this.vertex = vertex;
         this.x = (int) (location.getX());
         this.y = (int) (location.getY());
         SIZE = 26;
@@ -97,41 +101,57 @@ public class NodeWidget extends DrawableHelper implements Searchable {
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
 
-        bounds = new Rectangle2D.Float(x - SIZE / 2f - 5, y - SIZE / 2f - 5, SIZE, SIZE);
-        boolean hovered = bounds.contains(mouseX, mouseY);
-        if (hovered) {
-            RenderSystem.setShaderColor(0.75F, 0.75F, 0.75F, 1F);
-            if(Config.getInstance().debug) {
-                tooltip = Tooltip.of(Text.of(
-                        "Tooltip: " + node.getTooltip().getString() + "\n"
-                                + "Target: " + node.isHighlightedAsTarget() + "\n"
-                                + "CResult: " + node.isHighlightedAsCraftingResult() + "\n"
-                                + "CIngredient: " + node.isHighlightedAsCraftingIngredient() + "\n"
-                                + "Parent: " + node.isHighlightedAsParent() + "\n"
-                                + "Child: " + node.isHighlightedAsChild()
-                ));
-            } else {
-                tooltip = Tooltip.of(node.getTooltip());
-            }
-        } else if (node.isHighlightedAsTarget()) {
+        boolean isInteraction = vertex.isHighlightedAsInteraction();
+        if (vertex.isHighlightedAsTarget()) {
             RenderSystem.setShaderColor(0.1F, 1F, 0.1F, 1F);
-        } else if (node.isHighlightedAsCraftingResult() || node.isHighlightedAsCraftingIngredient()) {
-            RenderSystem.setShaderColor(1F, 1F, 0.1F, 1F);
-        } else if (node.isHighlightedAsParent()) {
-            RenderSystem.setShaderColor(1F, 0.1F, 0.1F, 1F);
-        } else if (node.isHighlightedAsChild()) {
-            RenderSystem.setShaderColor(0.1F, 0.1F, 1F, 1F);
+        } else if (vertex.isHighlightedAsParent()) {
+            if(isInteraction) {
+                RenderSystem.setShaderColor(1F, 1F, 0.1F, 1F);
+            } else {
+                RenderSystem.setShaderColor(1F, 0.1F, 0.1F, 1F);
+            }
+            if(RandoAssistantClient.showLine != -1) {
+                Line currentLine = GraphDisplayWidget.getInstance().getLine(RandoAssistantClient.showLine);
+                if(!currentLine.contains(getVertex())) {
+                    RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+                }
+            }
+        } else if (vertex.isHighlightedAsChild()) {
+            if(isInteraction) {
+                RenderSystem.setShaderColor(1F, 1F, 0.1F, 1F);
+            } else {
+                RenderSystem.setShaderColor(0.1F, 0.1F, 1F, 1F);
+            }
         } else {
             RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
         }
 
+        bounds = new Rectangle2D.Float(x - SIZE / 2f - 5, y - SIZE / 2f - 5, SIZE, SIZE);
+        boolean hovered = bounds.contains(mouseX, mouseY);
+
+        if(hovered) {
+            float[] color = RenderSystem.getShaderColor();
+            RenderSystem.setShaderColor(color[0] * 0.7F, color[1] * 0.7F, color[2] * 0.7F, 1F);
+            if(Config.getInstance().debug) {
+                tooltip = Tooltip.of(Text.of(
+                        "Tooltip: " + vertex.getTooltip().getString() + "\n"
+                                + "Target: " + vertex.isHighlightedAsTarget() + "\n"
+                                + "Interaction: " + vertex.isHighlightedAsInteraction() + "\n"
+                                + "Parent: " + vertex.isHighlightedAsParent() + "\n"
+                                + "Child: " + vertex.isHighlightedAsChild()
+                ));
+            } else {
+                tooltip = Tooltip.of(vertex.getTooltip());
+            }
+        }
+
         this.drawTexture(matrices, x - SIZE / 2 - 5, y - SIZE / 2 - 5, 0, 128 + 26, SIZE, SIZE);
 
-        if (node.isItem()) {
-            ItemStack icon = new ItemStack(node.getItem());
+        if (vertex.isItem()) {
+            ItemStack icon = new ItemStack(vertex.getItem());
             MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
-        } else if (node.isBlock()) {
-            Block block = node.getBlock();
+        } else if (vertex.isBlock()) {
+            Block block = vertex.getBlock();
             if (block instanceof FlowerPotBlock flowerPotBlock) {
                 ItemStack icon = new ItemStack(flowerPotBlock.getContent().asItem());
                 ItemStack pot = new ItemStack(Items.FLOWER_POT);
@@ -158,8 +178,8 @@ public class NodeWidget extends DrawableHelper implements Searchable {
                 if (icon.getItem() == Items.AIR) icon = new ItemStack(Items.BARRIER);
                 MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
             }
-        } else if (node.isEntity()) {
-            EntityType<?> entityType = node.getEntityType();
+        } else if (vertex.isEntity()) {
+            EntityType<?> entityType = vertex.getEntityType();
             MinecraftClient client = MinecraftClient.getInstance();
             drawEntity(x - 5, y + 2, (LivingEntity) Objects.requireNonNull(entityType.create(client.world)));
         }
@@ -177,7 +197,7 @@ public class NodeWidget extends DrawableHelper implements Searchable {
 
     @Override
     public String getSearchableString() {
-        return node.getTooltip().getString();
+        return vertex.getTooltip().getString();
     }
 
     public int getX() {
@@ -188,18 +208,13 @@ public class NodeWidget extends DrawableHelper implements Searchable {
         return y;
     }
 
-    public void setPos(double x, double y) {
-        this.x = (int) x;
-        this.y = (int) y;
-    }
-
-    public LootTableGraph.Vertex getNode() {
-        return node;
+    public LootTableGraph.Vertex getVertex() {
+        return vertex;
     }
 
     public static void deselect() {
         if(selectedNode == null) return;
-        selectedNode.node.unhighlightConnected();
+        selectedNode.vertex.unhighlightConnected();
     }
 
     public void select() {
@@ -208,18 +223,22 @@ public class NodeWidget extends DrawableHelper implements Searchable {
             deselect();
         }
         selectedNode = this;
-        selectedNode.node.highlightAsTarget();
-        if(!RandoAssistantClient.hideChildren) selectedNode.node.highlightChildren();
-        selectedNode.node.highlightParents(LootTableScreen.instance.topWidth, RandoAssistantClient.showLine);
-        LootTableScreen.instance.showOneLineWidget.setValue(-1);
+        selectedNode.vertex.highlightAsTarget();
+        if(!RandoAssistantClient.hideChildren) selectedNode.vertex.highlightChildren();
+        selectedNode.vertex.highlightParents();
+
+        Set<Line> lines = Line.builder().addLines(this.getVertex()).build();
+        GraphDisplayWidget.getInstance().setCurrentLines(lines);
+        ShowOneLineWidget.getInstance().setMaxValue(lines.size() - 1);
+        ShowOneLineWidget.getInstance().setValue(-1, true);
     }
 
     public static void refreshSelectedNode() {
         if(selectedNode == null) return;
-        selectedNode.node.unhighlightConnected();
-        selectedNode.node.highlightAsTarget();
-        if(!RandoAssistantClient.hideChildren) selectedNode.node.highlightChildren();
-        selectedNode.node.highlightParents(LootTableScreen.instance.topWidth, RandoAssistantClient.showLine);
+        selectedNode.vertex.unhighlightConnected();
+        selectedNode.vertex.highlightAsTarget();
+        if(!RandoAssistantClient.hideChildren) selectedNode.vertex.highlightChildren();
+        selectedNode.vertex.highlightParents();
     }
 
     @Nullable

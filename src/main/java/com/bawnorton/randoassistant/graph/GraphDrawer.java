@@ -1,7 +1,7 @@
 package com.bawnorton.randoassistant.graph;
 
 import com.bawnorton.randoassistant.RandoAssistant;
-import com.bawnorton.randoassistant.Wrapper;
+import com.bawnorton.randoassistant.util.Wrapper;
 import grapher.graph.drawing.Drawing;
 import grapher.graph.exception.CannotBeAppliedException;
 import grapher.graph.layout.GraphLayoutProperties;
@@ -34,23 +34,17 @@ public class GraphDrawer {
 
     public void updateDrawing() {
         if(!disabled) {
-            updateDrawing(0, null, Wrapper.ofNothing(), -1);
+            updateDrawing(0, null);
         }
     }
 
-    public void updateDrawing(int line) {
+    public void updateDrawing(LootTableGraph.Vertex vertex) {
         if(!disabled) {
-            updateDrawing(0, null, Wrapper.ofNothing(), line);
+            updateDrawing(0, vertex);
         }
     }
 
-    public void updateDrawing(LootTableGraph.Vertex vertex, Wrapper<Integer> topWidth, int line) {
-        if(!disabled) {
-            updateDrawing(0, vertex, topWidth, line);
-        }
-    }
-
-    private void updateDrawing(int retries, LootTableGraph.Vertex vertex, Wrapper<Integer> topWidth, int line) {
+    private void updateDrawing(int retries, LootTableGraph.Vertex vertex) {
         if (isDrawing && retries == 0) {
             return;
         }
@@ -78,7 +72,7 @@ public class GraphDrawer {
                 vertexSet = graph.getVertices();
                 edgeSet = graph.getEdges();
             } else {
-                vertexSet = vertex.getVerticesAssociatedWith(topWidth, line);
+                vertexSet = vertex.getVerticesAssociatedWith();
                 edgeSet = vertex.getEdgesAssociatedWithVertices(vertexSet);
             }
 
@@ -93,7 +87,7 @@ public class GraphDrawer {
             } catch (NullPointerException e) {
                 RandoAssistant.LOGGER.error("NullPointerException while trying to layout graph. Not fatal, trying again", e);
                 errorMessage = "NullPointerException while trying to layout graph. Not fatal, trying again";
-                updateDrawing(retries + 1, vertex, topWidth, line);
+                updateDrawing(retries + 1, vertex);
             }
             // scale down the drawing width so it better fits in the screen
             for (LootTableGraph.Edge edge : drawing.getEdgeMappings().keySet()) {

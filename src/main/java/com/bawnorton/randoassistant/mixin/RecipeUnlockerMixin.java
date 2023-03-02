@@ -33,7 +33,7 @@ public interface RecipeUnlockerMixin {
                     input.add(stack.getItem());
                 }
             });
-            RandoAssistant.interactionMap.addCrafting(output, input);
+            RandoAssistant.interactionMap.addCrafting(input, output);
         }
     }
 }

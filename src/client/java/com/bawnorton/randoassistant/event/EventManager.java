@@ -24,7 +24,7 @@ public class EventManager {
             ConfigManager.saveConfig();
             try {
                 Files.write(FileManager.getLootTablePath(), FileManager.GSON.toJson(RandoAssistant.lootTableMap.getSerializedLootTableMap()).getBytes());
-                Files.write(FileManager.getCraftingPath(), FileManager.GSON.toJson(RandoAssistant.interactionMap.getSerializedCraftingMap()).getBytes());
+                Files.write(FileManager.getCraftingPath(), FileManager.GSON.toJson(RandoAssistant.interactionMap.getSerializedInteractionMap()).getBytes());
             } catch (Exception e) {
                 RandoAssistant.LOGGER.error("Failed to save loot tables to json", e);
             }

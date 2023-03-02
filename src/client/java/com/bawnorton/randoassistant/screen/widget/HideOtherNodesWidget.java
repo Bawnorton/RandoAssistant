@@ -11,25 +11,22 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 public class HideOtherNodesWidget extends WButton {
-    private boolean isOn;
 
     public HideOtherNodesWidget() {
-        isOn = RandoAssistantClient.hideOtherNodes;
-        this.setLabel(Text.of(isOn ? "Show Other Nodes" : "Hide Other Nodes"));
+        this.setLabel(Text.of(RandoAssistantClient.hideOtherNodes ? "Show Other Nodes" : "Hide Other Nodes"));
     }
 
     @Override
     public InputResult onClick(int x, int y, int button) {
         InputResult result = super.onClick(x, y, button);
-        if (this.isOn) {
-            LootTableScreen.instance.redraw();
+        if (RandoAssistantClient.hideOtherNodes) {
+            LootTableScreen.getInstance().redraw();
             this.setLabel(Text.of("Hide Other Nodes"));
         } else {
-            LootTableScreen.instance.redrawWithSelectedNode();
+            LootTableScreen.getInstance().redrawWithSelectedNode();
             this.setLabel(Text.of("Show Other Nodes"));
         }
-        this.isOn = !this.isOn;
-        RandoAssistantClient.hideOtherNodes = this.isOn;
+        RandoAssistantClient.hideOtherNodes = !RandoAssistantClient.hideOtherNodes;
         return result;
     }
 

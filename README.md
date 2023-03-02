@@ -4,8 +4,8 @@ This is a mod that provides a hierarchical drop tracking graph for Minecraft wit
 
 ## GUI
 Open the GUI with the red book in the inventory. 
-- Each node contains a block or an entity.
-- Paths connect nodes to each other and when a node is selected, it's paths will render.
+- Each vertex contains a block or an entity.
+- Paths connect nodes to each other and when a vertex is selected, it's paths will render.
   - Red paths are paths to blocks / entities that drop the selected item.
   - Blue paths are paths to blocks / entities that are dropped by the selected item.
   - Yellow paths are paths to blocks / items that are gotten from crafting / interacting with the selected item.

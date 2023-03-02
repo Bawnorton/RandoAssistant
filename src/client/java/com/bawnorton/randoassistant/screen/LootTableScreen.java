@@ -2,7 +2,6 @@ package com.bawnorton.randoassistant.screen;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
-import com.bawnorton.randoassistant.Wrapper;
 import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.graph.GraphDrawer;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
@@ -20,10 +19,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 public class LootTableScreen extends LightweightGuiDescription {
-    public static LootTableScreen instance;
-
-    public ShowOneLineWidget showOneLineWidget;
-    public Wrapper<Integer> topWidth = Wrapper.of(0);
+    private static LootTableScreen instance;
 
     private final WPlainPanel panel;
     private final GraphDrawer drawer;
@@ -60,11 +56,15 @@ public class LootTableScreen extends LightweightGuiDescription {
         updateGraph();
     }
 
+    public static LootTableScreen getInstance() {
+        return instance;
+    }
+
     public void redrawWithSelectedNode() {
         NodeWidget selected = NodeWidget.getSelectedNode();
         if(selected == null) return;
 
-        drawer.updateDrawing(selected.getNode(), topWidth, RandoAssistantClient.showLine);
+        drawer.updateDrawing(selected.getVertex());
         clearPanel();
         CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
         panel.add(drawingLabel, drawingLabel.x(), drawingLabel.y());
@@ -72,7 +72,7 @@ public class LootTableScreen extends LightweightGuiDescription {
     }
 
     public void redraw() {
-        drawer.updateDrawing(RandoAssistantClient.showLine);
+        drawer.updateDrawing();
         clearPanel();
         CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
         panel.add(drawingLabel, drawingLabel.x(), drawingLabel.y());
@@ -81,12 +81,13 @@ public class LootTableScreen extends LightweightGuiDescription {
 
     private void drawGraph(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
         GraphDisplayWidget graphDisplayWidget = new GraphDisplayWidget(drawing);
-        SearchBarWidget searchBar = new SearchBarWidget(graphDisplayWidget);
+        SearchBarWidget searchBar = new SearchBarWidget();
         HideOtherNodesWidget hideOtherNodesWidget = new HideOtherNodesWidget();
         HideChildrenWidget hideChildrenWidget = new HideChildrenWidget();
-        SearchTypeWidget searchTypeWidget = new SearchTypeWidget(searchBar);
-        showOneLineWidget = new ShowOneLineWidget();
-        showOneLineWidget.setMaxValue(topWidth.get());
+        SearchTypeWidget searchTypeWidget = new SearchTypeWidget();
+        ShowOneLineWidget showOneLineWidget = new ShowOneLineWidget();
+        showOneLineWidget.setMaxValue(graphDisplayWidget.getLineCount() - 1);
+        showOneLineWidget.setValue(-1, true);
 
         Window window = MinecraftClient.getInstance().getWindow();
 

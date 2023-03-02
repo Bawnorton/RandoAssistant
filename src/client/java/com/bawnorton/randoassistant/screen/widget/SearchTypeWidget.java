@@ -10,11 +10,8 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 public class SearchTypeWidget extends WButton {
-    private final SearchBarWidget searchBarWidget;
-
-    public SearchTypeWidget(SearchBarWidget searchBarWidget) {
-        super(Text.of(capitalize(searchBarWidget.getManager().getSearchType().name())));
-        this.searchBarWidget = searchBarWidget;
+    public SearchTypeWidget() {
+        super(Text.of(capitalize(SearchBarWidget.getInstance().getManager().getSearchType().name())));
     }
 
     private static String capitalize(String in) {
@@ -23,9 +20,9 @@ public class SearchTypeWidget extends WButton {
 
     @Override
     public InputResult onClick(int x, int y, int button) {
-        searchBarWidget.getManager().nextSearchType();
-        this.setLabel(Text.of(capitalize(searchBarWidget.getManager().getSearchType().name())));
-        searchBarWidget.inputChanged(searchBarWidget.getText());
+        SearchBarWidget.getInstance().getManager().nextSearchType();
+        this.setLabel(Text.of(capitalize(SearchBarWidget.getInstance().getManager().getSearchType().name())));
+        SearchBarWidget.getInstance().inputChanged(SearchBarWidget.getInstance().getText());
         return InputResult.PROCESSED;
     }
 
@@ -37,10 +34,10 @@ public class SearchTypeWidget extends WButton {
         matrices.translate(0, 0, 100);
         super.paint(matrices, x, y, mouseX, mouseY);
 
-        Tooltip tooltip = Tooltip.of(Text.of(switch (searchBarWidget.getManager().getSearchType()) {
-            case EXACT -> "Search by starts with exact query";
-            case FUZZY -> "Search by closest name to query";
+        Tooltip tooltip = Tooltip.of(Text.of(switch (SearchBarWidget.getInstance().getManager().getSearchType()) {
+            case EXACT -> "Search by name matches query exactly";
             case CONTAINS -> "Search by name contains query";
+            case FUZZY -> "Search by closest name to query";
         }));
 
         if (isWithinBounds(mouseX, mouseY)) {

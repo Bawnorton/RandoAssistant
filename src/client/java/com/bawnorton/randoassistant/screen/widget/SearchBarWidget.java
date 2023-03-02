@@ -11,24 +11,28 @@ import net.minecraft.text.Text;
 import java.util.Optional;
 
 public class SearchBarWidget extends WTextField {
+    private static SearchBarWidget instance;
     private static SearchManager<NodeWidget> searchManager;
-    private final GraphDisplayWidget graphDisplay;
 
-    public SearchBarWidget(GraphDisplayWidget graphDisplay) {
+    public SearchBarWidget() {
         super(Text.of("Search..."));
+        instance = this;
         this.setEditable(true);
         this.setChangedListener(this::inputChanged);
         setMaxLength(100);
 
-        this.graphDisplay = graphDisplay;
-        searchManager = new SearchManager<>(graphDisplay.getNodes());
+        searchManager = new SearchManager<>(GraphDisplayWidget.getInstance().getNodes());
+    }
+
+    public static SearchBarWidget getInstance() {
+        return instance;
     }
 
     public void inputChanged(String text) {
         Optional<NodeWidget> node = searchManager.getBestMatch(text);
         if (node.isPresent()) {
             node.get().select();
-            graphDisplay.centerOnNode(node.get());
+            GraphDisplayWidget.getInstance().centerOnNode(node.get());
         } else {
             NodeWidget.deselect();
         }

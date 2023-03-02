@@ -4,6 +4,7 @@ import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
 import com.bawnorton.randoassistant.screen.widget.drawable.ResetPositionWidget;
+import com.bawnorton.randoassistant.util.Line;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.lambdaurora.spruceui.util.ScissorManager;
 import grapher.graph.drawing.Drawing;
@@ -17,17 +18,19 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.bawnorton.randoassistant.RandoAssistantClient.SCALE;
 
 public class GraphDisplayWidget extends WWidget {
+    private static GraphDisplayWidget instance;
+
     private final MinecraftClient client = MinecraftClient.getInstance();
     private final Map<LootTableGraph.Edge, List<Point2D>> edgeLocations;
     private final List<NodeWidget> nodeWidgets = new ArrayList<>();
     private final ResetPositionWidget resetPositionWidget;
+
+    private Set<Line> currentLines = new HashSet<>();
 
     private final int initialOffsetX = 35;
     private final int initialOffsetY = 90;
@@ -36,6 +39,7 @@ public class GraphDisplayWidget extends WWidget {
     public float yOffset = 0;
 
     public GraphDisplayWidget(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
+        instance = this;
         edgeLocations = drawing.getEdgeMappings();
 
         this.width = client.getWindow().getScaledWidth();
@@ -51,6 +55,15 @@ public class GraphDisplayWidget extends WWidget {
         }
 
         resetPositionWidget = new ResetPositionWidget(40, client.getWindow().getScaledHeight() - 26, this);
+
+        if (NodeWidget.getSelectedNode() != null) {
+            currentLines = Line.builder().addLines(NodeWidget.getSelectedNode().getVertex()).build();
+            ShowOneLineWidget.getInstance().setValue(RandoAssistantClient.showLine);
+        }
+    }
+
+    public static GraphDisplayWidget getInstance() {
+        return instance;
     }
 
     @Override
@@ -97,6 +110,26 @@ public class GraphDisplayWidget extends WWidget {
         if(nodeWidget == null) return;
         xOffset = client.getWindow().getScaledWidth() / 2f - initialOffsetX - nodeWidget.getX();
         yOffset = client.getWindow().getScaledHeight() / 2f - initialOffsetY - nodeWidget.getY();
+    }
+
+    public List<NodeWidget> getNodes() {
+        return nodeWidgets;
+    }
+
+    public Line getLine(int index) {
+        try {
+            return new ArrayList<>(currentLines).get(index);
+        } catch (IndexOutOfBoundsException e) {
+            return Line.EMPTY;
+        }
+    }
+
+    public void setCurrentLines(Set<Line> lines) {
+        currentLines = lines;
+    }
+
+    public int getLineCount() {
+        return currentLines.size();
     }
 
     private void drawLine(MatrixStack matrices, int x1, int y1, int x2, int y2, int colour) {
@@ -163,12 +196,20 @@ public class GraphDisplayWidget extends WWidget {
         for (LootTableGraph.Edge edge : edgeLocations.keySet()) {
             LootTableGraph.Vertex dest = edge.getDestination();
             LootTableGraph.Vertex origin = edge.getOrigin();
-            if (dest.isHighlightedAsCraftingResult() && origin.isHighlightedAsCraftingIngredient()) {
-                drawLine(matrices, x, y, edge, -256);
-            } else if ((dest.isHighlightedAsParent() || dest.isHighlightedAsTarget()) && origin.isHighlightedAsParent()) {
-                drawLine(matrices, x, y, edge, -65536);
+            if(dest.isHighlightedAsParent() || origin.isHighlightedAsParent()) {
+                if(RandoAssistantClient.showLine != -1) {
+                    Line currentLine = getLine(RandoAssistantClient.showLine);
+                    if(!currentLine.contains(dest) || !currentLine.contains(origin)) {
+                        continue;
+                    }
+                }
+            }
+            boolean isInteraction = dest.isHighlightedAsInteraction() && origin.isHighlightedAsInteraction();
+
+            if ((dest.isHighlightedAsParent() || dest.isHighlightedAsTarget()) && origin.isHighlightedAsParent()) {
+                drawLine(matrices, x, y, edge, isInteraction ? -256 : -65536);
             } else if (dest.isHighlightedAsChild() && (origin.isHighlightedAsChild() || origin.isHighlightedAsTarget())) {
-                drawLine(matrices, x, y, edge, -16776961);
+                drawLine(matrices, x, y, edge, isInteraction ? -256 : -16776961);
             }
         }
     }
@@ -205,9 +246,5 @@ public class GraphDisplayWidget extends WWidget {
             }
         }
         ScissorManager.popScaleFactor();
-    }
-
-    public List<NodeWidget> getNodes() {
-        return nodeWidgets;
     }
 }

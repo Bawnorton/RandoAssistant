@@ -23,7 +23,7 @@ public abstract class AxeItemMixin {
     private void onUseOnBlock(ItemUsageContext context, CallbackInfoReturnable<ActionResult> cir, World world, BlockPos blockPos, PlayerEntity playerEntity, BlockState originalState, Optional optional, Optional optional2, Optional optional3, ItemStack itemStack, Optional optional4) {
         if(optional4.isPresent()) {
             BlockState state = (BlockState) optional4.get();
-            RandoAssistant.interactionMap.addInteraction(state.getBlock(), originalState.getBlock());
+            RandoAssistant.interactionMap.addInteraction(originalState.getBlock(), state.getBlock());
         }
     }
 }

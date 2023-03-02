@@ -1,7 +1,6 @@
 package com.bawnorton.randoassistant.mixin.client;
 
-import com.bawnorton.randoassistant.RandoAssistantClient;
-import com.bawnorton.randoassistant.Wrapper;
+import com.bawnorton.randoassistant.util.Wrapper;
 import com.bawnorton.randoassistant.screen.LootTableScreen;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import net.minecraft.client.MinecraftClient;

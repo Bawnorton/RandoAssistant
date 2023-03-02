@@ -4,6 +4,7 @@ import com.bawnorton.randoassistant.event.EventManager;
 import com.bawnorton.randoassistant.file.FileManager;
 import com.bawnorton.randoassistant.config.ConfigManager;
 import com.bawnorton.randoassistant.keybind.KeybindManager;
+import com.bawnorton.randoassistant.util.Wrapper;
 import net.fabricmc.api.ClientModInitializer;
 
 public class RandoAssistantClient implements ClientModInitializer {
