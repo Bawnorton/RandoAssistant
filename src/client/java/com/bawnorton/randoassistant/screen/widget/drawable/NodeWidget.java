@@ -10,6 +10,7 @@ import com.bawnorton.randoassistant.screen.widget.ShowOneLineWidget;
 import com.bawnorton.randoassistant.search.Searchable;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.bawnorton.randoassistant.util.Line;
+import com.bawnorton.randoassistant.util.Wrapper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.minecraft.block.*;
@@ -106,7 +107,15 @@ public class NodeWidget extends DrawableHelper implements Searchable {
             RenderSystem.setShaderColor(0.1F, 1F, 0.1F, 1F);
         } else if (vertex.isHighlightedAsParent()) {
             if(isInteraction) {
-                RenderSystem.setShaderColor(1F, 1F, 0.1F, 1F);
+                Wrapper<Boolean> shouldHighlightAsInteraction = Wrapper.of(false);
+                vertex.getImmediateVerticesAssociatedWith(false).forEach(parent -> {
+                    if(parent.isHighlightedAsInteraction()) shouldHighlightAsInteraction.set(true);
+                });
+                if(shouldHighlightAsInteraction.get()) {
+                    RenderSystem.setShaderColor(1F, 1F, 0.1F, 1F);
+                } else {
+                    RenderSystem.setShaderColor(1F, 0.1F, 0.1F, 1F);
+                }
             } else {
                 RenderSystem.setShaderColor(1F, 0.1F, 0.1F, 1F);
             }
@@ -118,7 +127,15 @@ public class NodeWidget extends DrawableHelper implements Searchable {
             }
         } else if (vertex.isHighlightedAsChild()) {
             if(isInteraction) {
-                RenderSystem.setShaderColor(1F, 1F, 0.1F, 1F);
+                Wrapper<Boolean> shouldHighlightAsInteraction = Wrapper.of(false);
+                vertex.getImmediateVerticesAssociatedWith(false).forEach(child -> {
+                    if(child.isHighlightedAsInteraction()) shouldHighlightAsInteraction.set(true);
+                });
+                if(shouldHighlightAsInteraction.get()) {
+                    RenderSystem.setShaderColor(1F, 1F, 0.1F, 1F);
+                } else {
+                    RenderSystem.setShaderColor(0.1F, 0.1F, 1F, 1F);
+                }
             } else {
                 RenderSystem.setShaderColor(0.1F, 0.1F, 1F, 1F);
             }
@@ -134,7 +151,7 @@ public class NodeWidget extends DrawableHelper implements Searchable {
             RenderSystem.setShaderColor(color[0] * 0.7F, color[1] * 0.7F, color[2] * 0.7F, 1F);
             if(Config.getInstance().debug) {
                 tooltip = Tooltip.of(Text.of(
-                        "Tooltip: " + vertex.getTooltip().getString() + "\n"
+                        "Content: " + vertex.getContent().toString() + "\n"
                                 + "Target: " + vertex.isHighlightedAsTarget() + "\n"
                                 + "Interaction: " + vertex.isHighlightedAsInteraction() + "\n"
                                 + "Parent: " + vertex.isHighlightedAsParent() + "\n"
@@ -182,6 +199,9 @@ public class NodeWidget extends DrawableHelper implements Searchable {
             EntityType<?> entityType = vertex.getEntityType();
             MinecraftClient client = MinecraftClient.getInstance();
             drawEntity(x - 5, y + 2, (LivingEntity) Objects.requireNonNull(entityType.create(client.world)));
+        } else if (vertex.isLootTable()) {
+            ItemStack icon = new ItemStack(Items.CHEST);
+            MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
         }
         return tooltip;
     }

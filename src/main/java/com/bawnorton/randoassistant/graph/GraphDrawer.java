@@ -72,7 +72,7 @@ public class GraphDrawer {
                 vertexSet = graph.getVertices();
                 edgeSet = graph.getEdges();
             } else {
-                vertexSet = vertex.getVerticesAssociatedWith();
+                vertexSet = vertex.getVerticesAssociatedWith(true);
                 edgeSet = vertex.getEdgesAssociatedWithVertices(vertexSet);
             }
 

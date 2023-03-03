@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.event;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.file.FileManager;
 import com.bawnorton.randoassistant.config.ConfigManager;
 import com.bawnorton.randoassistant.graph.InteractionMap;
@@ -24,7 +25,7 @@ public class EventManager {
             ConfigManager.saveConfig();
             try {
                 Files.write(FileManager.getLootTablePath(), FileManager.GSON.toJson(RandoAssistant.lootTableMap.getSerializedLootTableMap()).getBytes());
-                Files.write(FileManager.getCraftingPath(), FileManager.GSON.toJson(RandoAssistant.interactionMap.getSerializedInteractionMap()).getBytes());
+                Files.write(FileManager.getInteractionPath(), FileManager.GSON.toJson(RandoAssistant.interactionMap.getSerializedInteractionMap()).getBytes());
             } catch (Exception e) {
                 RandoAssistant.LOGGER.error("Failed to save loot tables to json", e);
             }
@@ -33,7 +34,7 @@ public class EventManager {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             try {
                 RandoAssistant.lootTableMap = LootTableMap.fromSerialized(FileManager.GSON.fromJson(Files.newBufferedReader(FileManager.getLootTablePath()), Map.class));
-                RandoAssistant.interactionMap = InteractionMap.fromSerialized(FileManager.GSON.fromJson(Files.newBufferedReader(FileManager.getCraftingPath()), Map.class));
+                RandoAssistant.interactionMap = InteractionMap.fromSerialized(FileManager.GSON.fromJson(Files.newBufferedReader(FileManager.getInteractionPath()), Map.class));
                 RandoAssistant.lootTableMap.getGraph().getDrawer().updateDrawing();
             } catch (Exception e) {
                 RandoAssistant.LOGGER.error("Failed to load loot tables from json", e);
@@ -57,6 +58,10 @@ public class EventManager {
                     }
                     MinecraftClient.getInstance().setScreen(null);
                 }, Text.of("Reset all loot tables?"), Text.of("This will clear all loot tables from the graph.")));
+            }
+            while (KeybindManager.debugKeyBinding.wasPressed()) {
+                Config.getInstance().debug = !Config.getInstance().debug;
+                client.player.sendMessage(Text.of("§b[RandoAssistant]: " + (Config.getInstance().debug ? "§aEnabled Debug Mode" : "§cDisabled Debug Mode")), false);
             }
         });
     }

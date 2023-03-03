@@ -30,7 +30,7 @@ public class GraphDisplayWidget extends WWidget {
     private final List<NodeWidget> nodeWidgets = new ArrayList<>();
     private final ResetPositionWidget resetPositionWidget;
 
-    private Set<Line> currentLines = new HashSet<>();
+    private List<Line> currentLines = new ArrayList<>();
 
     private final int initialOffsetX = 35;
     private final int initialOffsetY = 90;
@@ -57,7 +57,8 @@ public class GraphDisplayWidget extends WWidget {
         resetPositionWidget = new ResetPositionWidget(40, client.getWindow().getScaledHeight() - 26, this);
 
         if (NodeWidget.getSelectedNode() != null) {
-            currentLines = Line.builder().addLines(NodeWidget.getSelectedNode().getVertex()).build();
+            Set<Line> lines = Line.builder().addLines(NodeWidget.getSelectedNode().getVertex()).build();
+            setCurrentLines(lines);
             ShowOneLineWidget.getInstance().setValue(RandoAssistantClient.showLine);
         }
     }
@@ -118,14 +119,15 @@ public class GraphDisplayWidget extends WWidget {
 
     public Line getLine(int index) {
         try {
-            return new ArrayList<>(currentLines).get(index);
+            return currentLines.get(index);
         } catch (IndexOutOfBoundsException e) {
             return Line.EMPTY;
         }
     }
 
     public void setCurrentLines(Set<Line> lines) {
-        currentLines = lines;
+        currentLines = new ArrayList<>(lines);
+        currentLines.sort(Comparator.comparingInt(Line::size));
     }
 
     public int getLineCount() {

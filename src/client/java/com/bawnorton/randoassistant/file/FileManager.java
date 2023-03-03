@@ -39,9 +39,9 @@ public class FileManager {
         return path;
     }
 
-    public static Path getCraftingPath() throws IOException {
+    public static Path getInteractionPath() throws IOException {
         String name = getFileName();
-        Path path = ASSISTANT_DIRECTORY.toPath().resolve(name + "_crafting.json");
+        Path path = ASSISTANT_DIRECTORY.toPath().resolve(name + "_interaction.json");
         if (!Files.exists(path)) {
             Files.createFile(path);
         }

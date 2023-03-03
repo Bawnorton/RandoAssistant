@@ -8,6 +8,7 @@ import org.lwjgl.glfw.GLFW;
 public class KeybindManager {
     public static KeyBinding revealKeyBinding;
     public static KeyBinding resetKeyBinding;
+    public static KeyBinding debugKeyBinding;
 
     public static void init() {
         revealKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -20,6 +21,12 @@ public class KeybindManager {
                 "key.randoassistant.reset",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_J,
+                "category.randoassistant"
+        ));
+        debugKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.randoassistant.debug",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_M,
                 "category.randoassistant"
         ));
     }

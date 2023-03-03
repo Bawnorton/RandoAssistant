@@ -8,7 +8,10 @@
     "AxeItemMixin",
     "BlockMixin",
     "CandleCakeBlockMixin",
+    "FishingBobberEntityMixin",
+    "HoneycombItemMixin",
     "LivingEntityMixin",
+    "LootableContainerBlockEntityMixin",
     "MinecraftServerMixin",
     "RecipeUnlockerMixin",
     "ServerWorldAccessor"

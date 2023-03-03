@@ -12,6 +12,11 @@ group = project.maven_group
 
 repositories {
     maven {
+        url {
+            "https://jitpack.io"
+        }
+    }
+    maven {
         name = "CottonMC"
         url = "https://server.bbkr.space/artifactory/libs-release"
     }
@@ -65,9 +70,16 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation include("io.github.cottonmc:LibGui:${project.libgui_version}")
-    include modImplementation("dev.lambdaurora:spruceui:${project.spruceui_version}")
 
+    // mod dependencies
+    modImplementation include("io.github.cottonmc:LibGui:${project.libgui_version}")
+    modImplementation include("dev.lambdaurora:spruceui:${project.spruceui_version}")
+
+    // mixin dependencies
+    include implementation("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
+    annotationProcessor("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
+
+    // graphing libraries
     include implementation(fileTree(dir: 'libs', include: '*.jar'))
     include implementation("org.jgrapht:jgrapht-core:1.5.1")
     include implementation("net.sf.jung:jung-algorithms:2.0.1")
