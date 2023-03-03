@@ -1,5 +1,7 @@
 package com.bawnorton.randoassistant.mixin.client;
 
+import com.bawnorton.randoassistant.RandoAssistantClient;
+import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
 import com.bawnorton.randoassistant.util.Wrapper;
 import com.bawnorton.randoassistant.screen.LootTableScreen;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
@@ -49,6 +51,16 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
                 if (client != null && client.player != null) {
                     MinecraftClient.getInstance().getWindow().setScaleFactor(ACTUAL_SCALE.get());
                     MinecraftClient.getInstance().setScreen(new InventoryScreen(client.player));
+                }
+            }
+
+            @Override
+            public void resize(MinecraftClient client, int width, int height) {
+                super.resize(client, width, height);
+                if(RandoAssistantClient.hideOtherNodes) {
+                    LootTableScreen.getInstance().redrawWithSelectedNode();
+                } else {
+                    LootTableScreen.getInstance().redraw();
                 }
             }
 
