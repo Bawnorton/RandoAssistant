@@ -46,12 +46,21 @@ public class LootTableScreen extends LightweightGuiDescription {
                 super.paint(matrices, x, y, mouseX, mouseY);
             }
         };
+
         setRootPanel(panel);
         setFullscreen(true);
         panel.setInsets(Insets.NONE);
         panel.setBackgroundPainter(((matrices, left, top, panel1) -> {}));
-        CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
-        panel.add(drawingLabel, drawingLabel.x(), drawingLabel.y());
+
+        if(graph.getVertices().isEmpty()) {
+            CenteredLabelWidget noGraphLabel = new CenteredLabelWidget("No graph to draw");
+            CenteredLabelWidget suggestionLabel = new CenteredLabelWidget("Start breaking some blocks", 20);
+            panel.add(noGraphLabel, noGraphLabel.x(), noGraphLabel.y());
+            panel.add(suggestionLabel, suggestionLabel.x(), suggestionLabel.y());
+        } else {
+            CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
+            panel.add(drawingLabel, drawingLabel.x(), drawingLabel.y());
+        }
 
         updateGraph();
     }

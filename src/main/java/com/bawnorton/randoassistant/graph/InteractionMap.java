@@ -16,9 +16,11 @@ import java.util.stream.Collectors;
 public class InteractionMap {
     private final Map<Set<String>, Set<String>> serializedInteractionMap;
     private final BiMap<Input, Output> interactionMap;
+    private final Set<Item> knownItems;
 
-    private InteractionMap(BiMap<Input, Output> interactionMap) {
+    private InteractionMap(BiMap<Input, Output> interactionMap, Set<Item> knownItems) {
         this.interactionMap = interactionMap;
+        this.knownItems = new HashSet<>(knownItems);
         this.serializedInteractionMap = new HashMap<>();
 
         LootTableGraph graph = RandoAssistant.lootTableMap.getGraph();
@@ -30,20 +32,25 @@ public class InteractionMap {
     }
 
     public InteractionMap() {
-        this(HashBiMap.create());
+        this(HashBiMap.create(), new HashSet<>());
     }
 
     public static InteractionMap fromSerialized(Map<String, List<String>> serializedInteractionMap) {
         BiMap<Input, Output> interactionMap = HashBiMap.create();
-        if (serializedInteractionMap == null) return new InteractionMap();
+        Set<Item> knownItems = new HashSet<>();
 
+        if (serializedInteractionMap == null) return new InteractionMap();
         for (Map.Entry<String, List<String>> serializedInteraction : serializedInteractionMap.entrySet()) {
             List<String> keys = Arrays.asList(serializedInteraction.getKey().replace("[", "").replace("]", "").replaceAll(" +", "").split(","));
             List<String> values = serializedInteraction.getValue();
-            addInteraction(interactionMap, Input.fromSerialized(keys), Output.fromSerialized(values));
+            Input input = Input.fromSerialized(keys);
+            Output output = Output.fromSerialized(values);
+            knownItems.addAll(input.content());
+            knownItems.addAll(output.content());
+            addInteraction(interactionMap, input, output);
         }
 
-        return new InteractionMap(interactionMap);
+        return new InteractionMap(interactionMap, knownItems);
     }
 
     private void initSerializedCraftingMap() {
@@ -101,19 +108,15 @@ public class InteractionMap {
         addInteraction(input.asItem(), output.asItem());
     }
 
-    public void addInteraction(List<Item> input, Item output) {
-        addInteraction(Input.of(new HashSet<>(input)), Output.of(output));
-    }
-
     public void addInteraction(Item item, List<ItemStack> output) {
         addInteraction(Input.of(item), Output.of(output.stream().map(ItemStack::getItem).collect(Collectors.toSet())));
     }
 
-    private record Input(Set<Item> content) implements Iterable<Item> {
-        public static Input of(Set<Item> input) {
-            return new Input(input);
-        }
+    public void addCraftingInteraction(List<Item> input, Item output) {
+        input.stream().filter(item -> RandoAssistant.lootTableMap.isKnownItem(item) || knownItems.contains(item)).forEach(item -> addInteraction(item, output));
+    }
 
+    private record Input(Set<Item> content) implements Iterable<Item> {
         public static Input of(Item input) {
             return new Input(Collections.singleton(input));
         }

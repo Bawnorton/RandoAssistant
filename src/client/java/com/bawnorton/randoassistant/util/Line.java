@@ -39,25 +39,39 @@ public class Line extends LinkedList<Vertex> {
         }
 
         private static Set<List<Vertex>> getRootPaths(Vertex from) {
-            Set<Vertex> visited = new HashSet<>();
+            Map<Vertex, Integer> expectedVists = new HashMap<>();
             List<Vertex> path = new ArrayList<>();
             Set<List<Vertex>> rootPaths = new HashSet<>();
-            getRootPathsHelper(from, visited, path, rootPaths);
+            getRootPathsHelper(from, expectedVists, path, rootPaths);
             return rootPaths;
         }
 
-        private static void getRootPathsHelper(Vertex node, Set<Vertex> visited, List<Vertex> path, Set<List<Vertex>> rootPaths) {
+        private static void getRootPathsHelper(Vertex node, Map<Vertex, Integer> expectedVisits, List<Vertex> path, Set<List<Vertex>> rootPaths) {
             path.add(node);
-            visited.add(node);
 
-            if (node.getImmediateParents().isEmpty()) {
-                rootPaths.add(new ArrayList<>(path));
-            } else {
-                for (Vertex parent : node.getImmediateParents()) {
-                    if (!visited.contains(parent)) {
-                        getRootPathsHelper(parent, visited, new ArrayList<>(path), rootPaths);
-                    }
+            if(expectedVisits.containsKey(node)) {
+                expectedVisits.put(node, expectedVisits.get(node) - 1);
+                if(expectedVisits.get(node) == 0) {
+                    expectedVisits.remove(node);
+                    return;
                 }
+            }
+
+            if(node.getImmediateParents().isEmpty()) {
+                rootPaths.add(new ArrayList<>(path));
+                return;
+            }
+
+            expectedVisits.putIfAbsent(node, node.getImmediateParents().size());
+
+            if (node.getImmediateParents().size() >= 2) {
+                for (Vertex parent : node.getImmediateParents()) {
+                    List<Vertex> splitPath = new ArrayList<>(path);
+                    getRootPathsHelper(parent, expectedVisits, splitPath, rootPaths);
+                }
+            } else {
+                Vertex parent = node.getImmediateParents().iterator().next();
+                getRootPathsHelper(parent, expectedVisits, path, rootPaths);
             }
         }
 
