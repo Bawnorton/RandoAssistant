@@ -6,16 +6,20 @@ import com.google.gson.annotations.SerializedName;
 public class Config {
     private static Config INSTANCE;
 
-    @Expose @SerializedName("debug")
+    @Expose
+    @SerializedName("debug")
     public Boolean debug;
 
-    @Expose @SerializedName("search_type")
+    @Expose
+    @SerializedName("search_type")
     public SearchType searchType;
 
-    @Expose @SerializedName("child_depth")
+    @Expose
+    @SerializedName("child_depth")
     public Integer childDepth;
 
-    @Expose @SerializedName("parent_depth")
+    @Expose
+    @SerializedName("parent_depth")
     public Integer parentDepth;
 
     private Config() {

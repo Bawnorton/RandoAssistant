@@ -43,7 +43,7 @@ public class SearchTypeWidget extends WButton {
         if (isWithinBounds(mouseX, mouseY)) {
             MinecraftClient.getInstance().currentScreen.renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), mouseX + x, mouseY + y - height / 2);
         }
-        if(Config.getInstance().debug) {
+        if (Config.getInstance().debug) {
             DrawableHelper.fill(matrices, this.x, this.y, this.x + this.width, this.y + this.height, 0x80ff0000);
         }
         matrices.pop();

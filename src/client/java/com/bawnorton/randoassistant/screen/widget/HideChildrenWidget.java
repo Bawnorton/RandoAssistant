@@ -2,7 +2,6 @@ package com.bawnorton.randoassistant.screen.widget;
 
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
-import com.bawnorton.randoassistant.screen.LootTableScreen;
 import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
@@ -40,7 +39,7 @@ public class HideChildrenWidget extends WButton {
         super.paint(matrices, x, y, mouseX, mouseY);
         matrices.pop();
 
-        if(Config.getInstance().debug) {
+        if (Config.getInstance().debug) {
             DrawableHelper.fill(matrices, this.x, this.y, this.x + this.width, this.y + this.height, 0x80ff0000);
         }
     }

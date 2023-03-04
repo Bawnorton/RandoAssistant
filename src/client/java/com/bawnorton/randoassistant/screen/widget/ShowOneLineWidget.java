@@ -16,7 +16,7 @@ public class ShowOneLineWidget extends WLabeledSlider {
         super(-1, 0);
         instance = this;
         value = RandoAssistantClient.showLine;
-        if(value == -1) {
+        if (value == -1) {
             setLabel(Text.of("Showing All Lines"));
         } else {
             setLabel(Text.of("Showing Line " + (value + 1)));
@@ -32,7 +32,7 @@ public class ShowOneLineWidget extends WLabeledSlider {
         super.onValueChanged(value);
         RandoAssistantClient.showLine = value;
         NodeWidget.refreshSelectedNode();
-        if(value == -1) {
+        if (value == -1) {
             setLabel(Text.of("Showing All Lines"));
         } else {
             setLabel(Text.of("Showing Line " + (value + 1)));
@@ -49,7 +49,7 @@ public class ShowOneLineWidget extends WLabeledSlider {
         super.paint(matrices, x, y, mouseX, mouseY);
         matrices.pop();
 
-        if(Config.getInstance().debug) {
+        if (Config.getInstance().debug) {
             DrawableHelper.fill(matrices, this.x, this.y, this.x + this.width, this.y + this.height, 0x80ff0000);
         }
     }

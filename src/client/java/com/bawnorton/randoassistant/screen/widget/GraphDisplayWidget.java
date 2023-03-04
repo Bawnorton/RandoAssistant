@@ -15,7 +15,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Item;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
@@ -31,14 +30,11 @@ public class GraphDisplayWidget extends WWidget {
     private final Map<LootTableGraph.Edge, List<Point2D>> edgeLocations;
     private final List<NodeWidget> nodeWidgets = new ArrayList<>();
     private final ResetPositionWidget resetPositionWidget;
-
-    private List<Line> currentLines = new ArrayList<>();
-
     private final int initialOffsetX = 35;
     private final int initialOffsetY = 90;
-
     public float xOffset = 0;
     public float yOffset = 0;
+    private List<Line> currentLines = new ArrayList<>();
 
     public GraphDisplayWidget(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
         instance = this;
@@ -75,15 +71,15 @@ public class GraphDisplayWidget extends WWidget {
         for (NodeWidget value : nodeWidgets) {
             if (button == 1) result = value.handleMouseDown(x, y);
         }
-        if(result == InputResult.IGNORED) result = resetPositionWidget.handleMouseDown(x, y);
+        if (result == InputResult.IGNORED) result = resetPositionWidget.handleMouseDown(x, y);
         return result;
     }
 
     @Override
     public InputResult onMouseScroll(int x, int y, double amount) {
         SCALE.set(SCALE.get() + (amount > 0 ? 0.5d : -0.5d));
-        if(SCALE.get() > 8) SCALE.set(8d);
-        if(SCALE.get() < 1) SCALE.set(1d);
+        if (SCALE.get() > 8) SCALE.set(8d);
+        if (SCALE.get() < 1) SCALE.set(1d);
         client.getWindow().setScaleFactor(SCALE.get());
         width = client.getWindow().getScaledWidth();
         height = client.getWindow().getScaledHeight();
@@ -110,7 +106,7 @@ public class GraphDisplayWidget extends WWidget {
     }
 
     public void centerOnNode(NodeWidget nodeWidget) {
-        if(nodeWidget == null) return;
+        if (nodeWidget == null) return;
         xOffset = client.getWindow().getScaledWidth() / 2f - initialOffsetX - nodeWidget.getX();
         yOffset = client.getWindow().getScaledHeight() / 2f - initialOffsetY - nodeWidget.getY();
     }
@@ -200,17 +196,17 @@ public class GraphDisplayWidget extends WWidget {
         for (LootTableGraph.Edge edge : edgeLocations.keySet()) {
             LootTableGraph.Vertex dest = edge.getDestination();
             LootTableGraph.Vertex origin = edge.getOrigin();
-            if(dest.isHighlightedAsParent() || origin.isHighlightedAsParent()) {
-                if(RandoAssistantClient.showLine != -1) {
+            if (dest.isHighlightedAsParent() || origin.isHighlightedAsParent()) {
+                if (RandoAssistantClient.showLine != -1) {
                     Line currentLine = getLine(RandoAssistantClient.showLine);
-                    if(!currentLine.contains(dest) || !currentLine.contains(origin)) {
+                    if (!currentLine.contains(dest) || !currentLine.contains(origin)) {
                         continue;
                     }
                 }
             }
             boolean isInteraction = dest.isHighlightedAsInteraction() && origin.isHighlightedAsInteraction();
 
-            if(isInteraction) {
+            if (isInteraction) {
                 isInteraction = RandoAssistant.interactionMap.checkInteraction(origin.getItem(), dest.getItem());
             }
 

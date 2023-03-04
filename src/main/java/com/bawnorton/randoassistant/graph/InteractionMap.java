@@ -57,6 +57,33 @@ public class InteractionMap {
         return new InteractionMap(interactionMap, knownItems, quickAccessMap);
     }
 
+    private static void addInteractionToMap(BiMap<Input, Output> interactionMap, Input input, Output output) {
+        try {
+            boolean added = false;
+            for (Input key : interactionMap.keySet()) {
+                if (key.content().equals(input.content())) {
+                    Output recorded = interactionMap.get(key);
+                    recorded = recorded.merge(output);
+                    interactionMap.put(key, recorded);
+                    added = true;
+                    break;
+                }
+            }
+            for (Output value : interactionMap.values()) {
+                if (value.content().equals(output.content())) {
+                    Input recorded = interactionMap.inverse().get(value);
+                    recorded = recorded.merge(input);
+                    interactionMap.inverse().put(value, recorded);
+                    added = true;
+                    break;
+                }
+            }
+            if (!added) interactionMap.put(input, output);
+        } catch (IllegalArgumentException e) {
+            RandoAssistant.LOGGER.error("Failed to add interaction: " + input + " -> " + output);
+        }
+    }
+
     private void initSerializedCraftingMap() {
         interactionMap.forEach((input, output) -> serializedInteractionMap.put(input.serialized(), output.serialized()));
     }
@@ -69,33 +96,6 @@ public class InteractionMap {
 
     public Map<Set<String>, Set<String>> getSerializedInteractionMap() {
         return serializedInteractionMap;
-    }
-
-    private static void addInteractionToMap(BiMap<Input, Output> interactionMap, Input input, Output output) {
-        try {
-            boolean added = false;
-            for(Input key: interactionMap.keySet()) {
-                if(key.content().equals(input.content())) {
-                    Output recorded = interactionMap.get(key);
-                    recorded = recorded.merge(output);
-                    interactionMap.put(key, recorded);
-                    added = true;
-                    break;
-                }
-            }
-            for(Output value: interactionMap.values()) {
-                if(value.content().equals(output.content())) {
-                    Input recorded = interactionMap.inverse().get(value);
-                    recorded = recorded.merge(input);
-                    interactionMap.inverse().put(value, recorded);
-                    added = true;
-                    break;
-                }
-            }
-            if(!added) interactionMap.put(input, output);
-        } catch (IllegalArgumentException e) {
-            RandoAssistant.LOGGER.error("Failed to add interaction: " + input + " -> " + output);
-        }
     }
 
     public boolean checkInteraction(Item source, Item target) {
@@ -183,7 +183,7 @@ public class InteractionMap {
         }
 
         public Output merge(Output output) {
-            if(output == null) return this;
+            if (output == null) return this;
             Set<Item> merged = new HashSet<>(content);
             merged.addAll(output.content);
             return new Output(merged);

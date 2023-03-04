@@ -12,6 +12,8 @@ public interface CenteredWidget {
     }
 
     int getWidth();
+
     int getHeight();
+
     int getYOffset();
 }

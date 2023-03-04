@@ -29,15 +29,6 @@ public class Line extends LinkedList<Vertex> {
     public static class LineBuilder {
         Set<Line> lines = new HashSet<>();
 
-        public LineBuilder addLines(Vertex from) {
-            Set<List<Vertex>> rootPaths = getRootPaths(from);
-            for (List<Vertex> rootPath : rootPaths) {
-                if(rootPath.isEmpty()) continue;
-                lines.add(new Line(rootPath));
-            }
-            return this;
-        }
-
         private static Set<List<Vertex>> getRootPaths(Vertex from) {
             Map<Vertex, Integer> expectedVists = new HashMap<>();
             List<Vertex> path = new ArrayList<>();
@@ -49,15 +40,15 @@ public class Line extends LinkedList<Vertex> {
         private static void getRootPathsHelper(Vertex node, Map<Vertex, Integer> expectedVisits, List<Vertex> path, Set<List<Vertex>> rootPaths) {
             path.add(node);
 
-            if(expectedVisits.containsKey(node)) {
+            if (expectedVisits.containsKey(node)) {
                 expectedVisits.put(node, expectedVisits.get(node) - 1);
-                if(expectedVisits.get(node) == 0) {
+                if (expectedVisits.get(node) == 0) {
                     expectedVisits.remove(node);
                     return;
                 }
             }
 
-            if(node.getImmediateParents().isEmpty()) {
+            if (node.getImmediateParents().isEmpty()) {
                 rootPaths.add(new ArrayList<>(path));
                 return;
             }
@@ -73,6 +64,15 @@ public class Line extends LinkedList<Vertex> {
                 Vertex parent = node.getImmediateParents().iterator().next();
                 getRootPathsHelper(parent, expectedVisits, path, rootPaths);
             }
+        }
+
+        public LineBuilder addLines(Vertex from) {
+            Set<List<Vertex>> rootPaths = getRootPaths(from);
+            for (List<Vertex> rootPath : rootPaths) {
+                if (rootPath.isEmpty()) continue;
+                lines.add(new Line(rootPath));
+            }
+            return this;
         }
 
         public Set<Line> build() {

@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.graph;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.util.WallBlockLookup;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;

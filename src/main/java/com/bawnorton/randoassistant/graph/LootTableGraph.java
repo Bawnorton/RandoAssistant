@@ -113,7 +113,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
     }
 
     public void addInteraction(Set<Item> input, Set<Item> output) {
-        for(Item outputItem: output) {
+        for (Item outputItem : output) {
             Vertex root = getOrCreateNode(new Vertex(outputItem));
             for (Item item : input) {
                 Vertex vertex = getOrCreateNode(new Vertex(item));
@@ -172,7 +172,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
     private Set<Vertex> getVerticesAssociatedWithVertex(Vertex vertex, boolean includeSelf) {
         Set<Vertex> vertices = new HashSet<>();
-        if(includeSelf) vertices.add(vertex);
+        if (includeSelf) vertices.add(vertex);
         vertices.addAll(vertex.getChildren());
         vertices.addAll(vertex.getParents());
         return vertices;
@@ -200,7 +200,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
     private Set<Vertex> getImmediateVerticesAssociatedWithVertex(Vertex vertex, boolean includeSelf) {
         Set<Vertex> vertices = new HashSet<>();
-        if(includeSelf) vertices.add(vertex);
+        if (includeSelf) vertices.add(vertex);
         vertices.addAll(getImmediateChildren(vertex));
         vertices.addAll(getImmediateParents(vertex));
         return vertices;
@@ -241,6 +241,130 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         @Override
         public String toString() {
             return (origin != null ? origin.toString() : null) + " -> " + (destination != null ? destination.toString() : null);
+        }
+    }
+
+    public static class LootTableType {
+        private final Block block;
+        private final Item item;
+        private final EntityType<?> entityType;
+        private final Identifier lootTableId;
+
+        private final boolean isBlock;
+        private final boolean isItem;
+        private final boolean isEntity;
+        private final boolean isLootTable;
+
+        private final Category category;
+
+        public LootTableType(Block block, Item item, EntityType<?> entityType, Identifier lootTableId) {
+            if (block == null && item != null) {
+                block = Block.getBlockFromItem(item);
+                if (block.asItem() == Items.AIR) block = null;
+            } else if (block != null && item == null) {
+                item = block.asItem();
+                if (item == Items.AIR) item = null;
+            }
+
+            this.isBlock = block != null;
+            this.isItem = item != null;
+            this.isEntity = entityType != null;
+            this.isLootTable = lootTableId != null;
+
+            this.block = block;
+            this.item = item;
+            this.entityType = entityType;
+            this.lootTableId = lootTableId;
+
+            if (isBlock) {
+                category = Category.BLOCK;
+            } else if (isItem) {
+                category = Category.ITEM;
+            } else if (isEntity) {
+                category = Category.ENTITY;
+            } else if (isLootTable) {
+                category = Category.LOOT_TABLE;
+            } else {
+                throw new IllegalArgumentException("Invalid LootTableType");
+            }
+        }
+
+        public LootTableType(Block block) {
+            this(block, null, null, null);
+        }
+
+        public LootTableType(Item item) {
+            this(null, item, null, null);
+        }
+
+        public LootTableType(EntityType<?> entityType) {
+            this(null, null, entityType, null);
+        }
+
+        public LootTableType(Identifier lootTableId) {
+            this(null, null, null, lootTableId);
+        }
+
+        public Block getBlock() {
+            if (!isBlock) return null;
+            return block;
+        }
+
+        public Item getItem() {
+            if (!isItem) return null;
+            return item;
+        }
+
+        public EntityType<?> getEntityType() {
+            if (!isEntity) return null;
+            return entityType;
+        }
+
+        public Identifier getLootTableId() {
+            if (!isLootTable) return null;
+            return lootTableId;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof LootTableType other) {
+                if (isBlock) {
+                    return other.isBlock && block.equals(other.block);
+                } else if (isItem) {
+                    return other.isItem && item.equals(other.item);
+                } else if (isEntity) {
+                    return other.isEntity && entityType.equals(other.entityType);
+                } else if (isLootTable) {
+                    return other.isLootTable && lootTableId.equals(other.lootTableId);
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            if (isBlock) {
+                return Registries.BLOCK.getId(block).toString().hashCode();
+            } else if (isItem) {
+                return Registries.ITEM.getId(item).toString().hashCode();
+            } else if (isEntity) {
+                return Registries.ENTITY_TYPE.getId(entityType).toString().hashCode();
+            } else if (isLootTable) {
+                return lootTableId.toString().hashCode();
+            }
+            return 0;
+        }
+
+        @Override
+        public String toString() {
+            return "LootTableType{" + (isBlock ? "block=" + block : isItem ? "item=" + item : isEntity ? "entityType=" + entityType : null) + '}';
+        }
+
+        public enum Category {
+            BLOCK,
+            ITEM,
+            ENTITY,
+            LOOT_TABLE
         }
     }
 
@@ -459,130 +583,6 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
         public void unhighlightConnected() {
             graphTaskExecutor.unhighlightConnected();
-        }
-    }
-
-    public static class LootTableType {
-        private final Block block;
-        private final Item item;
-        private final EntityType<?> entityType;
-        private final Identifier lootTableId;
-
-        private final boolean isBlock;
-        private final boolean isItem;
-        private final boolean isEntity;
-        private final boolean isLootTable;
-
-        private final Category category;
-
-        public LootTableType(Block block, Item item, EntityType<?> entityType, Identifier lootTableId) {
-            if (block == null && item != null) {
-                block = Block.getBlockFromItem(item);
-                if (block.asItem() == Items.AIR) block = null;
-            } else if (block != null && item == null) {
-                item = block.asItem();
-                if (item == Items.AIR) item = null;
-            }
-
-            this.isBlock = block != null;
-            this.isItem = item != null;
-            this.isEntity = entityType != null;
-            this.isLootTable = lootTableId != null;
-
-            this.block = block;
-            this.item = item;
-            this.entityType = entityType;
-            this.lootTableId = lootTableId;
-
-            if (isBlock) {
-                category = Category.BLOCK;
-            } else if (isItem) {
-                category = Category.ITEM;
-            } else if (isEntity) {
-                category = Category.ENTITY;
-            } else if (isLootTable) {
-                category = Category.LOOT_TABLE;
-            } else {
-                throw new IllegalArgumentException("Invalid LootTableType");
-            }
-        }
-
-        public LootTableType(Block block) {
-            this(block, null, null, null);
-        }
-
-        public LootTableType(Item item) {
-            this(null, item, null, null);
-        }
-
-        public LootTableType(EntityType<?> entityType) {
-            this(null, null, entityType, null);
-        }
-
-        public LootTableType(Identifier lootTableId) {
-            this(null, null, null, lootTableId);
-        }
-
-        public Block getBlock() {
-            if (!isBlock) return null;
-            return block;
-        }
-
-        public Item getItem() {
-            if (!isItem) return null;
-            return item;
-        }
-
-        public EntityType<?> getEntityType() {
-            if (!isEntity) return null;
-            return entityType;
-        }
-
-        public Identifier getLootTableId() {
-            if (!isLootTable) return null;
-            return lootTableId;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof LootTableType other) {
-                if (isBlock) {
-                    return other.isBlock && block.equals(other.block);
-                } else if (isItem) {
-                    return other.isItem && item.equals(other.item);
-                } else if (isEntity) {
-                    return other.isEntity && entityType.equals(other.entityType);
-                } else if (isLootTable) {
-                    return other.isLootTable && lootTableId.equals(other.lootTableId);
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            if (isBlock) {
-                return Registries.BLOCK.getId(block).toString().hashCode();
-            } else if (isItem) {
-                return Registries.ITEM.getId(item).toString().hashCode();
-            } else if (isEntity) {
-                return Registries.ENTITY_TYPE.getId(entityType).toString().hashCode();
-            } else if (isLootTable) {
-                return lootTableId.toString().hashCode();
-            }
-            return 0;
-        }
-
-        @Override
-        public String toString() {
-            return "LootTableType{" + (isBlock ? "block=" + block : isItem ? "item=" + item : isEntity ? "entityType=" + entityType : null) + '}';
-        }
-
-        public enum Category {
-            BLOCK,
-            ITEM,
-            ENTITY,
-            LOOT_TABLE
         }
     }
 }

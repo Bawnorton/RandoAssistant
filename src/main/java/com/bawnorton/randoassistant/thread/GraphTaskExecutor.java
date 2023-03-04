@@ -119,7 +119,7 @@ public class GraphTaskExecutor {
             highlighted.forEach(node -> RandoAssistant.interactionMap.getMap().forEach((entry) -> {
                 entry.getKey().forEach(item -> {
                     LootTableGraph.Vertex interactionVertex = graph.getVertex(item);
-                    if(interactionVertex == null) return;
+                    if (interactionVertex == null) return;
                     boolean isHighlightedCorrectly = isParent ? interactionVertex.isHighlightedAsParent() : interactionVertex.isHighlightedAsChild();
                     if (isHighlightedCorrectly || interactionVertex.isHighlightedAsTarget()) {
                         interactionVertex.highlightAsInteraction();
@@ -127,7 +127,7 @@ public class GraphTaskExecutor {
                 });
                 entry.getValue().forEach(item -> {
                     LootTableGraph.Vertex interactionVertex = graph.getVertex(item);
-                    if(interactionVertex == null) return;
+                    if (interactionVertex == null) return;
                     boolean isHighlightedCorrectly = isParent ? interactionVertex.isHighlightedAsParent() : interactionVertex.isHighlightedAsChild();
                     if (isHighlightedCorrectly || interactionVertex.isHighlightedAsTarget()) {
                         interactionVertex.highlightAsInteraction();
@@ -163,7 +163,7 @@ public class GraphTaskExecutor {
                 Set<LootTableGraph.Vertex> vertexSet;
                 Set<LootTableGraph.Edge> edgeSet;
 
-                if(vertex == null) {
+                if (vertex == null) {
                     vertexSet = graph.getVertices();
                     edgeSet = graph.getEdges();
                 } else {
@@ -212,12 +212,13 @@ public class GraphTaskExecutor {
         }
 
         public void start(LootTableGraph.Vertex vertex, Runnable successTask, Runnable failTask) {
-            if(!enabled) return;
+            if (!enabled) return;
             this.vertex = vertex;
-            if(isDirty()) {
+            if (isDirty()) {
                 failableExecutor.execute(task, successTask, failTask);
             } else {
-                failableExecutor.execute(() -> {}, successTask, failTask);
+                failableExecutor.execute(() -> {
+                }, successTask, failTask);
             }
         }
 
@@ -226,11 +227,13 @@ public class GraphTaskExecutor {
         }
 
         public void start(Runnable successTask) {
-            start(successTask, () -> {});
+            start(successTask, () -> {
+            });
         }
 
         public void start() {
-            start(() -> {});
+            start(() -> {
+            });
         }
 
         @Nullable

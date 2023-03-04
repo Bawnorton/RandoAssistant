@@ -19,7 +19,8 @@ import java.util.List;
 
 @Mixin(RecipeUnlocker.class)
 public interface RecipeUnlockerMixin {
-    @Shadow @Nullable Recipe<?> getLastRecipe();
+    @Shadow
+    @Nullable Recipe<?> getLastRecipe();
 
     @Inject(method = "unlockLastRecipe", at = @At("HEAD"))
     default void unlockLastRecipe(PlayerEntity player, CallbackInfo ci) {
@@ -29,7 +30,7 @@ public interface RecipeUnlockerMixin {
             List<Ingredient> ingredients = recipe.getIngredients();
             List<Item> input = new ArrayList<>();
             ingredients.forEach(ingredient -> {
-                for(ItemStack stack: ingredient.getMatchingStacks()) {
+                for (ItemStack stack : ingredient.getMatchingStacks()) {
                     input.add(stack.getItem());
                 }
             });

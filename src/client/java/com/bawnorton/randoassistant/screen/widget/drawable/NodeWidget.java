@@ -3,12 +3,12 @@ package com.bawnorton.randoassistant.screen.widget.drawable;
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
+import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.bawnorton.randoassistant.mixin.AbstractPlantPartBlockInvoker;
 import com.bawnorton.randoassistant.mixin.AttachedStemBlockAccessor;
 import com.bawnorton.randoassistant.screen.widget.GraphDisplayWidget;
 import com.bawnorton.randoassistant.screen.widget.ShowOneLineWidget;
 import com.bawnorton.randoassistant.search.Searchable;
-import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.bawnorton.randoassistant.util.Line;
 import com.bawnorton.randoassistant.util.Wrapper;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -43,15 +43,33 @@ public class NodeWidget extends DrawableHelper implements Searchable {
     private static int SIZE;
 
     private final LootTableGraph.Vertex vertex;
-    private Rectangle2D.Float bounds;
     private final int x;
     private final int y;
+    private Rectangle2D.Float bounds;
 
     public NodeWidget(LootTableGraph.Vertex vertex, Point2D location) {
         this.vertex = vertex;
         this.x = (int) (location.getX());
         this.y = (int) (location.getY());
         SIZE = 26;
+    }
+
+    public static void deselect() {
+        if (selectedNode == null) return;
+        selectedNode.vertex.unhighlightConnected();
+    }
+
+    public static void refreshSelectedNode() {
+        if (selectedNode == null) return;
+        selectedNode.vertex.unhighlightConnected();
+        selectedNode.vertex.highlightAsTarget();
+        if (!RandoAssistantClient.hideChildren) selectedNode.vertex.highlightChildren();
+        selectedNode.vertex.highlightParents();
+    }
+
+    @Nullable
+    public static NodeWidget getSelectedNode() {
+        return selectedNode;
     }
 
     private void drawEntity(int x, int y, LivingEntity entity) {
@@ -106,12 +124,12 @@ public class NodeWidget extends DrawableHelper implements Searchable {
         if (vertex.isHighlightedAsTarget()) {
             RenderSystem.setShaderColor(0.1F, 1F, 0.1F, 1F);
         } else if (vertex.isHighlightedAsParent()) {
-            if(isInteraction) {
+            if (isInteraction) {
                 Wrapper<Boolean> shouldHighlightAsInteraction = Wrapper.of(false);
                 vertex.getImmediateVerticesAssociatedWith(false).forEach(parent -> {
-                    if(parent.isHighlightedAsInteraction()) shouldHighlightAsInteraction.set(true);
+                    if (parent.isHighlightedAsInteraction()) shouldHighlightAsInteraction.set(true);
                 });
-                if(shouldHighlightAsInteraction.get()) {
+                if (shouldHighlightAsInteraction.get()) {
                     RenderSystem.setShaderColor(1F, 1F, 0.1F, 1F);
                 } else {
                     RenderSystem.setShaderColor(1F, 0.1F, 0.1F, 1F);
@@ -119,19 +137,19 @@ public class NodeWidget extends DrawableHelper implements Searchable {
             } else {
                 RenderSystem.setShaderColor(1F, 0.1F, 0.1F, 1F);
             }
-            if(RandoAssistantClient.showLine != -1) {
+            if (RandoAssistantClient.showLine != -1) {
                 Line currentLine = GraphDisplayWidget.getInstance().getLine(RandoAssistantClient.showLine);
-                if(!currentLine.contains(getVertex())) {
+                if (!currentLine.contains(getVertex())) {
                     RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
                 }
             }
         } else if (vertex.isHighlightedAsChild()) {
-            if(isInteraction) {
+            if (isInteraction) {
                 Wrapper<Boolean> shouldHighlightAsInteraction = Wrapper.of(false);
                 vertex.getImmediateVerticesAssociatedWith(false).forEach(child -> {
-                    if(child.isHighlightedAsInteraction()) shouldHighlightAsInteraction.set(true);
+                    if (child.isHighlightedAsInteraction()) shouldHighlightAsInteraction.set(true);
                 });
-                if(shouldHighlightAsInteraction.get()) {
+                if (shouldHighlightAsInteraction.get()) {
                     RenderSystem.setShaderColor(1F, 1F, 0.1F, 1F);
                 } else {
                     RenderSystem.setShaderColor(0.1F, 0.1F, 1F, 1F);
@@ -146,10 +164,10 @@ public class NodeWidget extends DrawableHelper implements Searchable {
         bounds = new Rectangle2D.Float(x - SIZE / 2f - 5, y - SIZE / 2f - 5, SIZE, SIZE);
         boolean hovered = bounds.contains(mouseX, mouseY);
 
-        if(hovered) {
+        if (hovered) {
             float[] color = RenderSystem.getShaderColor();
             RenderSystem.setShaderColor(color[0] * 0.7F, color[1] * 0.7F, color[2] * 0.7F, 1F);
-            if(Config.getInstance().debug) {
+            if (Config.getInstance().debug) {
                 tooltip = Tooltip.of(Text.of(
                         "Content: " + vertex.getContent().toString() + "\n"
                                 + "Target: " + vertex.isHighlightedAsTarget() + "\n"
@@ -232,37 +250,19 @@ public class NodeWidget extends DrawableHelper implements Searchable {
         return vertex;
     }
 
-    public static void deselect() {
-        if(selectedNode == null) return;
-        selectedNode.vertex.unhighlightConnected();
-    }
-
     public void select() {
-        if(this == selectedNode) return;
+        if (this == selectedNode) return;
         if (selectedNode != null) {
             deselect();
         }
         selectedNode = this;
         selectedNode.vertex.highlightAsTarget();
-        if(!RandoAssistantClient.hideChildren) selectedNode.vertex.highlightChildren();
+        if (!RandoAssistantClient.hideChildren) selectedNode.vertex.highlightChildren();
         selectedNode.vertex.highlightParents();
 
         Set<Line> lines = Line.builder().addLines(this.getVertex()).build();
         GraphDisplayWidget.getInstance().setCurrentLines(lines);
         ShowOneLineWidget.getInstance().setMaxValue(lines.size() - 1);
         ShowOneLineWidget.getInstance().setValue(-1, true);
-    }
-
-    public static void refreshSelectedNode() {
-        if(selectedNode == null) return;
-        selectedNode.vertex.unhighlightConnected();
-        selectedNode.vertex.highlightAsTarget();
-        if(!RandoAssistantClient.hideChildren) selectedNode.vertex.highlightChildren();
-        selectedNode.vertex.highlightParents();
-    }
-
-    @Nullable
-    public static NodeWidget getSelectedNode() {
-        return selectedNode;
     }
 }

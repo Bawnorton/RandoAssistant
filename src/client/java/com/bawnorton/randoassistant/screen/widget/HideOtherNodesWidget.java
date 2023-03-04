@@ -42,7 +42,7 @@ public class HideOtherNodesWidget extends WButton {
         super.paint(matrices, x, y, mouseX, mouseY);
         matrices.pop();
 
-        if(Config.getInstance().debug) {
+        if (Config.getInstance().debug) {
             DrawableHelper.fill(matrices, this.x, this.y, this.x + this.width, this.y + this.height, 0x80ff0000);
         }
     }

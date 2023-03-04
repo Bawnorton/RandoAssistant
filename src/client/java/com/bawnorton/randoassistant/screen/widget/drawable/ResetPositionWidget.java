@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.screen.widget.drawable;
 
-import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.screen.widget.GraphDisplayWidget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;

@@ -15,14 +15,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LootableContainerBlockEntity.class)
 public abstract class LootableContainerBlockEntityMixin {
-    @Shadow @Nullable protected Identifier lootTableId;
-    @Shadow protected abstract DefaultedList<ItemStack> getInvStackList();
-
+    @Shadow
+    @Nullable
+    protected Identifier lootTableId;
     private Identifier id;
+
+    @Shadow
+    protected abstract DefaultedList<ItemStack> getInvStackList();
 
     @Inject(method = "checkLootInteraction", at = @At(value = "INVOKE", target = "Lnet/minecraft/loot/LootTable;supplyInventory(Lnet/minecraft/inventory/Inventory;Lnet/minecraft/loot/context/LootContext;)V", shift = At.Shift.AFTER))
     private void onCheckLootInteraction(PlayerEntity player, CallbackInfo ci) {
-        RandoAssistant.lootTableMap.addChestLootTable(id,  getInvStackList());
+        RandoAssistant.lootTableMap.addChestLootTable(id, getInvStackList());
     }
 
     @Inject(method = "checkLootInteraction", at = @At("HEAD"))

@@ -40,7 +40,7 @@ public class LootTableScreen extends LightweightGuiDescription {
 
             @Override
             public void paint(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
-                if(Config.getInstance().debug) {
+                if (Config.getInstance().debug) {
                     MinecraftClient.getInstance().currentScreen.renderOrderedTooltip(matrices, MinecraftClient.getInstance().textRenderer.wrapLines(Text.of("Mouse: " + mouseX + ", " + mouseY), 200), mouseX, mouseY);
                 }
                 super.paint(matrices, x, y, mouseX, mouseY);
@@ -50,7 +50,8 @@ public class LootTableScreen extends LightweightGuiDescription {
         setRootPanel(panel);
         setFullscreen(true);
         panel.setInsets(Insets.NONE);
-        panel.setBackgroundPainter(((matrices, left, top, panel1) -> {}));
+        panel.setBackgroundPainter(((matrices, left, top, panel1) -> {
+        }));
 
         redraw();
     }
@@ -61,7 +62,7 @@ public class LootTableScreen extends LightweightGuiDescription {
 
     public void redrawWithSelectedNode() {
         NodeWidget selected = NodeWidget.getSelectedNode();
-        if(selected == null) return;
+        if (selected == null) return;
 
         executor.draw(selected.getVertex(), () -> drawGraph(executor.getDrawing()), () -> {
             clearPanel();
@@ -103,7 +104,7 @@ public class LootTableScreen extends LightweightGuiDescription {
 
         Window window = MinecraftClient.getInstance().getWindow();
 
-        if(!RandoAssistantClient.hideOtherNodes) {
+        if (!RandoAssistantClient.hideOtherNodes) {
             graphDisplayWidget.centerOnNode(NodeWidget.getSelectedNode());
         } else {
             graphDisplayWidget.resetOffset();
@@ -117,10 +118,10 @@ public class LootTableScreen extends LightweightGuiDescription {
         panel.add(hideOtherNodesWidget, window.getScaledWidth() - 180, window.getScaledHeight() - 70, 140, 20);
         panel.add(showOneLineWidget, window.getScaledWidth() - 180, window.getScaledHeight() - 100, 140, 20);
 
-        if(searchBar.getHost() == null) {
+        if (searchBar.getHost() == null) {
             searchBar.setHost(this);
         }
-        if(showOneLineWidget.getHost() == null) {
+        if (showOneLineWidget.getHost() == null) {
             showOneLineWidget.setHost(this);
         }
     }
