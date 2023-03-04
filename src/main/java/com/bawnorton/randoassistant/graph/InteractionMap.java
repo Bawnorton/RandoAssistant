@@ -104,7 +104,11 @@ public class InteractionMap {
 
     private void addInteraction(Input input, Output output) {
         addInteractionToMap(interactionMap, input, output);
-        input.forEach(in -> output.forEach(out -> quickAccessMap.put(in, out)));
+        input.forEach(in -> output.forEach(out -> {
+            quickAccessMap.put(in, out);
+            knownItems.add(in);
+            knownItems.add(out);
+        }));
         serializedInteractionMap.put(input.serialized(), output.serialized());
         RandoAssistant.lootTableMap.getGraph().addInteraction(input.content(), output.content());
     }

@@ -67,7 +67,6 @@ public class LootTableScreen extends LightweightGuiDescription {
         executor.draw(selected.getVertex(), () -> drawGraph(executor.getDrawing()), () -> {
             clearPanel();
             CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph :(");
-
             CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason: " + (executor.getErrorMessage() == null ? "Unknown" : executor.getErrorMessage()), 20);
             CenteredLabelWidget logLabel = new CenteredLabelWidget("Please send your log file to the developer", 40);
             panel.add(failedLabel, failedLabel.x(), failedLabel.y());
@@ -80,16 +79,24 @@ public class LootTableScreen extends LightweightGuiDescription {
     }
 
     public void redraw() {
-        executor.draw(() -> drawGraph(executor.getDrawing()), () -> {
+        if(RandoAssistant.lootTableMap.getGraph().getVertices().isEmpty()) {
             clearPanel();
-            CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph");
-            CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason: " + executor.getErrorMessage(), 20);
+            CenteredLabelWidget failedLabel = new CenteredLabelWidget("There is nothing to draw");
             panel.add(failedLabel, failedLabel.x(), failedLabel.y());
-            panel.add(reasonLabel, reasonLabel.x(), reasonLabel.y());
-        });
-        clearPanel();
-        CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
-        panel.add(drawingLabel, drawingLabel.x(), drawingLabel.y());
+        } else {
+            executor.draw(() -> drawGraph(executor.getDrawing()), () -> {
+                clearPanel();
+                CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph :(");
+                CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason: " + (executor.getErrorMessage() == null ? "Unknown" : executor.getErrorMessage()), 20);
+                CenteredLabelWidget logLabel = new CenteredLabelWidget("Please send your log file to the developer", 40);
+                panel.add(failedLabel, failedLabel.x(), failedLabel.y());
+                panel.add(reasonLabel, reasonLabel.x(), reasonLabel.y());
+                panel.add(logLabel, logLabel.x(), logLabel.y());
+            });
+            clearPanel();
+            CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
+            panel.add(drawingLabel, drawingLabel.x(), drawingLabel.y());
+        }
     }
 
     private void drawGraph(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
