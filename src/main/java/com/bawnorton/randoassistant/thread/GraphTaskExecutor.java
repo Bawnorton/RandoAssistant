@@ -149,48 +149,49 @@ public class GraphTaskExecutor {
         public DrawTask() {
             enabled = true;
             task = () -> {
-                double levelGap = 40;
-                double nodeGap = 40;
-                double heirarchyGap = 0;
-
-                LayoutAlgorithms algorithm = LayoutAlgorithms.HIERARCHICAL;
-
-                GraphLayoutProperties layoutProperties = new GraphLayoutProperties();
-                layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTER_HIERARCHY_SPACING, heirarchyGap);
-                layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTER_RANK_CELL_SPACING, levelGap);
-                layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTRA_CELL_SPACING, nodeGap);
-
-                Set<LootTableGraph.Vertex> vertexSet;
-                Set<LootTableGraph.Edge> edgeSet;
-
-                if (vertex == null) {
-                    vertexSet = graph.getVertices();
-                    edgeSet = graph.getEdges();
-                } else {
-                    vertexSet = vertex.getVerticesAssociatedWith(true);
-                    edgeSet = vertex.getEdgesAssociatedWithVertices(vertexSet);
-                }
-
-                List<LootTableGraph.Vertex> vertices = Collections.synchronizedList(new ArrayList<>(vertexSet));
-                List<LootTableGraph.Edge> edges = Collections.synchronizedList(new ArrayList<>(edgeSet));
-
-                Layouter<LootTableGraph.Vertex, LootTableGraph.Edge> layouter = new Layouter<>(vertices, edges, algorithm, layoutProperties);
                 try {
+                    double levelGap = 40;
+                    double nodeGap = 40;
+                    double heirarchyGap = 0;
+
+                    LayoutAlgorithms algorithm = LayoutAlgorithms.HIERARCHICAL;
+
+                    GraphLayoutProperties layoutProperties = new GraphLayoutProperties();
+                    layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTER_HIERARCHY_SPACING, heirarchyGap);
+                    layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTER_RANK_CELL_SPACING, levelGap);
+                    layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTRA_CELL_SPACING, nodeGap);
+
+                    Set<LootTableGraph.Vertex> vertexSet;
+                    Set<LootTableGraph.Edge> edgeSet;
+
+                    if (vertex == null) {
+                        vertexSet = graph.getVertices();
+                        edgeSet = graph.getEdges();
+                    } else {
+                        vertexSet = vertex.getVerticesAssociatedWith(true);
+                        edgeSet = vertex.getEdgesAssociatedWithVertices(vertexSet);
+                    }
+
+                    List<LootTableGraph.Vertex> vertices = Collections.synchronizedList(new ArrayList<>(vertexSet));
+                    List<LootTableGraph.Edge> edges = Collections.synchronizedList(new ArrayList<>(edgeSet));
+
+                    Layouter<LootTableGraph.Vertex, LootTableGraph.Edge> layouter = new Layouter<>(vertices, edges, algorithm, layoutProperties);
+
                     drawing = layouter.layout();
                     dirty = false;
+                    // scale down the drawing width so it better fits in the screen
+                    for (LootTableGraph.Edge edge : drawing.getEdgeMappings().keySet()) {
+                        List<Point2D> points = drawing.getEdgeMappings().get(edge);
+                        Point2D source = points.get(0);
+                        Point2D target = points.get(1);
+                        source.setLocation(source.getX() / 10, source.getY());
+                        target.setLocation(target.getX() / 10, target.getY());
+                    }
                 } catch (Exception e) {
-                    RandoAssistant.LOGGER.error("Failed to layout graph");
+                    RandoAssistant.LOGGER.error("Failed to draw graph");
                     error = e.getMessage();
                     markDirty();
                     throw new RuntimeException(e);
-                }
-                // scale down the drawing width so it better fits in the screen
-                for (LootTableGraph.Edge edge : drawing.getEdgeMappings().keySet()) {
-                    List<Point2D> points = drawing.getEdgeMappings().get(edge);
-                    Point2D source = points.get(0);
-                    Point2D target = points.get(1);
-                    source.setLocation(source.getX() / 10, source.getY());
-                    target.setLocation(target.getX() / 10, target.getY());
                 }
             };
         }

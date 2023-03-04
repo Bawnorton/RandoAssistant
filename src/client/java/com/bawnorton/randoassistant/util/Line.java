@@ -41,11 +41,10 @@ public class Line extends LinkedList<Vertex> {
             path.add(node);
 
             if (expectedVisits.containsKey(node)) {
-                expectedVisits.put(node, expectedVisits.get(node) - 1);
-                if (expectedVisits.get(node) == 0) {
-                    expectedVisits.remove(node);
+                if (expectedVisits.get(node) <= 0) {
                     return;
                 }
+                expectedVisits.put(node, expectedVisits.get(node) - 1);
             }
 
             if (node.getImmediateParents().isEmpty()) {
