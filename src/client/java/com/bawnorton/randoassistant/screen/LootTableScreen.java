@@ -3,10 +3,10 @@ package com.bawnorton.randoassistant.screen;
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
-import com.bawnorton.randoassistant.graph.GraphDrawer;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.bawnorton.randoassistant.screen.widget.*;
 import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
+import com.bawnorton.randoassistant.thread.GraphTaskExecutor;
 import grapher.graph.drawing.Drawing;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
@@ -21,14 +21,14 @@ import net.minecraft.text.Text;
 public class LootTableScreen extends LightweightGuiDescription {
     private static LootTableScreen instance;
 
+    private final GraphTaskExecutor executor;
     private final WPlainPanel panel;
-    private final GraphDrawer drawer;
 
     public LootTableScreen() {
         instance = this;
-        LootTableGraph graph = RandoAssistant.lootTableMap.getGraph();
-        drawer = graph.getDrawer();
+
         MinecraftClient.getInstance().getWindow().setScaleFactor(RandoAssistantClient.SCALE.get());
+        executor = RandoAssistant.lootTableMap.getGraph().getExecutor();
 
         panel = new WPlainPanel() {
             @Override
@@ -52,17 +52,7 @@ public class LootTableScreen extends LightweightGuiDescription {
         panel.setInsets(Insets.NONE);
         panel.setBackgroundPainter(((matrices, left, top, panel1) -> {}));
 
-        if(graph.getVertices().isEmpty()) {
-            CenteredLabelWidget noGraphLabel = new CenteredLabelWidget("No graph to draw");
-            CenteredLabelWidget suggestionLabel = new CenteredLabelWidget("Start breaking some blocks", 20);
-            panel.add(noGraphLabel, noGraphLabel.x(), noGraphLabel.y());
-            panel.add(suggestionLabel, suggestionLabel.x(), suggestionLabel.y());
-        } else {
-            CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
-            panel.add(drawingLabel, drawingLabel.x(), drawingLabel.y());
-        }
-
-        updateGraph();
+        redraw();
     }
 
     public static LootTableScreen getInstance() {
@@ -73,19 +63,35 @@ public class LootTableScreen extends LightweightGuiDescription {
         NodeWidget selected = NodeWidget.getSelectedNode();
         if(selected == null) return;
 
-        drawer.updateDrawing(selected.getVertex());
+        executor.draw(selected.getVertex(), () -> {
+            RandoAssistant.LOGGER.info("Successfully drew graph");
+            drawGraph(executor.getDrawing());
+        }, () -> {
+            clearPanel();
+            CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph");
+            CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason: " + executor.getErrorMessage(), 20);
+            panel.add(failedLabel, failedLabel.x(), failedLabel.y());
+            panel.add(reasonLabel, reasonLabel.x(), reasonLabel.y());
+        });
         clearPanel();
         CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
         panel.add(drawingLabel, drawingLabel.x(), drawingLabel.y());
-        updateGraph();
     }
 
     public void redraw() {
-        drawer.updateDrawing();
+        executor.draw(() -> {
+            RandoAssistant.LOGGER.info("Successfully drew graph");
+            drawGraph(executor.getDrawing());
+        }, () -> {
+            clearPanel();
+            CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph");
+            CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason: " + executor.getErrorMessage(), 20);
+            panel.add(failedLabel, failedLabel.x(), failedLabel.y());
+            panel.add(reasonLabel, reasonLabel.x(), reasonLabel.y());
+        });
         clearPanel();
         CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
         panel.add(drawingLabel, drawingLabel.x(), drawingLabel.y());
-        updateGraph();
     }
 
     private void drawGraph(Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing) {
@@ -119,21 +125,6 @@ public class LootTableScreen extends LightweightGuiDescription {
         }
         if(showOneLineWidget.getHost() == null) {
             showOneLineWidget.setHost(this);
-        }
-    }
-
-    public void updateGraph() {
-        Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing = drawer.getDrawing();
-        if (drawing == null) {
-            drawer.afterDrawing(() -> drawGraph(drawer.getDrawing()), () -> {
-                clearPanel();
-                CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph");
-                CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason: " + drawer.getErrorMessage(), 20);
-                panel.add(failedLabel, failedLabel.x(), failedLabel.y());
-                panel.add(reasonLabel, reasonLabel.x(), reasonLabel.y());
-            });
-        } else {
-            drawGraph(drawing);
         }
     }
 

@@ -1,8 +1,8 @@
 package com.bawnorton.randoassistant.mixin;
 
 import com.bawnorton.randoassistant.RandoAssistant;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import com.bawnorton.randoassistant.util.WallBlockLookup;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;

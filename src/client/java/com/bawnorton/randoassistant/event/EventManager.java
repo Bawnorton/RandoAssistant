@@ -35,7 +35,7 @@ public class EventManager {
             try {
                 RandoAssistant.lootTableMap = LootTableMap.fromSerialized(FileManager.GSON.fromJson(Files.newBufferedReader(FileManager.getLootTablePath()), Map.class));
                 RandoAssistant.interactionMap = InteractionMap.fromSerialized(FileManager.GSON.fromJson(Files.newBufferedReader(FileManager.getInteractionPath()), Map.class));
-                RandoAssistant.lootTableMap.getGraph().getDrawer().updateDrawing();
+                RandoAssistant.lootTableMap.getGraph().getExecutor().draw();
             } catch (Exception e) {
                 RandoAssistant.LOGGER.error("Failed to load loot tables from json", e);
             }

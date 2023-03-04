@@ -38,7 +38,7 @@ public class RandoAssistant implements ModInitializer {
     public static void addAllLootTables(PlayerEntity player) {
         LootManager lootManager = currentServer.getLootManager();
         currentServer.execute(() -> {
-            lootTableMap.getGraph().getDrawer().disable();
+            lootTableMap.getGraph().getExecutor().disableDrawTask();
             LootContextType lootContextType = new LootContextType.Builder().allow(LootContextParameters.THIS_ENTITY).allow(LootContextParameters.TOOL).build();
             for (int i = 0; i < 200; i++) { // random drop chances are fun... will probably get all possible drops
                 Registries.BLOCK.forEach(block -> {
@@ -66,8 +66,8 @@ public class RandoAssistant implements ModInitializer {
                     lootTableMap.addLootTable(entityType, stacks);
                 });
             }
-            lootTableMap.getGraph().getDrawer().enable();
-            lootTableMap.getGraph().getDrawer().updateDrawing();
+            lootTableMap.getGraph().getExecutor().enableDrawTask();
+            lootTableMap.getGraph().getExecutor().draw();
             player.sendMessage(Text.of("§b[RandoAssistant]: §aAdded all loot tables!"), false);
         });
     }

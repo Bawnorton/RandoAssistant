@@ -31,8 +31,7 @@ import static com.bawnorton.randoassistant.RandoAssistantClient.SCALE;
 public abstract class InventoryScreenMixin extends AbstractInventoryScreen<PlayerScreenHandler> {
 
     private static final Identifier LOOT_BUTTON_TEXTURE = new Identifier("randoassistant", "textures/gui/loot_button.png");
-    @Shadow
-    @Final
+    @Shadow @Final
     private RecipeBookWidget recipeBook;
     private TexturedButtonWidget lootButton;
 

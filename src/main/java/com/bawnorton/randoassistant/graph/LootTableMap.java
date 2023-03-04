@@ -1,5 +1,7 @@
 package com.bawnorton.randoassistant.graph;
 
+import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.util.WallBlockLookup;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
@@ -28,11 +30,11 @@ public class LootTableMap {
         this.serializedLootTableMap = new HashMap<>();
         this.lootTableGraph = new LootTableGraph();
 
-        lootTableGraph.getDrawer().disable();
+        lootTableGraph.getExecutor().disableDrawTask();
         blockLootTables.forEach(lootTableGraph::addLootTable);
         entityLootTables.forEach(lootTableGraph::addLootTable);
         otherLootTables.forEach(lootTableGraph::addLootTable);
-        lootTableGraph.getDrawer().enable();
+        lootTableGraph.getExecutor().enableDrawTask();
 
         initSerializedLootTable();
     }
@@ -150,6 +152,7 @@ public class LootTableMap {
     }
 
     public void addLootTable(Block block, List<ItemStack> items) {
+        block = WallBlockLookup.getBlock(block);
         items = filterAirAndDuplicates(items);
         List<Item> lootTable;
         boolean changed;
@@ -229,6 +232,18 @@ public class LootTableMap {
 
     public boolean isKnownItem(Item item) {
         return knownItems.contains(item);
+    }
+
+    public List<Item> getLootTable(Block block) {
+        return blockLootTables.get(block);
+    }
+
+    public List<Item> getLootTable(EntityType<?> entityType) {
+        return entityLootTables.get(entityType);
+    }
+
+    public List<Item> getLootTable(Identifier lootTableId) {
+        return otherLootTables.get(lootTableId);
     }
 
     public Map<String, List<String>> getSerializedLootTableMap() {

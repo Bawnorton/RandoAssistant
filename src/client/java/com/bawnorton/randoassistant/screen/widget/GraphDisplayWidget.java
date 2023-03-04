@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.screen.widget;
 
+import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
@@ -14,6 +15,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.Item;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
@@ -57,6 +59,7 @@ public class GraphDisplayWidget extends WWidget {
         resetPositionWidget = new ResetPositionWidget(40, client.getWindow().getScaledHeight() - 26, this);
 
         if (NodeWidget.getSelectedNode() != null) {
+            centerOnNode(NodeWidget.getSelectedNode());
             Set<Line> lines = Line.builder().addLines(NodeWidget.getSelectedNode().getVertex()).build();
             setCurrentLines(lines);
             ShowOneLineWidget.getInstance().setValue(RandoAssistantClient.showLine);
@@ -208,6 +211,10 @@ public class GraphDisplayWidget extends WWidget {
             }
             boolean isInteraction = dest.isHighlightedAsInteraction() && origin.isHighlightedAsInteraction();
 
+            if(isInteraction) {
+                isInteraction = RandoAssistant.interactionMap.checkInteraction(origin.getItem(), dest.getItem());
+            }
+
             if ((dest.isHighlightedAsParent() || dest.isHighlightedAsTarget()) && origin.isHighlightedAsParent()) {
                 drawLine(matrices, x, y, edge, isInteraction ? -256 : -65536);
             } else if (dest.isHighlightedAsChild() && (origin.isHighlightedAsChild() || origin.isHighlightedAsTarget())) {
@@ -219,6 +226,7 @@ public class GraphDisplayWidget extends WWidget {
     private ArrayList<Tooltip> renderGraphNodes(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
         ArrayList<Tooltip> tooltips = new ArrayList<>();
 
+        NodeWidget closestWidgetToCenter = null;
         for (NodeWidget widget : nodeWidgets) {
             int posX = (int) (x + widget.getX() + xOffset);
             int posY = (int) (y + widget.getY() + yOffset);

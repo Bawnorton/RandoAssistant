@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant.graph;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.config.Config;
+import com.bawnorton.randoassistant.thread.GraphTaskExecutor;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -22,14 +23,15 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
     private final Set<Edge> edges;
     private final Set<Vertex> vertices;
     private final Map<Item, Vertex> itemVertexMap;
-    private final GraphDrawer graphDrawer;
+
+    private final GraphTaskExecutor graphTaskExecutor;
 
     public LootTableGraph() {
         super(Edge.class);
         edges = new HashSet<>();
         vertices = new HashSet<>();
         itemVertexMap = new HashMap<>();
-        graphDrawer = new GraphDrawer(this);
+        graphTaskExecutor = new GraphTaskExecutor(this);
     }
 
     @Override
@@ -84,7 +86,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             addEdge(root, vertex);
             addVertex(vertex);
         }
-        graphDrawer.updateDrawing();
+        graphTaskExecutor.draw();
     }
 
     public void addLootTable(Block block, List<Item> items) {
@@ -94,7 +96,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             addEdge(root, vertex);
             addVertex(vertex);
         }
-        graphDrawer.updateDrawing();
+        graphTaskExecutor.draw();
     }
 
     public void addLootTable(Identifier lootTableId, List<Item> oldLootTable) {
@@ -104,7 +106,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             addEdge(root, vertex);
             addVertex(vertex);
         }
-        graphDrawer.updateDrawing();
+        graphTaskExecutor.draw();
     }
 
     public void addInteraction(Set<Item> input, Set<Item> output) {
@@ -116,7 +118,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
                 addVertex(vertex);
             }
         }
-        graphDrawer.updateDrawing();
+        graphTaskExecutor.draw();
     }
 
     private Set<Vertex> getParents(Vertex vertex, Set<Vertex> visited, Set<Vertex> parents, int depth, int maxDepth) {
@@ -200,12 +202,12 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         return vertices;
     }
 
-    public GraphDrawer getDrawer() {
-        return graphDrawer;
-    }
-
     public Vertex getVertex(Item item) {
         return itemVertexMap.get(item);
+    }
+
+    public GraphTaskExecutor getExecutor() {
+        return graphTaskExecutor;
     }
 
     public static class Edge extends DefaultEdge implements grapher.graph.elements.Edge<Vertex> {
@@ -238,107 +240,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         }
     }
 
-    private static class LootTableType {
-        private final Block block;
-        private final Item item;
-        private final EntityType<?> entityType;
-        private final Identifier lootTableId;
-        private final boolean isBlock;
-        private final boolean isItem;
-        private final boolean isEntity;
-        private final boolean isLootTable;
-
-        public LootTableType(Block block, Item item, EntityType<?> entityType, Identifier lootTableId) {
-            if (block == null && item != null) {
-                block = Block.getBlockFromItem(item);
-                if (block.asItem() == Items.AIR) block = null;
-            } else if (block != null && item == null) {
-                item = block.asItem();
-                if (item == Items.AIR) item = null;
-            }
-
-            this.isBlock = block != null;
-            this.isItem = item != null;
-            this.isEntity = entityType != null;
-            this.isLootTable = lootTableId != null;
-
-            this.block = block;
-            this.item = item;
-            this.entityType = entityType;
-            this.lootTableId = lootTableId;
-        }
-
-        public LootTableType(Block block) {
-            this(block, null, null, null);
-        }
-
-        public LootTableType(Item item) {
-            this(null, item, null, null);
-        }
-
-        public LootTableType(EntityType<?> entityType) {
-            this(null, null, entityType, null);
-        }
-
-        public LootTableType(Identifier lootTableId) {
-            this(null, null, null, lootTableId);
-        }
-
-        public Block getBlock() {
-            if (!isBlock) return null;
-            return block;
-        }
-
-        public Item getItem() {
-            if (!isItem) return null;
-            return item;
-        }
-
-        public EntityType<?> getEntityType() {
-            if (!isEntity) return null;
-            return entityType;
-        }
-
-        public Identifier getLootTableId() {
-            if (!isLootTable) return null;
-            return lootTableId;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof LootTableType other) {
-                if (isBlock) {
-                    return other.isBlock && block.equals(other.block);
-                } else if (isItem) {
-                    return other.isItem && item.equals(other.item);
-                } else if (isEntity) {
-                    return other.isEntity && entityType.equals(other.entityType);
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            if (isBlock) {
-                return Registries.BLOCK.getId(block).toString().hashCode();
-            } else if (isItem) {
-                return Registries.ITEM.getId(item).toString().hashCode();
-            } else if (isEntity) {
-                return Registries.ENTITY_TYPE.getId(entityType).toString().hashCode();
-            }
-            return 0;
-        }
-
-        @Override
-        public String toString() {
-            return "LootTableType{" + (isBlock ? "block=" + block : isItem ? "item=" + item : isEntity ? "entityType=" + entityType : null) + '}';
-        }
-    }
-
     public class Vertex implements grapher.graph.elements.Vertex {
-        private static final Set<Vertex> highlighted = new HashSet<>();
-
         private final LootTableType type;
         private boolean highlightAsParent = false;
         private boolean highlightAsChild = false;
@@ -395,6 +297,10 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         public Identifier getLootTableId() {
             if (type.isLootTable) return type.getLootTableId();
             return null;
+        }
+
+        public LootTableType.Category getType() {
+            return type.category;
         }
 
         @Override
@@ -489,7 +395,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
         public void highlightAsParent() {
             highlightAsParent = true;
-            highlighted.add(this);
+            graphTaskExecutor.highlight(this);
         }
 
         public void unhighlightAsParent() {
@@ -502,7 +408,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
         public void highlightAsChild() {
             highlightAsChild = true;
-            highlighted.add(this);
+            graphTaskExecutor.highlight(this);
         }
 
         public void unhighlightAsChild() {
@@ -515,7 +421,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
         public void highlightAsTarget() {
             highlightAsTarget = true;
-            highlighted.add(this);
+            graphTaskExecutor.highlight(this);
         }
 
         public void unhighlightAsTarget() {
@@ -528,7 +434,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
 
         public void highlightAsInteraction() {
             highlightAsInteraction = true;
-            highlighted.add(this);
+            graphTaskExecutor.highlight(this);
         }
 
         public void unhighlightAsInteraction() {
@@ -540,49 +446,139 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         }
 
         public void highlightParents() {
-            getParents().forEach(Vertex::highlightAsParent);
-            highlighted.forEach(node -> RandoAssistant.interactionMap.getMap().forEach((entry) -> {
-                entry.getKey().forEach(item -> {
-                    Vertex vertex = LootTableGraph.this.getVertex(item);
-                    if (vertex != null && (vertex.isHighlightedAsParent() || vertex.isHighlightedAsTarget())) {
-                        vertex.highlightAsInteraction();
-                    }
-                });
-                entry.getValue().forEach(item -> {
-                    Vertex vertex = LootTableGraph.this.getVertex(item);
-                    if (vertex != null && (vertex.isHighlightedAsParent() || vertex.isHighlightedAsTarget())) {
-                        vertex.highlightAsInteraction();
-                    }
-                });
-            }));
+            graphTaskExecutor.highlightParents(this);
         }
 
         public void highlightChildren() {
-            getChildren().forEach(Vertex::highlightAsChild);
-            highlighted.forEach(node -> RandoAssistant.interactionMap.getMap().forEach((entry) -> {
-                entry.getKey().forEach(item -> {
-                    Vertex vertex = LootTableGraph.this.getVertex(item);
-                    if (vertex != null && (vertex.isHighlightedAsChild() || vertex.isHighlightedAsTarget())) {
-                        vertex.highlightAsInteraction();
-                    }
-                });
-                entry.getValue().forEach(item -> {
-                    Vertex vertex = LootTableGraph.this.getVertex(item);
-                    if (vertex != null && (vertex.isHighlightedAsChild() || vertex.isHighlightedAsTarget())) {
-                        vertex.highlightAsInteraction();
-                    }
-                });
-            }));
+            graphTaskExecutor.highlightChildren(this);
         }
 
         public void unhighlightConnected() {
-            highlighted.forEach(vertex -> {
-                vertex.unhighlightAsParent();
-                vertex.unhighlightAsChild();
-                vertex.unhighlightAsTarget();
-                vertex.unhighlightAsInteraction();
-            });
-            highlighted.clear();
+            graphTaskExecutor.unhighlightConnected();
+        }
+    }
+
+    public static class LootTableType {
+        private final Block block;
+        private final Item item;
+        private final EntityType<?> entityType;
+        private final Identifier lootTableId;
+
+        private final boolean isBlock;
+        private final boolean isItem;
+        private final boolean isEntity;
+        private final boolean isLootTable;
+
+        private final Category category;
+
+        public LootTableType(Block block, Item item, EntityType<?> entityType, Identifier lootTableId) {
+            if (block == null && item != null) {
+                block = Block.getBlockFromItem(item);
+                if (block.asItem() == Items.AIR) block = null;
+            } else if (block != null && item == null) {
+                item = block.asItem();
+                if (item == Items.AIR) item = null;
+            }
+
+            this.isBlock = block != null;
+            this.isItem = item != null;
+            this.isEntity = entityType != null;
+            this.isLootTable = lootTableId != null;
+
+            this.block = block;
+            this.item = item;
+            this.entityType = entityType;
+            this.lootTableId = lootTableId;
+
+            if (isBlock) {
+                category = Category.BLOCK;
+            } else if (isItem) {
+                category = Category.ITEM;
+            } else if (isEntity) {
+                category = Category.ENTITY;
+            } else if (isLootTable) {
+                category = Category.LOOT_TABLE;
+            } else {
+                throw new IllegalArgumentException("Invalid LootTableType");
+            }
+        }
+
+        public LootTableType(Block block) {
+            this(block, null, null, null);
+        }
+
+        public LootTableType(Item item) {
+            this(null, item, null, null);
+        }
+
+        public LootTableType(EntityType<?> entityType) {
+            this(null, null, entityType, null);
+        }
+
+        public LootTableType(Identifier lootTableId) {
+            this(null, null, null, lootTableId);
+        }
+
+        public Block getBlock() {
+            if (!isBlock) return null;
+            return block;
+        }
+
+        public Item getItem() {
+            if (!isItem) return null;
+            return item;
+        }
+
+        public EntityType<?> getEntityType() {
+            if (!isEntity) return null;
+            return entityType;
+        }
+
+        public Identifier getLootTableId() {
+            if (!isLootTable) return null;
+            return lootTableId;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof LootTableType other) {
+                if (isBlock) {
+                    return other.isBlock && block.equals(other.block);
+                } else if (isItem) {
+                    return other.isItem && item.equals(other.item);
+                } else if (isEntity) {
+                    return other.isEntity && entityType.equals(other.entityType);
+                } else if (isLootTable) {
+                    return other.isLootTable && lootTableId.equals(other.lootTableId);
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            if (isBlock) {
+                return Registries.BLOCK.getId(block).toString().hashCode();
+            } else if (isItem) {
+                return Registries.ITEM.getId(item).toString().hashCode();
+            } else if (isEntity) {
+                return Registries.ENTITY_TYPE.getId(entityType).toString().hashCode();
+            } else if (isLootTable) {
+                return lootTableId.toString().hashCode();
+            }
+            return 0;
+        }
+
+        @Override
+        public String toString() {
+            return "LootTableType{" + (isBlock ? "block=" + block : isItem ? "item=" + item : isEntity ? "entityType=" + entityType : null) + '}';
+        }
+
+        public enum Category {
+            BLOCK,
+            ITEM,
+            ENTITY,
+            LOOT_TABLE
         }
     }
 }
