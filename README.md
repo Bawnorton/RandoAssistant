@@ -2,6 +2,8 @@
 
 This is a mod that provides a hierarchical drop tracking graph for Minecraft with random drops.
 
+[![Time Spent](https://wakatime.com/badge/user/d3cfc009-c727-4c07-bf46-94032e69d457/project/87bd5b80-7bb8-45de-a574-cc6f38f8fff3.svg)](https://wakatime.com/badge/user/d3cfc009-c727-4c07-bf46-94032e69d457/project/87bd5b80-7bb8-45de-a574-cc6f38f8fff3)
+
 ### <span style="color:#CC1010">PLEASE READ</span>
 #### This mod is quite techincal and still in development, please read the entire description before using it.
 

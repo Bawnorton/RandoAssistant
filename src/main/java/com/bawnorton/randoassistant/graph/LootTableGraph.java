@@ -86,6 +86,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             addEdge(root, vertex);
             addVertex(vertex);
         }
+        graphTaskExecutor.markDrawTaskDirty();
         graphTaskExecutor.draw();
     }
 
@@ -96,6 +97,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             addEdge(root, vertex);
             addVertex(vertex);
         }
+        graphTaskExecutor.markDrawTaskDirty();
         graphTaskExecutor.draw();
     }
 
@@ -106,6 +108,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             addEdge(root, vertex);
             addVertex(vertex);
         }
+        graphTaskExecutor.markDrawTaskDirty();
         graphTaskExecutor.draw();
     }
 
@@ -118,6 +121,7 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
                 addVertex(vertex);
             }
         }
+        graphTaskExecutor.markDrawTaskDirty();
         graphTaskExecutor.draw();
     }
 

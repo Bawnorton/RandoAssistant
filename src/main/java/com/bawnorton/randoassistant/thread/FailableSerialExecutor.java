@@ -27,7 +27,6 @@ public class FailableSerialExecutor implements Executor {
 
     protected synchronized void scheduleNext() {
         if ((active = tasks.poll()) != null) {
-            RandoAssistant.LOGGER.info("Executing task");
             executor.execute(active);
         }
     }
@@ -57,6 +56,8 @@ public class FailableSerialExecutor implements Executor {
                     })
                     .exceptionally((e) -> {
                         onFailure.run();
+                        RandoAssistant.LOGGER.error("Failed to execute task", e);
+                        scheduleNext();
                         return null;
                     });
         }

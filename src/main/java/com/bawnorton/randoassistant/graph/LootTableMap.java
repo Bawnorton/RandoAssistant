@@ -234,18 +234,6 @@ public class LootTableMap {
         return knownItems.contains(item);
     }
 
-    public List<Item> getLootTable(Block block) {
-        return blockLootTables.get(block);
-    }
-
-    public List<Item> getLootTable(EntityType<?> entityType) {
-        return entityLootTables.get(entityType);
-    }
-
-    public List<Item> getLootTable(Identifier lootTableId) {
-        return otherLootTables.get(lootTableId);
-    }
-
     public Map<String, List<String>> getSerializedLootTableMap() {
         return serializedLootTableMap;
     }

@@ -63,15 +63,15 @@ public class LootTableScreen extends LightweightGuiDescription {
         NodeWidget selected = NodeWidget.getSelectedNode();
         if(selected == null) return;
 
-        executor.draw(selected.getVertex(), () -> {
-            RandoAssistant.LOGGER.info("Successfully drew graph");
-            drawGraph(executor.getDrawing());
-        }, () -> {
+        executor.draw(selected.getVertex(), () -> drawGraph(executor.getDrawing()), () -> {
             clearPanel();
-            CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph");
-            CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason: " + executor.getErrorMessage(), 20);
+            CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph :(");
+
+            CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason: " + (executor.getErrorMessage() == null ? "Unknown" : executor.getErrorMessage()), 20);
+            CenteredLabelWidget logLabel = new CenteredLabelWidget("Please send your log file to the developer", 40);
             panel.add(failedLabel, failedLabel.x(), failedLabel.y());
             panel.add(reasonLabel, reasonLabel.x(), reasonLabel.y());
+            panel.add(logLabel, logLabel.x(), logLabel.y());
         });
         clearPanel();
         CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
@@ -79,10 +79,7 @@ public class LootTableScreen extends LightweightGuiDescription {
     }
 
     public void redraw() {
-        executor.draw(() -> {
-            RandoAssistant.LOGGER.info("Successfully drew graph");
-            drawGraph(executor.getDrawing());
-        }, () -> {
+        executor.draw(() -> drawGraph(executor.getDrawing()), () -> {
             clearPanel();
             CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph");
             CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason: " + executor.getErrorMessage(), 20);
@@ -102,7 +99,7 @@ public class LootTableScreen extends LightweightGuiDescription {
         SearchTypeWidget searchTypeWidget = new SearchTypeWidget();
         ShowOneLineWidget showOneLineWidget = new ShowOneLineWidget();
         showOneLineWidget.setMaxValue(graphDisplayWidget.getLineCount() - 1);
-        showOneLineWidget.setValue(-1, true);
+        showOneLineWidget.setValue(RandoAssistantClient.showLine, true);
 
         Window window = MinecraftClient.getInstance().getWindow();
 

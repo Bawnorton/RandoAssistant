@@ -62,7 +62,6 @@ public class GraphDisplayWidget extends WWidget {
             centerOnNode(NodeWidget.getSelectedNode());
             Set<Line> lines = Line.builder().addLines(NodeWidget.getSelectedNode().getVertex()).build();
             setCurrentLines(lines);
-            ShowOneLineWidget.getInstance().setValue(RandoAssistantClient.showLine);
         }
     }
 

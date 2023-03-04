@@ -4,7 +4,7 @@ import grapher.graph.drawing.Drawing;
 import grapher.graph.elements.Edge;
 import grapher.graph.elements.Graph;
 import grapher.graph.elements.Vertex;
-import grapher.graph.exception.CannotBeAppliedException;
+import grapher.graph.elements.exception.CannotBeAppliedException;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -54,7 +54,6 @@ public class SearchManager<T extends Searchable> {
 
     public Optional<T> getBestMatch(String query) {
         String adjustedQuery = filter(query);
-        RandoAssistant.LOGGER.info("Searching for " + adjustedQuery);
         if(adjustedQuery == null) return Optional.empty();
         if(searchType == Config.SearchType.EXACT) {
             return Optional.ofNullable(linearSearch(adjustedQuery));

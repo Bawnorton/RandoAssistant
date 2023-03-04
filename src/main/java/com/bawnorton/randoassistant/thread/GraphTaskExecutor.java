@@ -63,6 +63,10 @@ public class GraphTaskExecutor {
         drawTask.enable();
     }
 
+    public void markDrawTaskDirty() {
+        drawTask.markDirty();
+    }
+
     public Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> getDrawing() {
         return drawTask.getDrawing();
     }
@@ -140,11 +144,11 @@ public class GraphTaskExecutor {
         private Drawing<LootTableGraph.Vertex, LootTableGraph.Edge> drawing;
         private String error;
         private boolean enabled;
+        private boolean dirty;
 
         public DrawTask() {
             enabled = true;
             task = () -> {
-                RandoAssistant.LOGGER.info("Drawing graph");
                 double levelGap = 40;
                 double nodeGap = 40;
                 double heirarchyGap = 0;
@@ -173,9 +177,11 @@ public class GraphTaskExecutor {
                 Layouter<LootTableGraph.Vertex, LootTableGraph.Edge> layouter = new Layouter<>(vertices, edges, algorithm, layoutProperties);
                 try {
                     drawing = layouter.layout();
+                    dirty = false;
                 } catch (Exception e) {
-                    RandoAssistant.LOGGER.error("Failed to layout graph", e);
+                    RandoAssistant.LOGGER.error("Failed to layout graph");
                     error = e.getMessage();
+                    markDirty();
                     throw new RuntimeException(e);
                 }
                 // scale down the drawing width so it better fits in the screen
@@ -197,10 +203,22 @@ public class GraphTaskExecutor {
             enabled = false;
         }
 
+        public void markDirty() {
+            dirty = true;
+        }
+
+        public boolean isDirty() {
+            return dirty;
+        }
+
         public void start(LootTableGraph.Vertex vertex, Runnable successTask, Runnable failTask) {
             if(!enabled) return;
             this.vertex = vertex;
-            failableExecutor.execute(task, successTask, failTask);
+            if(isDirty()) {
+                failableExecutor.execute(task, successTask, failTask);
+            } else {
+                failableExecutor.execute(() -> {}, successTask, failTask);
+            }
         }
 
         public void start(Runnable successTask, Runnable failTask) {

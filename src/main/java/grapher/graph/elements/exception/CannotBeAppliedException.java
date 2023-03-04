@@ -1,4 +1,4 @@
-package grapher.graph.exception;
+package grapher.graph.elements.exception;
 
 import java.io.Serial;
 
