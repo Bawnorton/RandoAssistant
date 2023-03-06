@@ -207,7 +207,7 @@ public class GraphDisplayWidget extends WWidget {
             boolean isInteraction = dest.isHighlightedAsInteraction() && origin.isHighlightedAsInteraction();
 
             if (isInteraction) {
-                isInteraction = RandoAssistant.interactionMap.checkInteraction(origin.getItem(), dest.getItem());
+                isInteraction = RandoAssistantClient.interactionMap.checkInteraction(origin.getItem(), dest.getItem());
             }
 
             if ((dest.isHighlightedAsParent() || dest.isHighlightedAsTarget()) && origin.isHighlightedAsParent()) {
@@ -221,7 +221,6 @@ public class GraphDisplayWidget extends WWidget {
     private ArrayList<Tooltip> renderGraphNodes(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
         ArrayList<Tooltip> tooltips = new ArrayList<>();
 
-        NodeWidget closestWidgetToCenter = null;
         for (NodeWidget widget : nodeWidgets) {
             int posX = (int) (x + widget.getX() + xOffset);
             int posY = (int) (y + widget.getY() + yOffset);

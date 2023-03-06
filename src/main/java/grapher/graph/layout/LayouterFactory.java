@@ -5,7 +5,7 @@ import grapher.graph.elements.Vertex;
 import grapher.graph.layout.organic.JGraphHierarchicalLayouter;
 
 /**
- * Factory class used to create an instance of the layouter class
+ * Factory class used to create an instance ofItems the layouter class
  *
  * @param <V> The vertex type
  * @param <E> The edge type

@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.screen;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
@@ -28,7 +27,7 @@ public class LootTableScreen extends LightweightGuiDescription {
         instance = this;
 
         MinecraftClient.getInstance().getWindow().setScaleFactor(RandoAssistantClient.SCALE.get());
-        executor = RandoAssistant.lootTableMap.getGraph().getExecutor();
+        executor = RandoAssistantClient.lootTableMap.getGraph().getExecutor();
 
         panel = new WPlainPanel() {
             @Override
@@ -79,7 +78,7 @@ public class LootTableScreen extends LightweightGuiDescription {
     }
 
     public void redraw() {
-        if(RandoAssistant.lootTableMap.getGraph().getVertices().isEmpty()) {
+        if(RandoAssistantClient.lootTableMap.getGraph().getVertices().isEmpty()) {
             clearPanel();
             CenteredLabelWidget failedLabel = new CenteredLabelWidget("There is nothing to draw");
             panel.add(failedLabel, failedLabel.x(), failedLabel.y());

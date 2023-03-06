@@ -3,6 +3,8 @@ package com.bawnorton.randoassistant;
 import com.bawnorton.randoassistant.config.ConfigManager;
 import com.bawnorton.randoassistant.event.EventManager;
 import com.bawnorton.randoassistant.file.FileManager;
+import com.bawnorton.randoassistant.graph.InteractionMap;
+import com.bawnorton.randoassistant.graph.LootTableMap;
 import com.bawnorton.randoassistant.keybind.KeybindManager;
 import com.bawnorton.randoassistant.networking.client.Networking;
 import com.bawnorton.randoassistant.util.Easing;
@@ -22,6 +24,9 @@ public class RandoAssistantClient implements ClientModInitializer {
     public static boolean hideOtherNodes = false;
     public static boolean hideChildren = false;
     public static int showLine = -1;
+
+    public static LootTableMap lootTableMap;
+    public static InteractionMap interactionMap;
 
     @Override
     public void onInitializeClient() {

@@ -1,11 +1,11 @@
 package com.bawnorton.randoassistant.graph;
 
+import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import com.bawnorton.randoassistant.util.WallBlockLookup;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
@@ -99,9 +99,8 @@ public class LootTableMap {
         }
     }
 
-    private void processLootTable(List<ItemStack> in, List<Item> out) {
-        for (ItemStack itemStack : in) {
-            Item item = itemStack.getItem();
+    private void processLootTable(List<Item> in, List<Item> out) {
+        for (Item item : in) {
             boolean found = false;
             for (Item oldItemStack : out) {
                 if (oldItemStack == item) {
@@ -110,14 +109,13 @@ public class LootTableMap {
                 }
             }
             if (!found) {
-                out.add(itemStack.getItem());
+                out.add(item);
             }
         }
     }
 
-    private boolean lootTableChanged(List<ItemStack> in, List<Item> out) {
-        for (ItemStack itemStack : in) {
-            Item item = itemStack.getItem();
+    private boolean lootTableChanged(List<Item> in, List<Item> out) {
+        for (Item item : in) {
             boolean found = false;
             for (Item oldItemStack : out) {
                 if (oldItemStack == item) {
@@ -132,25 +130,25 @@ public class LootTableMap {
         return false;
     }
 
-    private List<ItemStack> filterAirAndDuplicates(List<ItemStack> lootTable) {
-        List<ItemStack> filteredLootTable = new ArrayList<>();
-        for (ItemStack itemStack : lootTable) {
-            if (itemStack.getItem() == Blocks.AIR.asItem()) continue;
+    private List<Item> filterAirAndDuplicates(List<Item> lootTable) {
+        List<Item> filteredLootTable = new ArrayList<>();
+        for (Item item : lootTable) {
+            if (item == Blocks.AIR.asItem()) continue;
             boolean found = false;
-            for (ItemStack filteredItemStack : filteredLootTable) {
-                if (filteredItemStack.getItem() == itemStack.getItem()) {
+            for (Item filteredItemStack : filteredLootTable) {
+                if (filteredItemStack == item) {
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                filteredLootTable.add(itemStack);
+                filteredLootTable.add(item);
             }
         }
         return filteredLootTable;
     }
 
-    public void addLootTable(Block block, List<ItemStack> items) {
+    private void addLootTable(Block block, List<Item> items) {
         block = WallBlockLookup.getBlock(block);
         items = filterAirAndDuplicates(items);
         List<Item> lootTable;
@@ -160,10 +158,7 @@ public class LootTableMap {
             changed = lootTableChanged(items, lootTable);
             processLootTable(items, lootTable);
         } else {
-            lootTable = new ArrayList<>();
-            for (ItemStack itemStack : items) {
-                lootTable.add(itemStack.getItem());
-            }
+            lootTable = items;
             changed = true;
         }
         if (changed) {
@@ -177,7 +172,7 @@ public class LootTableMap {
         }
     }
 
-    public void addLootTable(EntityType<?> entityType, List<ItemStack> items) {
+    private void addLootTable(EntityType<?> entityType, List<Item> items) {
         items = filterAirAndDuplicates(items);
         List<Item> lootTable;
         boolean changed;
@@ -186,10 +181,7 @@ public class LootTableMap {
             changed = lootTableChanged(items, lootTable);
             processLootTable(items, lootTable);
         } else {
-            lootTable = new ArrayList<>();
-            for (ItemStack itemStack : items) {
-                lootTable.add(itemStack.getItem());
-            }
+            lootTable = items;
             changed = true;
         }
         if (changed) {
@@ -203,7 +195,7 @@ public class LootTableMap {
         }
     }
 
-    public void addChestLootTable(Identifier lootTableId, List<ItemStack> items) {
+    private void addChestLootTable(Identifier lootTableId, List<Item> items) {
         items = filterAirAndDuplicates(items);
         List<Item> lootTable;
         boolean changed;
@@ -212,10 +204,7 @@ public class LootTableMap {
             changed = lootTableChanged(items, lootTable);
             processLootTable(items, lootTable);
         } else {
-            lootTable = new ArrayList<>();
-            for (ItemStack itemStack : items) {
-                lootTable.add(itemStack.getItem());
-            }
+            lootTable = items;
             changed = true;
         }
         if (changed) {
@@ -226,6 +215,16 @@ public class LootTableMap {
             for (Item item : otherLootTables.get(lootTableId)) {
                 serializedLootTableMap.get(lootTableId.toString()).add(Registries.ITEM.getId(item).toString());
             }
+        }
+    }
+
+    public void addLootTable(SerializeableLootTable lootTable) {
+        if (lootTable.isBlock()) {
+            addLootTable(lootTable.getBlock(), lootTable.getItems());
+        } else if (lootTable.isEntity()) {
+            addLootTable(lootTable.getEntity(), lootTable.getItems());
+        } else if (lootTable.isOther()) {
+            addChestLootTable(lootTable.getIdentifier(), lootTable.getItems());
         }
     }
 

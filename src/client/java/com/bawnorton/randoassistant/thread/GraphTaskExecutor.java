@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.thread;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
 import grapher.graph.drawing.Drawing;
 import grapher.graph.layout.GraphLayoutProperties;
@@ -44,11 +45,15 @@ public class GraphTaskExecutor {
     }
 
     public void draw() {
-        drawTask.start();
+        drawTask.start(null, () -> {}, () -> {});
+    }
+
+    public void draw(Runnable onSuccess) {
+        drawTask.start(null, onSuccess, () -> {});
     }
 
     public void draw(Runnable onSuccess, Runnable onFailure) {
-        drawTask.start(onSuccess, onFailure);
+        drawTask.start(null, onSuccess, onFailure);
     }
 
     public void draw(LootTableGraph.Vertex vertex, Runnable onSuccess, Runnable onFailure) {
@@ -116,7 +121,7 @@ public class GraphTaskExecutor {
         }
 
         private void highlightInteractables() {
-            highlighted.forEach(node -> RandoAssistant.interactionMap.getMap().forEach((entry) -> {
+            highlighted.forEach(node -> RandoAssistantClient.interactionMap.getMap().forEach((entry) -> {
                 entry.getKey().forEach(item -> {
                     LootTableGraph.Vertex interactionVertex = graph.getVertex(item);
                     if (interactionVertex == null) return;
@@ -221,20 +226,6 @@ public class GraphTaskExecutor {
                 failableExecutor.execute(() -> {
                 }, successTask, failTask);
             }
-        }
-
-        public void start(Runnable successTask, Runnable failTask) {
-            start(null, successTask, failTask);
-        }
-
-        public void start(Runnable successTask) {
-            start(successTask, () -> {
-            });
-        }
-
-        public void start() {
-            start(() -> {
-            });
         }
 
         @Nullable

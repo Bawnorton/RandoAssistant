@@ -27,11 +27,11 @@ public abstract class AbstractJGraphXLayouter<V extends Vertex, E extends Edge<V
 
 
     /**
-     * Maps vertices of the supplied graph to vertices of the JGraphX graph
+     * Maps vertices ofItems the supplied graph to vertices ofItems the JGraphX graph
      */
     protected final Map<V, Object> verticesMap = new HashMap<>();
     /**
-     * Maps edges of the supplied graph to edges of the JGraphX graph
+     * Maps edges ofItems the supplied graph to edges ofItems the JGraphX graph
      */
     protected final Map<E, Object> edgesMap = new HashMap<>();
     /**
@@ -83,10 +83,10 @@ public abstract class AbstractJGraphXLayouter<V extends Vertex, E extends Edge<V
     }
 
     /**
-     * Executes the layout algorithm and creates the drawing of the graph
-     * (mappings of its vertices and edges to their positions)
+     * Executes the layout algorithm and creates the drawing ofItems the graph
+     * (mappings ofItems its vertices and edges to their positions)
      *
-     * @return Drawing of the graph
+     * @return Drawing ofItems the graph
      */
     protected Drawing<V, E> createDrawing() {
 

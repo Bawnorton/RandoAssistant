@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Layouter accepts lists of veritces and edges which might in fact form more than one graph
+ * Layouter accepts lists ofItems veritces and edges which might in fact form more than one graph
  * It then forms the graphs which can later be layouted using the desired method
  *
  * @param <V> The vertex type
@@ -21,15 +21,15 @@ public class Layouter<V extends Vertex, E extends Edge<V>> {
 
 
     /**
-     * Factory used to create an instance of the appropriate algorithm
+     * Factory used to create an instance ofItems the appropriate algorithm
      */
     private final LayouterFactory<V, E> layouterFactory;
     /**
-     * Edges of the graph (diagram) that is to be laid out
+     * Edges ofItems the graph (diagram) that is to be laid out
      */
     private List<E> edges;
     /**
-     * Vertices of the graph (diagram) that is to be laid out
+     * Vertices ofItems the graph (diagram) that is to be laid out
      */
     private List<V> vertices;
     /**
@@ -37,23 +37,23 @@ public class Layouter<V extends Vertex, E extends Edge<V>> {
      */
     private LayoutAlgorithms algorithm;
     /**
-     * Properties of the algorithm that should be set
+     * Properties ofItems the algorithm that should be set
      */
     private GraphLayoutProperties layoutProperties;
 
     /**
-     * Constructs the layouter without populating list of edges and vertices
+     * Constructs the layouter without populating list ofItems edges and vertices
      */
     public Layouter() {
         layouterFactory = new LayouterFactory<>();
     }
 
     /**
-     * Constructs the layouter and sets lists of vertices and edges, as well
+     * Constructs the layouter and sets lists ofItems vertices and edges, as well
      * as the layout algorithm which should be used
      *
-     * @param vertices  A list of vertices
-     * @param edges     A list of edges
+     * @param vertices  A list ofItems vertices
+     * @param edges     A list ofItems edges
      * @param algorithm Layout algorithm
      */
     public Layouter(List<V> vertices, List<E> edges, LayoutAlgorithms algorithm) {
@@ -64,11 +64,11 @@ public class Layouter<V extends Vertex, E extends Edge<V>> {
     }
 
     /**
-     * Constructs the layouter and sets lists of vertices and edges, as well
+     * Constructs the layouter and sets lists ofItems vertices and edges, as well
      * as the layout algorithm which should be used and its properties
      *
-     * @param vertices         A list of vertices
-     * @param edges            A list of edges
+     * @param vertices         A list ofItems vertices
+     * @param edges            A list ofItems edges
      * @param algorithm        Layout algorithm
      * @param layoutProperties Algorithm's proeprties
      */
@@ -93,7 +93,7 @@ public class Layouter<V extends Vertex, E extends Edge<V>> {
     /**
      * Forms one graph for each 1-connected component
      *
-     * @return A list of formed graphs
+     * @return A list ofItems formed graphs
      */
     private List<Graph<V, E>> formGraphs(List<V> vertices, List<E> edges) {
 
@@ -105,7 +105,7 @@ public class Layouter<V extends Vertex, E extends Edge<V>> {
 
         if (algorithm == LayoutAlgorithms.AUTOMATIC) {
             verticesWithEdges = new ArrayList<>();
-            for (E e : edges) { //find vertices that don't belong to any of the graphs
+            for (E e : edges) { //find vertices that don't belong to any ofItems the graphs
                 if (!verticesWithEdges.contains(e.getOrigin()))
                     verticesWithEdges.add(e.getOrigin());
                 if (!verticesWithEdges.contains(e.getDestination()))
@@ -177,9 +177,9 @@ public class Layouter<V extends Vertex, E extends Edge<V>> {
     }
 
     /**
-     * Lays out the graph and returns an instance of the drawing object
+     * Lays out the graph and returns an instance ofItems the drawing object
      *
-     * @return Laid out drawing (mapping of vertices and edges to their calculated positions)
+     * @return Laid out drawing (mapping ofItems vertices and edges to their calculated positions)
      * @throws CannotBeAppliedException If the specified layout algorithm cannot be applied
      */
     public Drawing<V, E> layout() throws CannotBeAppliedException {

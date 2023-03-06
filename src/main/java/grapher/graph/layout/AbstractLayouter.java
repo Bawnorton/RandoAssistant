@@ -16,7 +16,7 @@ public abstract class AbstractLayouter<V extends Vertex, E extends Edge<V>> {
 
     /**
      * Indicates if the given algorithm lays out the whole graph, even if it
-     * consists of more than one 1-connected component
+     * consists ofItems more than one 1-connected component
      */
     protected final boolean oneGraph = true;
     /**
@@ -28,14 +28,14 @@ public abstract class AbstractLayouter<V extends Vertex, E extends Edge<V>> {
      * Lays out the graph, taking into account given properties
      *
      * @param graph            Graph that should be laid out
-     * @param layoutProperties Properties of the layout algorithm
+     * @param layoutProperties Properties ofItems the layout algorithm
      * @return Drawing
      */
     public abstract Drawing<V, E> layout(Graph<V, E> graph, GraphLayoutProperties layoutProperties);
 
     /**
-     * @return Indicator of weather the given algorithm lays out the whole graph, even if it
-     * consists of more than one 1-connected component
+     * @return Indicator ofItems weather the given algorithm lays out the whole graph, even if it
+     * consists ofItems more than one 1-connected component
      */
     public boolean isOneGraph() {
         return oneGraph;

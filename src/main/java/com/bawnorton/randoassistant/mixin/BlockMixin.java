@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant.mixin;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.networking.Networking;
+import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -23,11 +24,10 @@ public abstract class BlockMixin {
 
     @Inject(method = "getDroppedStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)Ljava/util/List;", at = @At("RETURN"))
     private static void getDroppedStacks(BlockState state, ServerWorld world, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemStack stack, CallbackInfoReturnable<List<ItemStack>> cir) {
-        if (entity instanceof PlayerEntity) {
-            RandoAssistant.lootTableMap.addLootTable(state.getBlock(), cir.getReturnValue());
-            if(entity instanceof ServerPlayerEntity serverPlayer) {
-                Networking.sendBrokeBlockPacket(serverPlayer);
-            }
+        if(entity instanceof ServerPlayerEntity serverPlayer) {
+            SerializeableLootTable lootTable = SerializeableLootTable.ofBlock(state.getBlock(), cir.getReturnValue());
+            Networking.sendLootTablePacket(serverPlayer, lootTable);
+            Networking.sendBrokeBlockPacket(serverPlayer);
         }
     }
 }

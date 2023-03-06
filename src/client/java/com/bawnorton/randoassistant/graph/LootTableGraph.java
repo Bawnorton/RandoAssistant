@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// Directed cyclic graph of loot tables
+// Directed cyclic graph ofItems loot tables
 public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, LootTableGraph.Edge> {
     private final Set<Edge> edges;
     private final Set<Vertex> vertices;
