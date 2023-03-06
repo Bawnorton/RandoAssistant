@@ -43,9 +43,15 @@ Open the GUI with the red book in the inventory.
   - This uses Minecraft's GUI scale setting and will reset back when the UI is closed.
     - This is the cleanest way to implement zooming as Minecraft does not play nice with scaling GUI elements any other way, unfortunately, this means that all the buttons will also scale.
 
+
+### Inventory Block Highlighting
+- Blocks that haven't been broken will be indicated by a star
+  - This can be turned off in the config
+
+
 ### Keybinds
 Press `k` to reveal all drops. This will fill the graph with all blocks and entities that have a drop.<br>
-Press `j` to remove all drops from the graph. 
+Press `j` to remove all drops from the graph.
 
 
 ## Dependencies
