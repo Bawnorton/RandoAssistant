@@ -56,7 +56,7 @@ Press `j` to remove all drops from the graph.
 
 ## Dependencies
 - [Minecraft Fabric 1.19.3](https://fabricmc.net/)
-- [Fabric API 0.73.2+1.19.3](https://www.curseforge.com/minecraft/mc-mods/fabric-api)
+- [Fabric API ≥ 0.75.1+1.19.3](https://www.curseforge.com/minecraft/mc-mods/fabric-api)
 
 ## Installation
 - Download the latest release from releases.

@@ -1,9 +1,9 @@
 package grapher.graph.layout;
 
 /**
- * List of all properties for each implemented layout algorithm
+ * List ofItems all properties for each implemented layout algorithm
  * Each enum contains values used for generic implementation
- * of the user interface
+ * ofItems the user interface
  *
  * @author Renata
  */
@@ -11,7 +11,7 @@ public interface PropertyEnums {
 
 
     /**
-     * All configurable properties of the hierarchical layout algorithm
+     * All configurable properties ofItems the hierarchical layout algorithm
      *
      * @author Renata
      */

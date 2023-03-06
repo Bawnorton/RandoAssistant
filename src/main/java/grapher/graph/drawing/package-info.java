@@ -1,5 +1,5 @@
 /**
- * Contains a class which represents results of the execution of layout algorithms.
+ * Contains a class which represents results ofItems the execution ofItems layout algorithms.
  *
  * @author Renata
  */

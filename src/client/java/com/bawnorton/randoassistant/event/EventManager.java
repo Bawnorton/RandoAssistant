@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.event;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.config.ConfigManager;
 import com.bawnorton.randoassistant.file.FileManager;
@@ -25,8 +26,8 @@ public class EventManager {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             ConfigManager.saveConfig();
             try {
-                Files.write(FileManager.getLootTablePath(), FileManager.GSON.toJson(RandoAssistant.lootTableMap.getSerializedLootTableMap()).getBytes());
-                Files.write(FileManager.getInteractionPath(), FileManager.GSON.toJson(RandoAssistant.interactionMap.getSerializedInteractionMap()).getBytes());
+                Files.write(FileManager.getLootTablePath(), FileManager.GSON.toJson(RandoAssistantClient.lootTableMap.getSerializedLootTableMap()).getBytes());
+                Files.write(FileManager.getInteractionPath(), FileManager.GSON.toJson(RandoAssistantClient.interactionMap.getSerializedInteractionMap()).getBytes());
             } catch (Exception e) {
                 RandoAssistant.LOGGER.error("Failed to save loot tables to json", e);
             }
@@ -34,9 +35,9 @@ public class EventManager {
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             try {
-                RandoAssistant.lootTableMap = LootTableMap.fromSerialized(FileManager.GSON.fromJson(Files.newBufferedReader(FileManager.getLootTablePath()), Map.class));
-                RandoAssistant.interactionMap = InteractionMap.fromSerialized(FileManager.GSON.fromJson(Files.newBufferedReader(FileManager.getInteractionPath()), Map.class));
-                RandoAssistant.lootTableMap.getGraph().getExecutor().draw();
+                RandoAssistantClient.lootTableMap = LootTableMap.fromSerialized(FileManager.GSON.fromJson(Files.newBufferedReader(FileManager.getLootTablePath()), Map.class));
+                RandoAssistantClient.interactionMap = InteractionMap.fromSerialized(FileManager.GSON.fromJson(Files.newBufferedReader(FileManager.getInteractionPath()), Map.class));
+                RandoAssistantClient.lootTableMap.getGraph().getExecutor().draw();
 
                 client.getNetworkHandler().sendPacket(new ClientStatusC2SPacket(ClientStatusC2SPacket.Mode.REQUEST_STATS));
             } catch (Exception e) {
@@ -48,6 +49,7 @@ public class EventManager {
             while (KeybindManager.revealKeyBinding.wasPressed()) {
                 MinecraftClient.getInstance().setScreen(new ConfirmScreen((result) -> {
                     if (result) {
+                        RandoAssistantClient.lootTableMap.getGraph().getExecutor().disableDrawTask();
                         RandoAssistant.addAllLootTables(Objects.requireNonNull(client.player));
                     }
                     MinecraftClient.getInstance().setScreen(null);
@@ -56,8 +58,8 @@ public class EventManager {
             while (KeybindManager.resetKeyBinding.wasPressed()) {
                 MinecraftClient.getInstance().setScreen(new ConfirmScreen((result) -> {
                     if (result) {
-                        RandoAssistant.lootTableMap = new LootTableMap();
-                        RandoAssistant.interactionMap = new InteractionMap();
+                        RandoAssistantClient.lootTableMap = new LootTableMap();
+                        RandoAssistantClient.interactionMap = new InteractionMap();
                     }
                     MinecraftClient.getInstance().setScreen(null);
                 }, Text.of("Reset all loot tables?"), Text.of("This will clear all loot tables from the graph.")));

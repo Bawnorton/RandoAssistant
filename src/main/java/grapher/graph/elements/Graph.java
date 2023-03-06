@@ -7,8 +7,8 @@ import java.util.Map;
 
 /**
  * /**
- * A graph consisting of a set of vertices of type <code>V</code>
- * and a set of edges of type <code>E</code>.
+ * A graph consisting ofItems a set ofItems vertices ofItems type <code>V</code>
+ * and a set ofItems edges ofItems type <code>E</code>.
  *
  * @param <V> The vertex type
  * @param <E> The edge type
@@ -21,17 +21,17 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     protected final boolean directed = false;
 
     /**
-     * An adjacent list contains a list of all the edges leaving the vertex
+     * An adjacent list contains a list ofItems all the edges leaving the vertex
      */
     protected final Map<V, List<E>> adjacentLists;
 
     /**
-     * Map of all edges leaving vertices
+     * Map ofItems all edges leaving vertices
      */
     protected final Map<V, List<E>> outgoingEdges;
 
     /**
-     * Map of all edges entering vertices
+     * Map ofItems all edges entering vertices
      */
     protected final Map<V, List<E>> incomingEdges;
 
@@ -41,7 +41,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     protected final Map<Object, V> vertexByContentMap;
 
     /**
-     * Creates a graph by creating empty lists of edges, vertices and other properties
+     * Creates a graph by creating empty lists ofItems edges, vertices and other properties
      * By default, the graph is undirected
      */
     public Graph() {

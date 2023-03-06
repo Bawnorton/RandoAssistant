@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.screen.widget;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.screen.LootTableScreen;
@@ -20,7 +19,7 @@ public class HideOtherNodesWidget extends WButton {
     @Override
     public InputResult onClick(int x, int y, int button) {
         InputResult result = super.onClick(x, y, button);
-        RandoAssistant.lootTableMap.getGraph().getExecutor().markDrawTaskDirty();
+        RandoAssistantClient.lootTableMap.getGraph().getExecutor().markDrawTaskDirty();
         if (RandoAssistantClient.hideOtherNodes) {
             LootTableScreen.getInstance().redraw();
             this.setLabel(Text.of("Hide Other Nodes"));

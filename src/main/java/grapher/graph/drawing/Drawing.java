@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.*;
 
 /**
- * Represents a drawing of a graph.
- * A drawing Γ of a graph G = (V, E) is  a mapping of each vertex v in V to a
- * distinct point Γ(v) and of each edge e = (u, v) in E to a simple open Jordan curve Γ(e),
- * represented here with a list of its nodes' positions,
+ * Represents a drawing ofItems a graph.
+ * A drawing Γ ofItems a graph G = (V, E) is  a mapping ofItems each vertex v in V to a
+ * distinct point Γ(v) and ofItems each edge e = (u, v) in E to a simple open Jordan curve Γ(e),
+ * represented here with a list ofItems its nodes' positions,
  * which has Γ(u) and Γ(v) as its endpoints.
  *
  * @param <V> The vertex type
@@ -26,7 +26,7 @@ public class Drawing<V extends Vertex, E extends Edge<V>> {
      */
     private final Map<V, Point2D> vertexMappings;
     /**
-     * Maps edges to a list of positions of their nodes
+     * Maps edges to a list ofItems positions ofItems their nodes
      */
     private final Map<E, List<Point2D>> edgeMappings;
 
@@ -40,8 +40,8 @@ public class Drawing<V extends Vertex, E extends Edge<V>> {
 
 
     /**
-     * Once positions of vertices are calculated, this method
-     * sets positions of edges (their nodes).
+     * Once positions ofItems vertices are calculated, this method
+     * sets positions ofItems edges (their nodes).
      * Multiple and recursive edges are handled.
      *
      * @param edges Edges to be positioned
@@ -57,7 +57,7 @@ public class Drawing<V extends Vertex, E extends Edge<V>> {
 
             if (e.getDestination() == e.getOrigin()) {
 
-                //position edge nodes near the top edge of the vertex, to the side, and near the bottom
+                //position edge nodes near the top edge ofItems the vertex, to the side, and near the bottom
 
                 int vertexHeight = (int) e.getOrigin().getSize().getHeight();
                 int vertexWidth = (int) e.getOrigin().getSize().getWidth();
@@ -165,9 +165,9 @@ public class Drawing<V extends Vertex, E extends Edge<V>> {
 
 
     /**
-     * Finds the position of the topmost vertex
+     * Finds the position ofItems the topmost vertex
      *
-     * @return Position of the topmost vertex
+     * @return Position ofItems the topmost vertex
      */
     public int findTop() {
         V top = findTopExcluding();
@@ -177,7 +177,7 @@ public class Drawing<V extends Vertex, E extends Edge<V>> {
     /**
      * Finds the highest vertex not counting those in the excluding list
      *
-     * @return Position of the topmost vertex not counting those in the excluding list
+     * @return Position ofItems the topmost vertex not counting those in the excluding list
      */
     private V findTopExcluding() {
         V top = null;
@@ -190,9 +190,9 @@ public class Drawing<V extends Vertex, E extends Edge<V>> {
     }
 
     /**
-     * Finds the position of the left-most vertex
+     * Finds the position ofItems the left-most vertex
      *
-     * @return Position of the left-most vertex
+     * @return Position ofItems the left-most vertex
      */
     public int findLeftmostPosition() {
         V leftmost = findLeftmostExcluding();
@@ -202,7 +202,7 @@ public class Drawing<V extends Vertex, E extends Edge<V>> {
     /**
      * Finds the leftmost vertex not counting those in the excluding list
      *
-     * @return Position of the left-most vertex not counting those in the excluding list
+     * @return Position ofItems the left-most vertex not counting those in the excluding list
      */
     private V findLeftmostExcluding() {
         V leftmost = null;
@@ -214,9 +214,9 @@ public class Drawing<V extends Vertex, E extends Edge<V>> {
     }
 
     /**
-     * Calculates bounds of the drawing
+     * Calculates bounds ofItems the drawing
      *
-     * @return Bounds of the drawing - ret[0] = width, ret[1] = height
+     * @return Bounds ofItems the drawing - ret[0] = width, ret[1] = height
      */
     public int[] getBounds() {
 
@@ -286,7 +286,7 @@ public class Drawing<V extends Vertex, E extends Edge<V>> {
     }
 
     /**
-     * @return Edges-positions of their nodes mapping
+     * @return Edges-positions ofItems their nodes mapping
      */
     public Map<E, List<Point2D>> getEdgeMappings() {
         return edgeMappings;

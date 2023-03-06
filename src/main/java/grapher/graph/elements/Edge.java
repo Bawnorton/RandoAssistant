@@ -2,7 +2,7 @@ package grapher.graph.elements;
 
 
 /**
- * Edge of the graph
+ * Edge ofItems the graph
  *
  * @param <V> The vertex type
  * @author Renata
@@ -10,12 +10,12 @@ package grapher.graph.elements;
 public interface Edge<V extends Vertex> {
 
     /**
-     * @return Origin of the edge
+     * @return Origin ofItems the edge
      */
     V getOrigin();
 
     /**
-     * @return Destination of the edge
+     * @return Destination ofItems the edge
      */
     V getDestination();
 }

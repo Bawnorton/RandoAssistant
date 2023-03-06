@@ -4,34 +4,34 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Class containing a map of layout properties and their values
+ * Class containing a map ofItems layout properties and their values
  * as well as convenience methods for setting and getting values
- * of the properties
+ * ofItems the properties
  *
  * @author Renata
  */
 public class GraphLayoutProperties {
 
     /**
-     * Map of properties and their values
+     * Map ofItems properties and their values
      */
     private final Map<PropertyEnums, Object> propeprtiesMap = new HashMap<>();
 
     /**
-     * Sets a value of a property with the given key
+     * Sets a value ofItems a property with the given key
      *
      * @param key   Property's key
-     * @param value Value of the property
+     * @param value Value ofItems the property
      */
     public void setProperty(PropertyEnums key, Object value) {
         propeprtiesMap.put(key, value);
     }
 
     /**
-     * Return value of the property given its key
+     * Return value ofItems the property given its key
      *
      * @param key Property's key
-     * @return Value of the property
+     * @return Value ofItems the property
      */
     public Object getProperty(PropertyEnums key) {
         return propeprtiesMap.get(key);

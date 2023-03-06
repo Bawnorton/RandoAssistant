@@ -1,9 +1,12 @@
 package com.bawnorton.randoassistant.mixin;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.networking.Networking;
+import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +28,10 @@ public abstract class LootableContainerBlockEntityMixin {
 
     @Inject(method = "checkLootInteraction", at = @At(value = "INVOKE", target = "Lnet/minecraft/loot/LootTable;supplyInventory(Lnet/minecraft/inventory/Inventory;Lnet/minecraft/loot/context/LootContext;)V", shift = At.Shift.AFTER))
     private void onCheckLootInteraction(PlayerEntity player, CallbackInfo ci) {
-        RandoAssistant.lootTableMap.addChestLootTable(id, getInvStackList());
+        if(player instanceof ServerPlayerEntity serverPlayer) {
+            SerializeableLootTable lootTable = SerializeableLootTable.ofOther(id, getInvStackList());
+            Networking.sendLootTablePacket(serverPlayer, lootTable);
+        }
     }
 
     @Inject(method = "checkLootInteraction", at = @At("HEAD"))

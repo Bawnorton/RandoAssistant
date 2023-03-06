@@ -1,12 +1,14 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.networking.Networking;
+import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeUnlocker;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,7 +36,9 @@ public interface RecipeUnlockerMixin {
                     input.add(stack.getItem());
                 }
             });
-            RandoAssistant.interactionMap.addCraftingInteraction(input, output);
+            if(player instanceof ServerPlayerEntity serverPlayer) {
+                Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofCrafting(input, output));
+            }
         }
     }
 }
