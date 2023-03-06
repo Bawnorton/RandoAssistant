@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant.file;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.mixin.ServerWorldAccessor;
+import com.bawnorton.randoassistant.networking.Networking;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
@@ -49,8 +50,8 @@ public class FileManager {
     }
 
     private static String getFileName() {
-        String[] name = new String[]{((ServerWorldAccessor) Objects.requireNonNull(RandoAssistant.currentServer.getWorld(World.OVERWORLD))).getWorldProperties().getLevelName()};
-        RandoAssistant.currentServer.getSaveProperties().getDataConfiguration().dataPacks().getEnabled().forEach((file) -> {
+        String[] name = new String[]{((ServerWorldAccessor) Objects.requireNonNull(Networking.server.getWorld(World.OVERWORLD))).getWorldProperties().getLevelName()};
+        Networking.server.getSaveProperties().getDataConfiguration().dataPacks().getEnabled().forEach((file) -> {
             if (file.contains("random_loot")) {
                 Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
                 Matcher matcher = pattern.matcher(file);

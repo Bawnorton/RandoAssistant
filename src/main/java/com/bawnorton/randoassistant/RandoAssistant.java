@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant;
 
 import com.bawnorton.randoassistant.graph.InteractionMap;
 import com.bawnorton.randoassistant.graph.LootTableMap;
+import com.bawnorton.randoassistant.networking.Networking;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.block.CandleBlock;
 import net.minecraft.block.CandleCakeBlock;
@@ -30,19 +31,18 @@ public class RandoAssistant implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static final Map<CandleCakeBlock, CandleBlock> CANDLE_CAKE_MAP = new HashMap<>();
-    public static MinecraftServer currentServer;
     public static LootTableMap lootTableMap;
     public static InteractionMap interactionMap;
 
     public static void addAllLootTables(PlayerEntity player) {
-        LootManager lootManager = currentServer.getLootManager();
-        currentServer.execute(() -> {
+        LootManager lootManager = Networking.server.getLootManager();
+        Networking.server.execute(() -> {
             lootTableMap.getGraph().getExecutor().disableDrawTask();
             LootContextType lootContextType = new LootContextType.Builder().allow(LootContextParameters.THIS_ENTITY).allow(LootContextParameters.TOOL).build();
             for (int i = 0; i < 200; i++) { // random drop chances are fun... will probably get all possible drops
                 Registries.BLOCK.forEach(block -> {
                     LootTable table = lootManager.getTable(block.getLootTableId());
-                    LootContext.Builder builder = new LootContext.Builder(currentServer.getWorld(World.OVERWORLD));
+                    LootContext.Builder builder = new LootContext.Builder( Networking.server.getWorld(World.OVERWORLD));
                     builder.optionalParameter(LootContextParameters.THIS_ENTITY, player);
                     List<ItemStack> stacks = table.generateLoot(builder.build(lootContextType));
                     lootTableMap.addLootTable(block, stacks);
@@ -54,7 +54,7 @@ public class RandoAssistant implements ModInitializer {
                 });
                 Registries.ENTITY_TYPE.forEach(entityType -> {
                     LootTable table = lootManager.getTable(entityType.getLootTableId());
-                    LootContext.Builder builder = new LootContext.Builder(currentServer.getWorld(World.OVERWORLD));
+                    LootContext.Builder builder = new LootContext.Builder( Networking.server.getWorld(World.OVERWORLD));
                     builder.optionalParameter(LootContextParameters.THIS_ENTITY, player);
                     List<ItemStack> stacks = table.generateLoot(builder.build(lootContextType));
                     lootTableMap.addLootTable(entityType, stacks);

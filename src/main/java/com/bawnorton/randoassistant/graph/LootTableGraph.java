@@ -206,6 +206,26 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         return vertices;
     }
 
+    public Set<Vertex> getLeaves() {
+        Set<Vertex> leaves = new HashSet<>();
+        for (Vertex vertex : vertexSet()) {
+            if (outDegreeOf(vertex) == 0) {
+                leaves.add(vertex);
+            }
+        }
+        return leaves;
+    }
+
+    public Set<Vertex> getBranches() {
+        Set<Vertex> branches = new HashSet<>();
+        for (Vertex vertex : vertexSet()) {
+            if (outDegreeOf(vertex) > 1) {
+                branches.add(vertex);
+            }
+        }
+        return branches;
+    }
+
     public Vertex getVertex(Item item) {
         return itemVertexMap.get(item);
     }

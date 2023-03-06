@@ -3,9 +3,12 @@
   "package": "com.bawnorton.randoassistant.mixin.client",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "InventoryScreenMixin"
+    "InventoryScreenMixin",
+    "HandledScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+  ]
 }

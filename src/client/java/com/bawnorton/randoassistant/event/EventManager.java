@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmScreen;
+import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
 import net.minecraft.text.Text;
 
 import java.nio.file.Files;
@@ -36,6 +37,8 @@ public class EventManager {
                 RandoAssistant.lootTableMap = LootTableMap.fromSerialized(FileManager.GSON.fromJson(Files.newBufferedReader(FileManager.getLootTablePath()), Map.class));
                 RandoAssistant.interactionMap = InteractionMap.fromSerialized(FileManager.GSON.fromJson(Files.newBufferedReader(FileManager.getInteractionPath()), Map.class));
                 RandoAssistant.lootTableMap.getGraph().getExecutor().draw();
+
+                client.getNetworkHandler().sendPacket(new ClientStatusC2SPacket(ClientStatusC2SPacket.Mode.REQUEST_STATS));
             } catch (Exception e) {
                 RandoAssistant.LOGGER.error("Failed to load loot tables from json", e);
             }
@@ -61,7 +64,9 @@ public class EventManager {
             }
             while (KeybindManager.debugKeyBinding.wasPressed()) {
                 Config.getInstance().debug = !Config.getInstance().debug;
-                client.player.sendMessage(Text.of("§b[RandoAssistant]: " + (Config.getInstance().debug ? "§aEnabled Debug Mode" : "§cDisabled Debug Mode")), false);
+                if (client.player != null) {
+                    client.player.sendMessage(Text.of("§b[RandoAssistant]: " + (Config.getInstance().debug ? "§aEnabled Debug Mode" : "§cDisabled Debug Mode")), false);
+                }
             }
         });
     }

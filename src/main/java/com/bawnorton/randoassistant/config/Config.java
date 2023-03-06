@@ -11,6 +11,10 @@ public class Config {
     public Boolean debug;
 
     @Expose
+    @SerializedName("unbroken_block_icon")
+    public Boolean unbrokenBlockIcon;
+
+    @Expose
     @SerializedName("search_type")
     public SearchType searchType;
 

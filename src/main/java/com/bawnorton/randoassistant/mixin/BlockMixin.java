@@ -1,12 +1,14 @@
 package com.bawnorton.randoassistant.mixin;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.networking.Networking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,6 +25,9 @@ public abstract class BlockMixin {
     private static void getDroppedStacks(BlockState state, ServerWorld world, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemStack stack, CallbackInfoReturnable<List<ItemStack>> cir) {
         if (entity instanceof PlayerEntity) {
             RandoAssistant.lootTableMap.addLootTable(state.getBlock(), cir.getReturnValue());
+            if(entity instanceof ServerPlayerEntity serverPlayer) {
+                Networking.sendBrokeBlockPacket(serverPlayer);
+            }
         }
     }
 }
