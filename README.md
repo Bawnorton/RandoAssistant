@@ -51,8 +51,8 @@ Open the GUI with the red book in the inventory.
 
 ### Keybinds
 Press `k` to reveal all drops. This will fill the graph with all blocks and entities that have a drop.<br>
-Press `j` to remove all drops from the graph.
-
+Press `j` to remove all drops from the graph.<br>
+Press `m` to open the in-game config. Requires [YACL](https://www.curseforge.com/minecraft/mc-mods/yacl).
 
 ## Dependencies
 - [Minecraft Fabric 1.19.3](https://fabricmc.net/)
