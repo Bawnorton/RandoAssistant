@@ -1,13 +1,11 @@
 package com.bawnorton.randoassistant.screen.widget;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
 import com.bawnorton.randoassistant.screen.widget.drawable.ResetPositionWidget;
 import com.bawnorton.randoassistant.util.Line;
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.lambdaurora.spruceui.util.ScissorManager;
 import grapher.graph.drawing.Drawing;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
@@ -236,8 +234,6 @@ public class GraphDisplayWidget extends WWidget {
     public void paint(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
         super.paint(matrices, x, y, mouseX, mouseY);
 
-        ScissorManager.pushScaleFactor(client.getWindow().getScaleFactor());
-
         renderLines(matrices, x + initialOffsetX - 6, y + initialOffsetY);
         ArrayList<Tooltip> tooltips = renderGraphNodes(matrices, x + initialOffsetX, y + initialOffsetY, mouseX, mouseY);
         tooltips.add(resetPositionWidget.render(matrices, mouseX, mouseY));
@@ -249,6 +245,5 @@ public class GraphDisplayWidget extends WWidget {
                 break;
             }
         }
-        ScissorManager.popScaleFactor();
     }
 }

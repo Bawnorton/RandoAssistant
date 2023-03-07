@@ -21,8 +21,12 @@ repositories {
         url = "https://server.bbkr.space/artifactory/libs-release"
     }
     maven {
-        name 'Gegy'
-        url 'https://maven.gegy.dev'
+        name = "TerraformersMC"
+        url = "https://maven.terraformersmc.com/"
+    }
+    maven {
+        name = "Xander Maven"
+        url = "https://maven.isxander.dev/releases"
     }
     flatDir {
         dirs 'libs'
@@ -73,7 +77,8 @@ dependencies {
 
     // mod dependencies
     modImplementation include("io.github.cottonmc:LibGui:${project.libgui_version}")
-    modImplementation include("dev.lambdaurora:spruceui:${project.spruceui_version}")
+    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+    modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 
     // mixin dependencies
     include implementation("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")

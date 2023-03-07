@@ -9,7 +9,8 @@
   ],
   "contact": {
     "homepage": "https://bawnorton.com",
-    "sources": "https://github.com/Benjamin-Norton/RandoAssistant"
+    "sources": "https://github.com/Benjamin-Norton/RandoAssistant",
+    "issues": "https://github.com/Benjamin-Norton/RandoAssistant/issues"
   },
   "license": "CC0-1.0",
   "icon": "assets/randoassistant/icon.png",
@@ -26,6 +27,9 @@
     ],
     "preLaunch": [
       "com.bawnorton.randoassistant.RandoAssistantPreLaunch"
+    ],
+    "modmenu": [
+      "com.bawnorton.randoassistant.compat.modmenu.RandoAssistantModMenuApiImpl"
     ]
   },
   "mixins": [
@@ -42,6 +46,14 @@
     "fabric-api": ">=0.68.1"
   },
   "suggests": {
-    "another-mod": "*"
+    "yet-another-config-lib": ">=2.2.0",
+    "modmenu": ">=5.0.0"
+  },
+  "custom" : {
+    "modmenu" : {
+      "links": {
+        "randoassistant.homepage": "https://bawnorton.com"
+      }
+    }
   }
 }

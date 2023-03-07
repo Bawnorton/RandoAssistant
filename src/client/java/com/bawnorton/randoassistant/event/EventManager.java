@@ -2,7 +2,6 @@ package com.bawnorton.randoassistant.event;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
-import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.config.ConfigManager;
 import com.bawnorton.randoassistant.file.FileManager;
 import com.bawnorton.randoassistant.graph.InteractionMap;
@@ -64,10 +63,9 @@ public class EventManager {
                     MinecraftClient.getInstance().setScreen(null);
                 }, Text.of("Reset all loot tables?"), Text.of("This will clear all loot tables from the graph.")));
             }
-            while (KeybindManager.debugKeyBinding.wasPressed()) {
-                Config.getInstance().debug = !Config.getInstance().debug;
+            while (KeybindManager.configScreen.wasPressed()) {
                 if (client.player != null) {
-                    client.player.sendMessage(Text.of("§b[RandoAssistant]: " + (Config.getInstance().debug ? "§aEnabled Debug Mode" : "§cDisabled Debug Mode")), false);
+                    MinecraftClient.getInstance().setScreen(ConfigManager.getConfigScreen());
                 }
             }
         });

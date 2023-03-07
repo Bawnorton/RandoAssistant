@@ -1,5 +1,7 @@
 {
   "key.randoassistant.reveal": "Reveal All Loot Tables",
   "key.randoassistant.reset": "Reset All Loot Tables",
-  "category.randoassistant": "RandoAssistant"
+  "key.randoassistant.config": "Open RandoAssistant Config",
+  "category.randoassistant": "RandoAssistant",
+  "randoassistant.homepage": "My Website"
 }

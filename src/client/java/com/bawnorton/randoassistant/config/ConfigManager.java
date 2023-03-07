@@ -1,12 +1,20 @@
 package com.bawnorton.randoassistant.config;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.compat.yacl.YACLImpl;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ConfirmScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.screen.ScreenTexts;
+import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -46,6 +54,16 @@ public class ConfigManager {
             RandoAssistant.LOGGER.error("Failed to load config", e);
         }
         return config == null ? Config.getInstance() : config;
+    }
+
+    public static Screen getConfigScreen() {
+        if(!FabricLoader.getInstance().isModLoaded("yet-another-config-lib")) return new ConfirmScreen((result) -> {
+            if (result) {
+                Util.getOperatingSystem().open(URI.create("https://www.curseforge.com/minecraft/mc-mods/yacl/files/4260308"));
+            }
+            MinecraftClient.getInstance().setScreen(null);
+        }, Text.of("Yet Another Config Lib not installed!"), Text.of("YACL is required to edit the config in game, would you like to install YACL?"), ScreenTexts.YES, ScreenTexts.NO);
+        return YACLImpl.getScreen();
     }
 
     private static void save() {
