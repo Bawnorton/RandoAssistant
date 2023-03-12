@@ -5,6 +5,10 @@ import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.gson.JsonElement;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
@@ -13,58 +17,71 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class InteractionMap {
-    private final Map<Set<String>, Set<String>> serializedInteractionMap;
+    private static final Codec<Map<String, List<String>>> codec = Codec.unboundedMap(Codec.STRING, Codec.list(Codec.STRING));
+
     private final BiMap<Input, Output> interactionMap;
     private final Set<Item> knownItems;
 
     private InteractionMap(BiMap<Input, Output> interactionMap, Set<Item> knownItems) {
         this.interactionMap = interactionMap;
         this.knownItems = knownItems;
-        this.serializedInteractionMap = new HashMap<>();
 
         LootTableGraph graph = RandoAssistantClient.lootTableMap.getGraph();
         graph.getExecutor().disableDrawTask();
         interactionMap.forEach((input, output) -> RandoAssistantClient.lootTableMap.getGraph().addInteraction(input.content(), output.content()));
         graph.getExecutor().enableDrawTask();
-
-        initSerialized();
     }
 
     public InteractionMap() {
         this(HashBiMap.create(), new HashSet<>());
     }
 
-    public static InteractionMap fromSerialized(Map<String, List<String>> serializedInteractionMap) {
-        BiMap<Input, Output> interactionMap = HashBiMap.create();
-        Set<Item> knownItems = new HashSet<>();
-
-        if (serializedInteractionMap == null) return new InteractionMap();
-        for (Map.Entry<String, List<String>> serializedInteraction : serializedInteractionMap.entrySet()) {
-            List<String> keys = Arrays.asList(serializedInteraction.getKey().replace("[", "").replace("]", "").replaceAll(" +", "").split(","));
-            List<String> values = serializedInteraction.getValue();
-            Input input = Input.fromSerialized(keys);
-            Output output = Output.fromSerialized(values);
-            knownItems.addAll(input.content());
-            knownItems.addAll(output.content());
-            addInteractionToMap(interactionMap, input, output);
+    public JsonElement serialize() {
+        Map<String, List<String>> serializedInteractionMap = new HashMap<>();
+        interactionMap.forEach((input, output) -> {
+            Set<String> serializedInput = input.serialize();
+            Set<String> serializedOutput = output.serialize();
+            serializedInteractionMap.put(String.join(",", serializedInput), new ArrayList<>(serializedOutput));
+        });
+        DataResult<JsonElement> result = codec.encodeStart(JsonOps.INSTANCE, serializedInteractionMap);
+        if(result.error().isPresent()) {
+            RandoAssistant.LOGGER.error(result.error().get().message());
+        } else if(result.result().isPresent()) {
+            return result.result().get();
         }
-
-        return new InteractionMap(interactionMap, knownItems);
+        RandoAssistant.LOGGER.error("Failed to serialize interaction map");
+        RandoAssistant.LOGGER.error("Result: " + result);
+        return null;
     }
 
-    private void initSerialized() {
-        serializedInteractionMap.clear();
-        interactionMap.forEach((input, output) -> serializedInteractionMap.put(input.serialized(), output.serialized()));
+    public static InteractionMap deserialize(JsonElement json) {
+        if(json == null) return new InteractionMap();
+        DataResult<Map<String, List<String>>> result = codec.parse(JsonOps.INSTANCE, json);
+        if(result.error().isPresent()) {
+            RandoAssistant.LOGGER.error(result.error().get().message());
+        } else if(result.result().isPresent()) {
+            Map<String, List<String>> serializedInteractionMap = result.result().get();
+            BiMap<Input, Output> interactionMap = HashBiMap.create();
+            Set<Item> knownItems = new HashSet<>();
+            for (Map.Entry<String, List<String>> serializedInteraction : serializedInteractionMap.entrySet()) {
+                List<String> keys = Arrays.asList(serializedInteraction.getKey().split(","));
+                Input input = Input.deserialize(keys);
+                Output output = Output.deserialize(serializedInteraction.getValue());
+                knownItems.addAll(input.content());
+                knownItems.addAll(output.content());
+                addInteractionToMap(interactionMap, input, output);
+            }
+            return new InteractionMap(interactionMap, knownItems);
+        }
+        RandoAssistant.LOGGER.error("Failed to deserialize interaction map");
+        RandoAssistant.LOGGER.error("Result: " + result);
+        return null;
     }
 
     public Set<Map.Entry<Set<Item>, Set<Item>>> getMap() {
         Set<Map.Entry<Set<Item>, Set<Item>>> map = new HashSet<>();
         interactionMap.forEach((input, output) -> map.add(Map.entry(input.content(), output.content())));
         return map;
-    }
-
-    public Map<Set<String>, Set<String>> getSerializedInteractionMap() {
-        return serializedInteractionMap;
     }
 
     public boolean checkInteraction(Item source, Item target) {
@@ -113,7 +130,6 @@ public class InteractionMap {
             knownItems.addAll(in.content);
             knownItems.addAll(out.content);
         });
-        initSerialized();
         RandoAssistantClient.lootTableMap.getGraph().addInteraction(input.content(), output.content());
     }
 
@@ -146,13 +162,13 @@ public class InteractionMap {
             return new Input(input);
         }
 
-        public static Input fromSerialized(List<String> values) {
+        public static Input deserialize(List<String> values) {
             Set<Item> input = new HashSet<>();
             values.forEach(item -> input.add(Registries.ITEM.get(new Identifier(item))));
             return new Input(input);
         }
 
-        public Set<String> serialized() {
+        public Set<String> serialize() {
             Set<String> serialized = new HashSet<>();
             content.forEach(item -> serialized.add(Registries.ITEM.getId(item).toString()));
             return serialized;
@@ -191,13 +207,13 @@ public class InteractionMap {
             return new Output(Collections.singleton(output));
         }
 
-        public static Output fromSerialized(List<String> serialized) {
+        public static Output deserialize(List<String> serialized) {
             Set<Item> output = new HashSet<>();
             serialized.forEach(item -> output.add(Registries.ITEM.get(new Identifier(item))));
             return new Output(output);
         }
 
-        public Set<String> serialized() {
+        public Set<String> serialize() {
             Set<String> serialized = new HashSet<>();
             content.forEach(item -> serialized.add(Registries.ITEM.getId(item).toString()));
             return serialized;
@@ -225,5 +241,12 @@ public class InteractionMap {
         public Iterator<Item> iterator() {
             return content.iterator();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "InteractionMap{" +
+                "interactionMap=" + interactionMap +
+                "}";
     }
 }

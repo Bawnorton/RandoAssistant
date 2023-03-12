@@ -26,6 +26,7 @@ public class ConfigManager {
         Config config = load();
 
         if (config.debug == null) config.debug = false;
+        if (config.toasts == null) config.toasts = true;
         if (config.unbrokenBlockIcon == null) config.unbrokenBlockIcon = true;
         if (config.searchType == null) config.searchType = Config.SearchType.CONTAINS;
         if (config.childDepth == null) config.childDepth = 100;

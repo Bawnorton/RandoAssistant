@@ -44,7 +44,8 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             edges.add(edge);
             return edge;
         } catch (IllegalArgumentException e) {
-            RandoAssistant.LOGGER.warn("Skipping edge from " + sourceVertex + " to " + targetVertex + " because it is self-looping");
+            if(e.getMessage().contains("loops not allowed")) RandoAssistant.LOGGER.warn("Skipping edge from " + sourceVertex + " to " + targetVertex + " because it is self-looping");
+            else RandoAssistant.LOGGER.error("Failed to add edge from " + sourceVertex + " to " + targetVertex, e);
             return null;
         }
     }
@@ -206,26 +207,6 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
         return vertices;
     }
 
-    public Set<Vertex> getLeaves() {
-        Set<Vertex> leaves = new HashSet<>();
-        for (Vertex vertex : vertexSet()) {
-            if (outDegreeOf(vertex) == 0) {
-                leaves.add(vertex);
-            }
-        }
-        return leaves;
-    }
-
-    public Set<Vertex> getBranches() {
-        Set<Vertex> branches = new HashSet<>();
-        for (Vertex vertex : vertexSet()) {
-            if (outDegreeOf(vertex) > 1) {
-                branches.add(vertex);
-            }
-        }
-        return branches;
-    }
-
     public Vertex getVertex(Item item) {
         return itemVertexMap.get(item);
     }
@@ -243,9 +224,8 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             this.destination = destination;
         }
 
-        public Edge() {
-            this.origin = null;
-            this.destination = null;
+        public Edge() { // this must be here for adding edges to work
+            this(null, null);
         }
 
         @Override

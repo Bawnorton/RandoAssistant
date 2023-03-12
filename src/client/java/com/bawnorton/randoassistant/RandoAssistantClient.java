@@ -8,6 +8,7 @@ import com.bawnorton.randoassistant.graph.LootTableMap;
 import com.bawnorton.randoassistant.keybind.KeybindManager;
 import com.bawnorton.randoassistant.networking.client.Networking;
 import com.bawnorton.randoassistant.util.Easing;
+import com.bawnorton.randoassistant.util.Status;
 import com.bawnorton.randoassistant.util.Wrapper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
@@ -27,6 +28,9 @@ public class RandoAssistantClient implements ClientModInitializer {
 
     public static LootTableMap lootTableMap;
     public static InteractionMap interactionMap;
+
+    public static Status saveStatus = Status.NONE;
+    public static Status dumpStatus = Status.NONE;
 
     @Override
     public void onInitializeClient() {

@@ -15,6 +15,10 @@ public class Config {
     public Boolean unbrokenBlockIcon;
 
     @Expose
+    @SerializedName("toasts")
+    public Boolean toasts;
+
+    @Expose
     @SerializedName("search_type")
     public SearchType searchType;
 

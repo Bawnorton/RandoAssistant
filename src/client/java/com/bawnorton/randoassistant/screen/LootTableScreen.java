@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant.screen;
 
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
+import com.bawnorton.randoassistant.file.FileManager;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.bawnorton.randoassistant.screen.widget.*;
 import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
@@ -65,12 +66,15 @@ public class LootTableScreen extends LightweightGuiDescription {
 
         executor.draw(selected.getVertex(), () -> drawGraph(executor.getDrawing()), () -> {
             clearPanel();
+            FileManager.createFailureZip();
             CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph :(");
             CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason: " + (executor.getErrorMessage() == null ? "Unknown" : executor.getErrorMessage()), 20);
-            CenteredLabelWidget logLabel = new CenteredLabelWidget("Please send your log file to the developer", 40);
+            CenteredLabelWidget logLabel = new CenteredLabelWidget("A report has been created in your .minecraft folder", 40);
+            CenteredLabelWidget logLabel2 = new CenteredLabelWidget("Please send it to the mod author", 60);
             panel.add(failedLabel, failedLabel.x(), failedLabel.y());
             panel.add(reasonLabel, reasonLabel.x(), reasonLabel.y());
             panel.add(logLabel, logLabel.x(), logLabel.y());
+            panel.add(logLabel2, logLabel2.x(), logLabel2.y());
         });
         clearPanel();
         CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");
@@ -85,12 +89,15 @@ public class LootTableScreen extends LightweightGuiDescription {
         } else {
             executor.draw(() -> drawGraph(executor.getDrawing()), () -> {
                 clearPanel();
+                FileManager.createFailureZip();
                 CenteredLabelWidget failedLabel = new CenteredLabelWidget("Failed to draw graph :(");
                 CenteredLabelWidget reasonLabel = new CenteredLabelWidget("Reason: " + (executor.getErrorMessage() == null ? "Unknown" : executor.getErrorMessage()), 20);
-                CenteredLabelWidget logLabel = new CenteredLabelWidget("Please send your log file to the developer", 40);
+                CenteredLabelWidget logLabel = new CenteredLabelWidget("A report has been created in your .minecraft folder", 40);
+                CenteredLabelWidget logLabel2 = new CenteredLabelWidget("Please send it to the mod author", 60);
                 panel.add(failedLabel, failedLabel.x(), failedLabel.y());
                 panel.add(reasonLabel, reasonLabel.x(), reasonLabel.y());
                 panel.add(logLabel, logLabel.x(), logLabel.y());
+                panel.add(logLabel2, logLabel2.x(), logLabel2.y());
             });
             clearPanel();
             CenteredLabelWidget drawingLabel = new CenteredLabelWidget("Drawing graph...");

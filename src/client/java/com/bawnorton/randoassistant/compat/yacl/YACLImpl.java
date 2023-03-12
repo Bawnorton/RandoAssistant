@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.compat.yacl;
 
 import com.bawnorton.randoassistant.config.Config;
+import com.bawnorton.randoassistant.file.FileManager;
 import dev.isxander.yacl.api.ConfigCategory;
 import dev.isxander.yacl.api.Option;
 import dev.isxander.yacl.api.OptionGroup;
@@ -12,6 +13,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
 public class YACLImpl {
+    private static boolean createFile = false;
+
     public static Screen getScreen() {
         return YetAnotherConfigLib.createBuilder()
                 .title(Text.literal("Random Assistant Config"))
@@ -24,6 +27,12 @@ public class YACLImpl {
                                         .name(Text.literal("Display Star Icons"))
                                         .tooltip(Text.literal("Display star icons on unbroken blocks"))
                                         .binding(true, () -> Config.getInstance().unbrokenBlockIcon, (value) -> Config.getInstance().unbrokenBlockIcon = value)
+                                        .controller(TickBoxController::new)
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Enable Toasts"))
+                                        .tooltip(Text.literal("Enable toasts that display the load/save status of the mod (Failure reporting toasts are always enabled)"))
+                                        .binding(true, () -> Config.getInstance().toasts, (value) -> Config.getInstance().toasts = value)
                                         .controller(TickBoxController::new)
                                         .build())
                                 .option(Option.createBuilder(Config.SearchType.class)
@@ -52,6 +61,15 @@ public class YACLImpl {
                                         .tooltip(Text.literal("The maximum depth to search for parent nodes"))
                                         .binding(100, () -> Config.getInstance().parentDepth, (value) -> Config.getInstance().parentDepth = value)
                                         .controller(IntegerFieldController::new)
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Create Report"))
+                                        .tooltip(Text.literal("Create the failure report with the current state of the mod"))
+                                        .binding(false, () -> {
+                                            if(createFile) FileManager.createFailureZip();
+                                            return createFile;
+                                        }, (value) -> createFile = value)
+                                        .controller(TickBoxController::new)
                                         .build())
                                 .collapsed(true)
                                 .build())

@@ -1,7 +1,12 @@
 package com.bawnorton.randoassistant.graph;
 
+import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import com.bawnorton.randoassistant.util.WallBlockLookup;
+import com.google.gson.JsonElement;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
@@ -12,7 +17,8 @@ import net.minecraft.util.Identifier;
 import java.util.*;
 
 public class LootTableMap {
-    private final Map<String, List<String>> serializedLootTableMap;
+    private static final Codec<Map<String, List<String>>> codec = Codec.unboundedMap(Codec.STRING, Codec.list(Codec.STRING));
+
     private final LootTableGraph lootTableGraph;
 
     private final Map<Block, List<Item>> blockLootTables;
@@ -26,7 +32,6 @@ public class LootTableMap {
         this.entityLootTables = entityLootTables;
         this.otherLootTables = otherLootTables;
         this.knownItems = new HashSet<>(knownItems);
-        this.serializedLootTableMap = new HashMap<>();
         this.lootTableGraph = new LootTableGraph();
 
         lootTableGraph.getExecutor().disableDrawTask();
@@ -34,69 +39,81 @@ public class LootTableMap {
         entityLootTables.forEach(lootTableGraph::addLootTable);
         otherLootTables.forEach(lootTableGraph::addLootTable);
         lootTableGraph.getExecutor().enableDrawTask();
-
-        initSerializedLootTable();
     }
 
     public LootTableMap() {
         this(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashSet<>());
     }
 
-    public static LootTableMap fromSerialized(Map<String, List<String>> serializedLootTableMap) {
-        Map<Block, List<Item>> blockLootTables = new HashMap<>();
-        Map<EntityType<?>, List<Item>> entityLootTables = new HashMap<>();
-        Map<Identifier, List<Item>> otherLootTables = new HashMap<>();
-        Set<Item> knownItems = new HashSet<>();
+    public JsonElement serialize() {
+        Map<String, List<String>> serializedLootTableMap = new HashMap<>();
 
-        if (serializedLootTableMap == null) return new LootTableMap();
-        for (Map.Entry<String, List<String>> entry : serializedLootTableMap.entrySet()) {
-            Identifier identifier = new Identifier(entry.getKey());
-            List<Item> lootTable = new ArrayList<>();
-            for (String type : entry.getValue()) {
-                Item item = Registries.ITEM.get(new Identifier(type));
-                lootTable.add(item);
-                knownItems.add(item);
-            }
-
-            if (Registries.BLOCK.containsId(identifier)) {
-                blockLootTables.put(Registries.BLOCK.get(identifier), lootTable);
-            } else if (Registries.ENTITY_TYPE.containsId(identifier)) {
-                entityLootTables.put(Registries.ENTITY_TYPE.get(identifier), lootTable);
-            } else {
-                otherLootTables.put(identifier, lootTable);
+        for (Map.Entry<Block, List<Item>> entry : blockLootTables.entrySet()) {
+            serializedLootTableMap.put(Registries.BLOCK.getId(entry.getKey()).toString(), new ArrayList<>());
+            for (Item item : entry.getValue()) {
+                serializedLootTableMap.get(Registries.BLOCK.getId(entry.getKey()).toString()).add(Registries.ITEM.getId(item).toString());
             }
         }
-        return new LootTableMap(blockLootTables, entityLootTables, otherLootTables, knownItems);
+
+        for (Map.Entry<EntityType<?>, List<Item>> entry : entityLootTables.entrySet()) {
+            serializedLootTableMap.put(Registries.ENTITY_TYPE.getId(entry.getKey()).toString(), new ArrayList<>());
+            for (Item item : entry.getValue()) {
+                serializedLootTableMap.get(Registries.ENTITY_TYPE.getId(entry.getKey()).toString()).add(Registries.ITEM.getId(item).toString());
+            }
+        }
+
+        for (Map.Entry<Identifier, List<Item>> entry : otherLootTables.entrySet()) {
+            serializedLootTableMap.put(entry.getKey().toString(), new ArrayList<>());
+            for (Item item : entry.getValue()) {
+                serializedLootTableMap.get(entry.getKey().toString()).add(Registries.ITEM.getId(item).toString());
+            }
+        }
+
+        DataResult<JsonElement> result = codec.encodeStart(JsonOps.INSTANCE, serializedLootTableMap);
+        if(result.error().isPresent()) {
+            RandoAssistant.LOGGER.error(result.error().get().message());
+        } else if(result.result().isPresent()) {
+            return result.result().get();
+        }
+        RandoAssistant.LOGGER.error("Failed to serialize loot table map");
+        RandoAssistant.LOGGER.error("Result: " + result);
+        return null;
     }
 
-    private void initSerializedLootTable() {
-        for (Map.Entry<Block, List<Item>> entry : blockLootTables.entrySet()) {
-            Block block = entry.getKey();
-            serializedLootTableMap.put(Registries.BLOCK.getId(block).toString(), new ArrayList<>());
+    public static LootTableMap deserialize(JsonElement json) {
+        if(json == null) return new LootTableMap();
+        DataResult<Map<String, List<String>>> result = codec.parse(JsonOps.INSTANCE, json);
+        if(result.error().isPresent()) {
+            RandoAssistant.LOGGER.error(result.error().get().message());
+        } else if(result.result().isPresent()) {
+            Map<String, List<String>> serializedLootTableMap = result.result().get();
+            Map<Block, List<Item>> blockLootTables = new HashMap<>();
+            Map<EntityType<?>, List<Item>> entityLootTables = new HashMap<>();
+            Map<Identifier, List<Item>> otherLootTables = new HashMap<>();
+            Set<Item> knownItems = new HashSet<>();
 
-            List<Item> lootTable = entry.getValue();
-            for (Item loot : lootTable) {
-                serializedLootTableMap.get(Registries.BLOCK.getId(block).toString()).add(Registries.ITEM.getId(loot).toString());
-            }
-        }
-        for (Map.Entry<EntityType<?>, List<Item>> entry : entityLootTables.entrySet()) {
-            EntityType<?> entityType = entry.getKey();
-            serializedLootTableMap.put(Registries.ENTITY_TYPE.getId(entityType).toString(), new ArrayList<>());
+            for (Map.Entry<String, List<String>> entry : serializedLootTableMap.entrySet()) {
+                Identifier identifier = new Identifier(entry.getKey());
+                List<Item> lootTable = new ArrayList<>();
+                for (String type : entry.getValue()) {
+                    Item item = Registries.ITEM.get(new Identifier(type));
+                    lootTable.add(item);
+                    knownItems.add(item);
+                }
 
-            List<Item> lootTable = entry.getValue();
-            for (Item loot : lootTable) {
-                serializedLootTableMap.get(Registries.ENTITY_TYPE.getId(entityType).toString()).add(Registries.ITEM.getId(loot).toString());
+                if (Registries.BLOCK.containsId(identifier)) {
+                    blockLootTables.put(Registries.BLOCK.get(identifier), lootTable);
+                } else if (Registries.ENTITY_TYPE.containsId(identifier)) {
+                    entityLootTables.put(Registries.ENTITY_TYPE.get(identifier), lootTable);
+                } else {
+                    otherLootTables.put(identifier, lootTable);
+                }
             }
+            return new LootTableMap(blockLootTables, entityLootTables, otherLootTables, knownItems);
         }
-        for (Map.Entry<Identifier, List<Item>> entry : otherLootTables.entrySet()) {
-            Identifier identifier = entry.getKey();
-            serializedLootTableMap.put(identifier.toString(), new ArrayList<>());
-
-            List<Item> lootTable = entry.getValue();
-            for (Item loot : lootTable) {
-                serializedLootTableMap.get(identifier.toString()).add(Registries.ITEM.getId(loot).toString());
-            }
-        }
+        RandoAssistant.LOGGER.error("Failed to deserialize loot table map");
+        RandoAssistant.LOGGER.error("Result: " + result);
+        return null;
     }
 
     private void processLootTable(List<Item> in, List<Item> out) {
@@ -165,10 +182,6 @@ public class LootTableMap {
             blockLootTables.put(block, lootTable);
             knownItems.addAll(lootTable);
             lootTableGraph.addLootTable(block, lootTable);
-            serializedLootTableMap.put(Registries.BLOCK.getId(block).toString(), new ArrayList<>());
-            for (Item item : blockLootTables.get(block)) {
-                serializedLootTableMap.get(Registries.BLOCK.getId(block).toString()).add(Registries.ITEM.getId(item).toString());
-            }
         }
     }
 
@@ -188,10 +201,6 @@ public class LootTableMap {
             entityLootTables.put(entityType, lootTable);
             knownItems.addAll(lootTable);
             lootTableGraph.addLootTable(entityType, lootTable);
-            serializedLootTableMap.put(Registries.ENTITY_TYPE.getId(entityType).toString(), new ArrayList<>());
-            for (Item item : entityLootTables.get(entityType)) {
-                serializedLootTableMap.get(Registries.ENTITY_TYPE.getId(entityType).toString()).add(Registries.ITEM.getId(item).toString());
-            }
         }
     }
 
@@ -211,10 +220,6 @@ public class LootTableMap {
             otherLootTables.put(lootTableId, lootTable);
             knownItems.addAll(lootTable);
             lootTableGraph.addLootTable(lootTableId, lootTable);
-            serializedLootTableMap.put(lootTableId.toString(), new ArrayList<>());
-            for (Item item : otherLootTables.get(lootTableId)) {
-                serializedLootTableMap.get(lootTableId.toString()).add(Registries.ITEM.getId(item).toString());
-            }
         }
     }
 
@@ -232,11 +237,16 @@ public class LootTableMap {
         return knownItems.contains(item);
     }
 
-    public Map<String, List<String>> getSerializedLootTableMap() {
-        return serializedLootTableMap;
-    }
-
     public LootTableGraph getGraph() {
         return lootTableGraph;
+    }
+
+    @Override
+    public String toString() {
+        return "LootTableMap{" +
+                "blockLootTables=" + blockLootTables +
+                ", entityLootTables=" + entityLootTables +
+                ", otherLootTables=" + otherLootTables +
+                '}';
     }
 }
