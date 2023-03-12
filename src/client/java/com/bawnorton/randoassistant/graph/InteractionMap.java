@@ -9,8 +9,11 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.toast.SystemToast;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,6 +67,14 @@ public class InteractionMap {
             BiMap<Input, Output> interactionMap = HashBiMap.create();
             Set<Item> knownItems = new HashSet<>();
             for (Map.Entry<String, List<String>> serializedInteraction : serializedInteractionMap.entrySet()) {
+                if(serializedInteraction.getKey().contains("[") || serializedInteraction.getKey().contains("]")) {
+                    MinecraftClient.getInstance().getToastManager().add(new SystemToast(
+                            SystemToast.Type.UNSECURE_SERVER_WARNING,
+                            Text.of("§c[RandoAssistant]"),
+                            Text.of("Refusing to load interactions from old version")
+                    ));
+                    return new InteractionMap();
+                }
                 List<String> keys = Arrays.asList(serializedInteraction.getKey().split(","));
                 Input input = Input.deserialize(keys);
                 Output output = Output.deserialize(serializedInteraction.getValue());
@@ -164,7 +175,13 @@ public class InteractionMap {
 
         public static Input deserialize(List<String> values) {
             Set<Item> input = new HashSet<>();
-            values.forEach(item -> input.add(Registries.ITEM.get(new Identifier(item))));
+            values.forEach(item -> {
+                try {
+                    input.add(Registries.ITEM.get(new Identifier(item)));
+                } catch (Exception e) {
+                    RandoAssistant.LOGGER.error("Failed to deserialize item: " + item);
+                }
+            });
             return new Input(input);
         }
 
@@ -209,7 +226,13 @@ public class InteractionMap {
 
         public static Output deserialize(List<String> serialized) {
             Set<Item> output = new HashSet<>();
-            serialized.forEach(item -> output.add(Registries.ITEM.get(new Identifier(item))));
+            serialized.forEach(item -> {
+                try {
+                    output.add(Registries.ITEM.get(new Identifier(item)));
+                } catch (Exception e) {
+                    RandoAssistant.LOGGER.error("Failed to deserialize item: " + item);
+                }
+            });
             return new Output(output);
         }
 
