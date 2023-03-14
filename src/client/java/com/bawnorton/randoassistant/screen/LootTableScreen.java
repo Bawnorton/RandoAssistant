@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.screen;
 
+import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.file.FileManager;
@@ -9,11 +10,14 @@ import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
 import com.bawnorton.randoassistant.thread.GraphTaskExecutor;
 import grapher.graph.drawing.Drawing;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
+import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -130,6 +134,18 @@ public class LootTableScreen extends LightweightGuiDescription {
         panel.add(hideChildrenWidget, window.getScaledWidth() - 180, window.getScaledHeight() - 40, 140, 20);
         panel.add(hideOtherNodesWidget, window.getScaledWidth() - 180, window.getScaledHeight() - 70, 140, 20);
         panel.add(showOneLineWidget, window.getScaledWidth() - 180, window.getScaledHeight() - 100, 140, 20);
+        panel.add(new WLabel(Text.of("Random Assistant v0.3.1"), 0xAAAAAA){
+            @Override
+            public void paint(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
+                this.x = window.getScaledWidth() - 160;
+                this.y = 20;
+
+                matrices.push();
+                matrices.translate(0, 0, 100);
+                super.paint(matrices, x, y, mouseX, mouseY);
+                matrices.pop();
+            }
+        }, window.getScaledWidth() - 160, 20);
 
         if (searchBar.getHost() == null) {
             searchBar.setHost(this);

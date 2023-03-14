@@ -224,7 +224,9 @@ public class LootTableGraph extends SimpleDirectedGraph<LootTableGraph.Vertex, L
             this.destination = destination;
         }
 
-        public Edge() { // this must be here for adding edges to work
+        // this must be here for adding edges to work
+        @SuppressWarnings("unused")
+        public Edge() {
             this(null, null);
         }
 
