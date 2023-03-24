@@ -252,7 +252,6 @@ public class NodeWidget extends DrawableHelper implements Searchable {
     }
 
     public void select() {
-        if (this == selectedNode) return;
         if (selectedNode != null) {
             deselect();
         }
