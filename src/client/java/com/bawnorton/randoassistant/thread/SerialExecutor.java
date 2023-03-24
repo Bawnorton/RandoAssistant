@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
 public class SerialExecutor implements Executor {
     private final Queue<Runnable> tasks;
@@ -18,6 +19,10 @@ public class SerialExecutor implements Executor {
 
     @Override
     public synchronized void execute(@NotNull Runnable command) {
+        if(tasks.size() >= 5000) {
+            tasks.clear();
+            throw new RejectedExecutionException("Too many tasks queued");
+        }
         tasks.add(() -> {
             try {
                 command.run();

@@ -2,16 +2,21 @@ package com.bawnorton.randoassistant.thread;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
+import com.bawnorton.randoassistant.file.FileManager;
 import com.bawnorton.randoassistant.graph.LootTableGraph;
 import grapher.graph.drawing.Drawing;
 import grapher.graph.layout.GraphLayoutProperties;
 import grapher.graph.layout.LayoutAlgorithms;
 import grapher.graph.layout.Layouter;
 import grapher.graph.layout.PropertyEnums;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.toast.SystemToast;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.geom.Point2D;
 import java.util.*;
+import java.util.concurrent.RejectedExecutionException;
 
 public class GraphTaskExecutor {
     private final LootTableGraph graph;
@@ -99,25 +104,49 @@ public class GraphTaskExecutor {
         }
 
         public void highlight(LootTableGraph.Vertex vertex) {
-            executor.execute(() -> highlighted.add(vertex));
+            try {
+                executor.execute(() -> highlighted.add(vertex));
+            } catch (RejectedExecutionException e) {
+                RandoAssistant.LOGGER.error("Too many nodes to highlight", e);
+            }
         }
 
         public void start(LootTableGraph.Vertex vertex, boolean isParent) {
             this.vertex = vertex;
             this.isParent = isParent;
-            executor.execute(task);
+            try {
+                executor.execute(task);
+            } catch (RejectedExecutionException e) {
+                RandoAssistant.LOGGER.error("Failed to start highligher on vertex: " + vertex, e);
+                FileManager.createFailureZip();
+                MinecraftClient.getInstance().getToastManager().add(new SystemToast(
+                        SystemToast.Type.UNSECURE_SERVER_WARNING,
+                        Text.of("[RandoAssistant]§c failed to highlight vertex"),
+                        Text.of("§cPlease send the zip file in your .minecraft folder to the developer")
+                ));
+            }
         }
 
         public void unhighlightConnected() {
-            executor.execute(() -> {
-                highlighted.forEach(vertex -> {
-                    vertex.unhighlightAsChild();
-                    vertex.unhighlightAsParent();
-                    vertex.unhighlightAsTarget();
-                    vertex.unhighlightAsInteraction();
+            try {
+                executor.execute(() -> {
+                    highlighted.forEach(vertex -> {
+                        vertex.unhighlightAsChild();
+                        vertex.unhighlightAsParent();
+                        vertex.unhighlightAsTarget();
+                        vertex.unhighlightAsInteraction();
+                    });
+                    highlighted.clear();
                 });
-                highlighted.clear();
-            });
+            } catch (RejectedExecutionException e) {
+                RandoAssistant.LOGGER.error("Failed to unhighlight vertices", e);
+                FileManager.createFailureZip();
+                MinecraftClient.getInstance().getToastManager().add(new SystemToast(
+                        SystemToast.Type.UNSECURE_SERVER_WARNING,
+                        Text.of("[RandoAssistant]§c failed to unhighlight vertex"),
+                        Text.of("§cPlease send the zip file in your .minecraft folder to the developer")
+                ));
+            }
         }
 
         private void highlightInteractables() {
@@ -126,7 +155,7 @@ public class GraphTaskExecutor {
                     LootTableGraph.Vertex interactionVertex = graph.getVertex(item);
                     if (interactionVertex == null) return;
                     boolean isHighlightedCorrectly = isParent ? interactionVertex.isHighlightedAsParent() : interactionVertex.isHighlightedAsChild();
-                    if (isHighlightedCorrectly || interactionVertex.isHighlightedAsTarget()) {
+                    if ((isHighlightedCorrectly || interactionVertex.isHighlightedAsTarget()) && !interactionVertex.isHighlightedAsInteraction()) {
                         interactionVertex.highlightAsInteraction();
                     }
                 });
@@ -134,7 +163,7 @@ public class GraphTaskExecutor {
                     LootTableGraph.Vertex interactionVertex = graph.getVertex(item);
                     if (interactionVertex == null) return;
                     boolean isHighlightedCorrectly = isParent ? interactionVertex.isHighlightedAsParent() : interactionVertex.isHighlightedAsChild();
-                    if (isHighlightedCorrectly || interactionVertex.isHighlightedAsTarget()) {
+                    if ((isHighlightedCorrectly || interactionVertex.isHighlightedAsTarget()) && !interactionVertex.isHighlightedAsInteraction()) {
                         interactionVertex.highlightAsInteraction();
                     }
                 });
@@ -220,11 +249,21 @@ public class GraphTaskExecutor {
         public void start(LootTableGraph.Vertex vertex, Runnable successTask, Runnable failTask) {
             if (!enabled) return;
             this.vertex = vertex;
-            if (isDirty()) {
-                failableExecutor.execute(task, successTask, failTask);
-            } else {
-                failableExecutor.execute(() -> {
-                }, successTask, failTask);
+            try {
+                if (isDirty()) {
+                    failableExecutor.execute(task, successTask, failTask);
+                } else {
+                    failableExecutor.execute(() -> {
+                    }, successTask, failTask);
+                }
+            } catch (RejectedExecutionException e) {
+                RandoAssistant.LOGGER.error("Failed to start drawer on vertex: " + vertex, e);
+                FileManager.createFailureZip();
+                MinecraftClient.getInstance().getToastManager().add(new SystemToast(
+                        SystemToast.Type.UNSECURE_SERVER_WARNING,
+                        Text.of("[RandoAssistant]§c failed to draw graph"),
+                        Text.of("§cPlease send the zip file in your .minecraft folder to the developer")
+                ));
             }
         }
 

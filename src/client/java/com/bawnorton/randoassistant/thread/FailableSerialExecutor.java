@@ -7,6 +7,7 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
 public class FailableSerialExecutor implements Executor {
     private final Queue<FailableRunnable> tasks;
@@ -19,6 +20,10 @@ public class FailableSerialExecutor implements Executor {
     }
 
     public synchronized void execute(@NotNull Runnable command, @NotNull Runnable onSuccess, @NotNull Runnable onFailure) {
+        if(tasks.size() >= 5000) {
+            tasks.clear();
+            throw new RejectedExecutionException("Too many tasks queued");
+        }
         tasks.add(new FailableRunnable(command, onSuccess, onFailure));
         if (active == null) {
             scheduleNext();
