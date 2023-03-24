@@ -54,7 +54,7 @@ public class ResetPositionWidget extends DrawableHelper {
         MatrixStack modelStack = RenderSystem.getModelViewStack();
         modelStack.push();
         modelStack.translate(0, 0, 400);
-        MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
+        MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
         modelStack.pop();
         return tooltip;
     }

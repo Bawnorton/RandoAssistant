@@ -40,14 +40,14 @@
     }
   ],
   "depends": {
-    "fabricloader": ">=0.14.11",
-    "minecraft": "~1.19.3",
+    "fabricloader": ">=0.14.18",
+    "minecraft": "~1.19.4",
     "java": ">=17",
-    "fabric-api": ">=0.68.1"
+    "fabric-api": ">=0.76.0"
   },
   "suggests": {
-    "yet-another-config-lib": ">=2.2.0",
-    "modmenu": ">=5.0.0"
+    "yet-another-config-lib": ">=2.3.0",
+    "modmenu": ">=6.1.0"
   },
   "custom" : {
     "modmenu" : {

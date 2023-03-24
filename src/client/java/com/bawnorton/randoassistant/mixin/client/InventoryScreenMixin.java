@@ -78,7 +78,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
         return (button) -> {
             recipeBook.toggleOpen();
             this.x = this.recipeBook.findLeftEdge(this.width, this.backgroundWidth);
-            button.setPos(this.x + 104, this.height / 2 - 22);
+            button.setPosition(this.x + 104, this.height / 2 - 22);
             lootButton.setX(button.getX() + 22);
         };
     }

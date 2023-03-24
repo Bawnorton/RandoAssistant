@@ -8,6 +8,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeUnlocker;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,7 +31,7 @@ public interface RecipeUnlockerMixin {
     default void unlockLastRecipe(PlayerEntity player, CallbackInfo ci) {
         Recipe<?> recipe = getLastRecipe();
         if (recipe != null) {
-            Item output = recipe.getOutput().getItem();
+            Item output = recipe.getOutput(DynamicRegistryManager.of(Registries.REGISTRIES)).getItem();
             List<Ingredient> ingredients = recipe.getIngredients();
             List<Item> input = new ArrayList<>();
             ingredients.forEach(ingredient -> {

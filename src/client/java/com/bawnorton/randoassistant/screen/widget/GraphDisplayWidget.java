@@ -5,16 +5,20 @@ import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
 import com.bawnorton.randoassistant.screen.widget.drawable.ResetPositionWidget;
 import com.bawnorton.randoassistant.util.Line;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import grapher.graph.drawing.Drawing;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.render.*;
+import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.lwjgl.opengl.GL33C;
 
 import java.awt.geom.Point2D;
 import java.util.*;
@@ -134,11 +138,9 @@ public class GraphDisplayWidget extends WWidget {
         Matrix4f matrix = matrices.peek().getPositionMatrix();
 
         RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
-        RenderSystem.defaultBlendFunc();
         RenderSystem.disableCull();
+        ShaderProgram currentShader = RenderSystem.getShader();
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
         bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         int width = y1 > y2 ? -1 : 1;
@@ -156,12 +158,7 @@ public class GraphDisplayWidget extends WWidget {
         }
 
         Tessellator.getInstance().draw();
-        RenderSystem.enableTexture();
-        RenderSystem.disableBlend();
 
-        RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
-        RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
         BufferBuilder arrowBufferBuilder = Tessellator.getInstance().getBuffer();
@@ -174,9 +171,8 @@ public class GraphDisplayWidget extends WWidget {
         arrowBufferBuilder.vertex(matrix, x2 - arrowVector.x * offset, y2 - arrowVector.y * offset, 0).color(colour).next();
 
         Tessellator.getInstance().draw();
-        RenderSystem.enableTexture();
-        RenderSystem.disableBlend();
         RenderSystem.enableCull();
+        RenderSystem.setShader(() -> currentShader);
     }
 
     private void drawLine(MatrixStack matrices, int x, int y, LootTableGraph.Edge edge, int colour) {

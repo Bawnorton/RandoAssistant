@@ -180,38 +180,39 @@ public class NodeWidget extends DrawableHelper implements Searchable {
             }
         }
 
-        this.drawTexture(matrices, x - SIZE / 2 - 5, y - SIZE / 2 - 5, 0, 128 + 26, SIZE, SIZE);
+        drawTexture(matrices, x - SIZE / 2 - 5, y - SIZE / 2 - 5, 0, 128 + 26, SIZE, SIZE);
 
+        RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
         if (vertex.isItem()) {
             ItemStack icon = new ItemStack(vertex.getItem());
-            MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
+            MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
         } else if (vertex.isBlock()) {
             Block block = vertex.getBlock();
             if (block instanceof FlowerPotBlock flowerPotBlock) {
                 ItemStack icon = new ItemStack(flowerPotBlock.getContent().asItem());
                 ItemStack pot = new ItemStack(Items.FLOWER_POT);
-                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
-                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(pot, x - SIZE / 2, y + SIZE / 2);
+                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
+                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, pot, x - SIZE / 2, y + SIZE / 2);
             } else if (block instanceof CandleCakeBlock candleCakeBlock) {
                 ItemStack icon = new ItemStack(Items.CAKE);
                 ItemStack candle = new ItemStack(RandoAssistant.CANDLE_CAKE_MAP.get(candleCakeBlock));
-                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
-                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(candle, x - SIZE / 2, y + SIZE / 2);
+                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
+                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, candle, x - SIZE / 2, y + SIZE / 2);
             } else if (block instanceof AbstractPlantPartBlock abstractPlantBlock) {
                 AbstractPlantStemBlock stemBlock = ((AbstractPlantPartBlockInvoker) abstractPlantBlock).getStem();
                 ItemStack icon = new ItemStack(stemBlock.getDefaultState().getBlock().asItem());
-                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
+                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
             } else if (block instanceof AttachedStemBlock attachedStemBlock) {
                 GourdBlock gourdBlock = ((AttachedStemBlockAccessor) attachedStemBlock).getGourdBlock();
                 ItemStack icon = new ItemStack(gourdBlock.getStem().asItem());
-                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
+                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
             } else if (block instanceof TallSeagrassBlock) {
                 ItemStack icon = new ItemStack(Items.SEAGRASS);
-                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
+                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
             } else {
                 ItemStack icon = new ItemStack(block.asItem());
                 if (icon.getItem() == Items.AIR) icon = new ItemStack(Items.BARRIER);
-                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
+                MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
             }
         } else if (vertex.isEntity()) {
             EntityType<?> entityType = vertex.getEntityType();
@@ -219,7 +220,7 @@ public class NodeWidget extends DrawableHelper implements Searchable {
             drawEntity(x - 5, y + 2, (LivingEntity) Objects.requireNonNull(entityType.create(client.world)));
         } else if (vertex.isLootTable()) {
             ItemStack icon = new ItemStack(Items.CHEST);
-            MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(icon, x - SIZE / 2, y - SIZE / 2);
+            MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
         }
         return tooltip;
     }
