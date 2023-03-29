@@ -9,18 +9,17 @@ assignees: Benjamin-Norton
 
 **Expected Behaviour**
 Summary of what should have happened
-<br>
+
 **Actual Behaviour**
 Summary of what actually happened
-<br>
+
 **Steps to Reproduce**
 - Step 1
 - Step 2
 - ...
-<br>
+
 **What version of the mod are you using**
 This can be found in the name of the jar
-<br>
 
 **Helpful Files**
 Drag and drop these files here to help me figure out what broke.
