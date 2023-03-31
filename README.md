@@ -2,7 +2,9 @@
 
 This is a mod that provides a hierarchical drop-tracking graph for Minecraft with random drops.
 
-[![Time Spent](https://wakatime.com/badge/user/d3cfc009-c727-4c07-bf46-94032e69d457/project/87bd5b80-7bb8-45de-a574-cc6f38f8fff3.svg)](https://wakatime.com/badge/user/d3cfc009-c727-4c07-bf46-94032e69d457/project/87bd5b80-7bb8-45de-a574-cc6f38f8fff3)
+[![Modrinth](https://img.shields.io/modrinth/dt/random-assistant?color=00AF5C&label=downloads&logo=modrinth)](https://modrinth.com/mod/random-assistant)
+[![CurseForge](https://cf.way2muchnoise.eu/full_828527_downloads.svg)](https://curseforge.com/minecraft/mc-mods/random-assistant)
+[![Time Spent](https://wakatime.com/badge/user/d3cfc009-c727-4c07-bf46-94032e69d457/project/87bd5b80-7bb8-45de-a574-cc6f38f8fff3.svg)]()
 
 ### <span style="color:#CC1010">PLEASE READ</span>
 #### This mod is quite technical and still in development, please read the entire description before using it.
