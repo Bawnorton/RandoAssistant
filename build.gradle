@@ -81,8 +81,7 @@ dependencies {
     modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 
     // mixin dependencies
-    include implementation("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
+    include implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${mixin_extras_version}"))
 
     // graphing libraries
     include implementation(fileTree(dir: 'libs', include: '*.jar'))
