@@ -15,7 +15,7 @@ public abstract class BiomeMixin {
     @Inject(method = "getFogColor", at = @At("RETURN"), cancellable = true)
     private void onGetFogColor(CallbackInfoReturnable<Integer> cir) {
         try {
-            if(!Config.getInstance().enableAprilFools) return;
+            if(!Config.getInstance().randomizeColours) return;
             Random random = new Random(cir.getReturnValue() + RandoAssistantClient.seed);
             int r = random.nextInt(256);
             int g = random.nextInt(256);
@@ -27,7 +27,7 @@ public abstract class BiomeMixin {
     @Inject(method = "getSkyColor", at = @At("RETURN"), cancellable = true)
     private void onGetSkyColor(CallbackInfoReturnable<Integer> cir) {
         try {
-            if(!Config.getInstance().enableAprilFools) return;
+            if(!Config.getInstance().randomizeColours) return;
             Random random = new Random(cir.getReturnValue() + RandoAssistantClient.seed);
             int r = random.nextInt(256);
             int g = random.nextInt(256);
@@ -39,7 +39,7 @@ public abstract class BiomeMixin {
     @Inject(method = "getWaterColor", at = @At("RETURN"), cancellable = true)
     private void onGetWaterColor(CallbackInfoReturnable<Integer> cir) {
         try {
-            if(!Config.getInstance().enableAprilFools) return;
+            if(!Config.getInstance().randomizeColours) return;
             Random random = new Random(RandoAssistantClient.seed);
             int r = random.nextInt(256);
             int g = random.nextInt(256);
@@ -51,7 +51,7 @@ public abstract class BiomeMixin {
     @Inject(method = "getWaterFogColor", at = @At("RETURN"), cancellable = true)
     private void onGetWaterFogColor(CallbackInfoReturnable<Integer> cir) {
         try {
-            if(!Config.getInstance().enableAprilFools) return;
+            if(!Config.getInstance().randomizeColours) return;
             Random random = new Random(RandoAssistantClient.seed);
             int r = random.nextInt(256);
             int g = random.nextInt(256);

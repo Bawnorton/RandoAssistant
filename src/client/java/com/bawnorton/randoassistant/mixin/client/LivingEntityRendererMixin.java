@@ -20,7 +20,7 @@ public abstract class LivingEntityRendererMixin {
     @ModifyArgs(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V"))
     private void onRender(Args args) {
         try {
-            if(!Config.getInstance().enableAprilFools) return;
+            if(!Config.getInstance().randomizeColours) return;
             Random random = new Random(MinecraftClient.getInstance().hashCode() + model.hashCode());
             int rgb = random.nextInt(16777216);
             float red = (rgb >> 16) & 0xFF;

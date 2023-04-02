@@ -131,7 +131,7 @@ public class LootTableScreen extends LightweightGuiDescription {
         panel.add(hideChildrenWidget, window.getScaledWidth() - 180, window.getScaledHeight() - 40, 140, 20);
         panel.add(hideOtherNodesWidget, window.getScaledWidth() - 180, window.getScaledHeight() - 70, 140, 20);
         panel.add(showOneLineWidget, window.getScaledWidth() - 180, window.getScaledHeight() - 100, 140, 20);
-        panel.add(new WLabel(Text.of("Random Assistant v0.3.4"), 0xAAAAAA){
+        panel.add(new WLabel(Text.of("Random Assistant v0.3.6"), 0xAAAAAA){
             @Override
             public void paint(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
                 this.x = window.getScaledWidth() - 160;
