@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
 import net.minecraft.text.Text;
@@ -71,6 +72,13 @@ public class EventManager {
                             Text.of("Successfully loaded " + RandoAssistantClient.lootTableMap.getGraph().getVertices().size() + " loot tables")
                     ));
                 }
+
+                if(Config.getInstance().randomizeColours) {
+                    ClientPlayerEntity clientPlayer = client.player;
+                    if(clientPlayer == null) return;
+                    clientPlayer.sendMessage(Text.of("Colour Randomizer is enabled\nPress " + KeybindManager.randomizeColours.getBoundKeyLocalizedText().getString() + " to toggle the colour randomizer"), false);
+                }
+
             } catch (Exception e) {
                 RandoAssistant.LOGGER.error("Failed to load randoassistant data", e);
                 MinecraftClient.getInstance().getToastManager().add(new SystemToast(
@@ -132,6 +140,19 @@ public class EventManager {
             while (KeybindManager.configScreen.wasPressed()) {
                 if (client.player != null) {
                     MinecraftClient.getInstance().setScreen(ConfigManager.getConfigScreen());
+                }
+            }
+            while(KeybindManager.randomizeColours.wasPressed()) {
+                if(client.player != null) {
+                    Config.getInstance().randomizeColours = !Config.getInstance().randomizeColours;
+                    ConfigManager.saveConfig();
+                    if(Config.getInstance().randomizeColours) {
+                        client.player.sendMessage(Text.of("Colours have been randomized"), false);
+                    } else {
+                        client.player.sendMessage(Text.of("Colours have been unrandomized"), false);
+                    }
+                    RandoAssistantClient.seed++;
+                    client.worldRenderer.reload();
                 }
             }
         });

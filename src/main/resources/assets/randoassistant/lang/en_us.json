@@ -2,6 +2,7 @@
   "key.randoassistant.reveal": "Reveal All Loot Tables",
   "key.randoassistant.reset": "Reset All Loot Tables",
   "key.randoassistant.config": "Open RandoAssistant Config",
+  "key.randoassistant.randomizer": "Toggle Colour Randomizer",
   "category.randoassistant": "RandoAssistant",
   "randoassistant.homepage": "My Website"
 }

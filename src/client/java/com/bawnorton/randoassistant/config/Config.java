@@ -30,6 +30,10 @@ public class Config {
     @SerializedName("parent_depth")
     public Integer parentDepth;
 
+    @Expose
+    @SerializedName("randomize_colours")
+    public Boolean randomizeColours;
+
     private Config() {
     }
 

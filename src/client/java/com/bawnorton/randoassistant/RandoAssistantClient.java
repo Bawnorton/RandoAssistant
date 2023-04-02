@@ -12,6 +12,7 @@ import com.bawnorton.randoassistant.util.Status;
 import com.bawnorton.randoassistant.util.Wrapper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
@@ -31,6 +32,7 @@ public class RandoAssistantClient implements ClientModInitializer {
 
     public static Status saveStatus = Status.NONE;
     public static Status dumpStatus = Status.NONE;
+    public static long seed = 0L;
 
     @Override
     public void onInitializeClient() {

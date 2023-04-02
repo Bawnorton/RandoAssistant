@@ -31,6 +31,7 @@ public class ConfigManager {
         if (config.searchType == null) config.searchType = Config.SearchType.CONTAINS;
         if (config.childDepth == null) config.childDepth = 100;
         if (config.parentDepth == null) config.parentDepth = 100;
+        if (config.randomizeColours == null) config.randomizeColours = false;
 
         Config.update(config);
         save();
@@ -58,13 +59,17 @@ public class ConfigManager {
     }
 
     public static Screen getConfigScreen() {
-        if(!FabricLoader.getInstance().isModLoaded("yet-another-config-lib")) return new ConfirmScreen((result) -> {
-            if (result) {
-                Util.getOperatingSystem().open(URI.create("https://www.curseforge.com/minecraft/mc-mods/yacl/files/4260308"));
-            }
-            MinecraftClient.getInstance().setScreen(null);
-        }, Text.of("Yet Another Config Lib not installed!"), Text.of("YACL is required to edit the config in game, would you like to install YACL?"), ScreenTexts.YES, ScreenTexts.NO);
-        return YACLImpl.getScreen();
+        try {
+            if(!FabricLoader.getInstance().isModLoaded("yet-another-config-lib")) return new ConfirmScreen((result) -> {
+                if (result) {
+                    Util.getOperatingSystem().open(URI.create("https://www.curseforge.com/minecraft/mc-mods/yacl/files/4260308"));
+                }
+                MinecraftClient.getInstance().setScreen(null);
+            }, Text.of("Yet Another Config Lib not installed!"), Text.of("YACL is required to edit the config in game, would you like to install YACL?"), ScreenTexts.YES, ScreenTexts.NO);
+            return YACLImpl.getScreen();
+        } catch (RuntimeException e) {
+            return null;
+        }
     }
 
     private static void save() {

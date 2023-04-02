@@ -39,6 +39,7 @@
       "environment": "client"
     }
   ],
+  "accessWidener": "randoassistant.accesswidener",
   "depends": {
     "fabricloader": ">=0.14.18",
     "minecraft": "~1.19.4",
