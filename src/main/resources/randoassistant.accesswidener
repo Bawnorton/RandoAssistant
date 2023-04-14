@@ -1,3 +1,9 @@
 accessWidener   v2  named
 accessible class net/minecraft/client/render/chunk/ChunkBuilder$BuiltChunk$RebuildTask
 accessible class net/minecraft/client/render/chunk/ChunkBuilder$BuiltChunk$RebuildTask$RenderData
+accessible field net/minecraft/entity/ai/goal/FollowOwnerGoal owner Lnet/minecraft/entity/LivingEntity;
+accessible field net/minecraft/entity/ai/goal/FollowOwnerGoal tameable Lnet/minecraft/entity/passive/TameableEntity;
+accessible field net/minecraft/entity/ai/goal/FollowOwnerGoal minDistance F
+accessible field net/minecraft/entity/ai/goal/FollowOwnerGoal leavesAllowed Z
+accessible field net/minecraft/entity/ai/goal/FollowOwnerGoal world Lnet/minecraft/world/WorldView;
+extendable method net/minecraft/entity/ai/goal/FollowOwnerGoal canTeleportTo (Lnet/minecraft/util/math/BlockPos;)Z

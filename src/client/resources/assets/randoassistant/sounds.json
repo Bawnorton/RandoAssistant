@@ -1,0 +1,21 @@
+{
+  "entity.penguin.ambient": {
+    "sounds": [
+      "randoassistant:penguin_ambient1",
+      "randoassistant:penguin_ambient2"
+    ],
+    "subtitle": "randoassistant.subtitles.entity.penguin.ambient"
+  },
+  "entity.penguin.death": {
+    "sounds": [
+      "randoassistant:penguin_death"
+    ],
+    "subtitle": "randoassistant.subtitles.entity.penguin.death"
+  },
+  "entity.penguin.hurt": {
+    "sounds": [
+      "randoassistant:penguin_hurt"
+    ],
+    "subtitle": "randoassistant.subtitles.entity.penguin.hurt"
+  }
+}

@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.networking.client;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.networking.NetworkingConstants;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;

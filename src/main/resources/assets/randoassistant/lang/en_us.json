@@ -4,5 +4,9 @@
   "key.randoassistant.config": "Open RandoAssistant Config",
   "key.randoassistant.randomizer": "Toggle Colour Randomizer",
   "category.randoassistant": "RandoAssistant",
-  "randoassistant.homepage": "My Website"
+  "randoassistant.homepage": "My Website",
+  "entity.randoassistant.penguin": "Penguin",
+  "randoassistant.subtitles.entity.penguin.ambient": "Penguin squawks",
+  "randoassistant.subtitles.entity.penguin.death": "Penguin dies",
+  "randoassistant.subtitles.entity.penguin.hurt": "Penguin hurts"
 }
