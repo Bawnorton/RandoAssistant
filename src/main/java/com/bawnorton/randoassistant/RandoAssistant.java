@@ -100,6 +100,10 @@ public class RandoAssistant implements ModInitializer {
 
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
             if(entity instanceof Penguin penguin) {
+                if(THE_PENGUIN.containsKey(world)) {
+                    Penguin oldPenguin = THE_PENGUIN.get(world);
+                    oldPenguin.remove(Entity.RemovalReason.DISCARDED);
+                }
                 THE_PENGUIN.put(world, penguin);
                 List<ServerPlayerEntity> players = world.getPlayers();
                 if(players.size() == 0) return;
@@ -113,20 +117,14 @@ public class RandoAssistant implements ModInitializer {
                         break;
                     }
                 }
-                if(!isCaptainPlayer && !FabricLoader.getInstance().isDevelopmentEnvironment()) {
+                if(!isCaptainPlayer) {
                     entity.remove(Entity.RemovalReason.DISCARDED);
                     RandoAssistant.LOGGER.warn("Penguins not enabled unless CaptainSparklez is playing!");
                     return;
                 }
 
                 penguin.setCustomName(Text.of("Lil' Donk"));
-                if(captain == null && FabricLoader.getInstance().isDevelopmentEnvironment()) {
-                    if(penguin.getOwner() == null) {
-                        penguin.setOwner(players.get(0));
-                    }
-                } else {
-                    penguin.setOwner(captain);
-                }
+                penguin.setOwner(captain);
             }
         });
 

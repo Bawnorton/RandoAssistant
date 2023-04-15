@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant.command;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.config.ServerConfig;
+import com.bawnorton.randoassistant.config.ServerConfigManager;
 import com.bawnorton.randoassistant.entity.Penguin;
 import com.bawnorton.randoassistant.registry.Registrar;
 import com.mojang.brigadier.CommandDispatcher;
@@ -50,6 +51,7 @@ public class CommandHandler {
                 penguin.remove(Entity.RemovalReason.DISCARDED);
             });
         }
+        ServerConfigManager.saveConfig();
         return 1;
     }
 }
