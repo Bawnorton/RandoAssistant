@@ -57,7 +57,7 @@ Press `j` to remove all drops from the graph.<br>
 Press `m` to open the in-game config. Requires [YACL](https://www.curseforge.com/minecraft/mc-mods/yacl).
 
 ## Dependencies
-- [Minecraft Fabric 1.19.5](https://fabricmc.net/)
+- [Minecraft Fabric 1.19.4](https://fabricmc.net/)
 - [Fabric API ≥ 0.76.0+1.19.4](https://www.curseforge.com/minecraft/mc-mods/fabric-api)
 
 ## Installation
