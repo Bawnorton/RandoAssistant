@@ -26,7 +26,6 @@ public class LootTableMap {
     private final Map<Identifier, List<Item>> otherLootTables;
     private final HashSet<Item> knownItems;
 
-
     private LootTableMap(Map<Block, List<Item>> blockLootTables, Map<EntityType<?>, List<Item>> entityLootTables, Map<Identifier, List<Item>> otherLootTables, Set<Item> knownItems) {
         this.blockLootTables = blockLootTables;
         this.entityLootTables = entityLootTables;

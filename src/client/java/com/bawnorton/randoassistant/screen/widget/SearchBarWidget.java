@@ -8,6 +8,7 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
+import java.util.List;
 import java.util.Optional;
 
 public class SearchBarWidget extends WTextField {
@@ -29,7 +30,12 @@ public class SearchBarWidget extends WTextField {
     }
 
     public void inputChanged(String text) {
-        Optional<NodeWidget> node = searchManager.getBestMatch(text);
+        List<Optional<NodeWidget>> nodes = searchManager.getBestMatch(text);
+        if(nodes.size() == 0) {
+            NodeWidget.deselect();
+            return;
+        }
+        Optional<NodeWidget> node = nodes.get(NextMatchWidget.getInstance().getCount() % nodes.size());
         if (node.isPresent()) {
             node.get().select();
             GraphDisplayWidget.getInstance().centerOnNode(node.get());
@@ -40,7 +46,7 @@ public class SearchBarWidget extends WTextField {
 
     @Override
     public void paint(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
-        width = MinecraftClient.getInstance().getWindow().getScaledWidth() - 220;
+        width = MinecraftClient.getInstance().getWindow().getScaledWidth() - 320;
 
         matrices.push();
         matrices.translate(0, 0, 500);

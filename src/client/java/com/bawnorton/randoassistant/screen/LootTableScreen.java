@@ -111,6 +111,7 @@ public class LootTableScreen extends LightweightGuiDescription {
         SearchBarWidget searchBar = new SearchBarWidget();
         HideOtherNodesWidget hideOtherNodesWidget = new HideOtherNodesWidget();
         HideChildrenWidget hideChildrenWidget = new HideChildrenWidget();
+        NextMatchWidget nextMatchWidget = new NextMatchWidget();
         SearchTypeWidget searchTypeWidget = new SearchTypeWidget();
         ShowOneLineWidget showOneLineWidget = new ShowOneLineWidget();
         showOneLineWidget.setMaxValue(graphDisplayWidget.getLineCount() - 1);
@@ -126,12 +127,13 @@ public class LootTableScreen extends LightweightGuiDescription {
 
         clearPanel();
         panel.add(graphDisplayWidget, 0, 0);
-        panel.add(searchBar, 30, 40, window.getScaledWidth() - 220, 20);
+        panel.add(searchBar, 30, 40, window.getScaledWidth() - 320, 20);
+        panel.add(nextMatchWidget, window.getScaledWidth() - 280, 40, 110, 20);
         panel.add(searchTypeWidget, window.getScaledWidth() - 160, 40, 120, 20);
         panel.add(hideChildrenWidget, window.getScaledWidth() - 180, window.getScaledHeight() - 40, 140, 20);
         panel.add(hideOtherNodesWidget, window.getScaledWidth() - 180, window.getScaledHeight() - 70, 140, 20);
         panel.add(showOneLineWidget, window.getScaledWidth() - 180, window.getScaledHeight() - 100, 140, 20);
-        panel.add(new WLabel(Text.of("Random Assistant v0.4.1"), 0xAAAAAA){
+        panel.add(new WLabel(Text.of("Random Assistant v0.4.2"), 0xAAAAAA){
             @Override
             public void paint(MatrixStack matrices, int x, int y, int mouseX, int mouseY) {
                 this.x = window.getScaledWidth() - 160;

@@ -8,6 +8,9 @@ public class SearchManager<T extends Searchable> {
     private final Map<String, T> searchMap;
     private final List<String> searchList;
     private Config.SearchType searchType;
+    private String cachedQuery = "";
+    private Config.SearchType cachedSearchType = Config.SearchType.CONTAINS;
+    private List<Optional<T>> cachedMatches = List.of(Optional.empty());
 
     public SearchManager(List<T> searchList) {
         this.searchMap = new HashMap<>();
@@ -51,31 +54,40 @@ public class SearchManager<T extends Searchable> {
         return null;
     }
 
-    public Optional<T> getBestMatch(String query) {
+    public List<Optional<T>> getBestMatch(String query) {
+        if (query.equals(cachedQuery) && cachedSearchType.equals(searchType)) return cachedMatches;
+        cachedSearchType = searchType;
+        cachedQuery = query;
         String adjustedQuery = filter(query);
-        if (adjustedQuery == null) return Optional.empty();
+        if (adjustedQuery == null) return List.of(Optional.empty());
         if (searchType == Config.SearchType.EXACT) {
-            return Optional.ofNullable(linearSearch(adjustedQuery));
+            cachedMatches = List.of(Optional.ofNullable(linearSearch(adjustedQuery)));
         } else if (searchType == Config.SearchType.CONTAINS) {
+            List<Optional<T>> matches = new ArrayList<>();
             for (String match : searchList) {
                 if (match.contains(adjustedQuery)) {
-                    return Optional.of(searchMap.get(match));
+                    matches.add(Optional.of(searchMap.get(match)));
                 }
             }
+            cachedMatches = matches;
         } else if (searchType == Config.SearchType.FUZZY) {
             int bestDistance = Integer.MAX_VALUE;
-            T bestMatch = null;
+            List<Optional<T>> matches = new ArrayList<>();
             for (String match : searchList) {
                 int distance = levenshteinDistance(adjustedQuery, match);
-                if (distance == 0) return Optional.of(searchMap.get(match));
                 if (distance < bestDistance) {
                     bestDistance = distance;
-                    bestMatch = searchMap.get(match);
+                    matches.add(Optional.of(searchMap.get(match)));
                 }
             }
-            return Optional.ofNullable(bestMatch);
+            cachedMatches = matches;
         }
-        return Optional.empty();
+        cachedMatches = removeDuplicates(cachedMatches);
+        return cachedMatches;
+    }
+
+    private List<Optional<T>> removeDuplicates(List<Optional<T>> list) {
+        return new ArrayList<>(new HashSet<>(list));
     }
 
     public Config.SearchType getSearchType() {
