@@ -21,6 +21,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.random.Random;
 
 public class RandoAssistantClient implements ClientModInitializer {
     private static final Identifier STAR = new Identifier(RandoAssistant.MOD_ID, "textures/gui/item_stars.png");
@@ -37,7 +38,7 @@ public class RandoAssistantClient implements ClientModInitializer {
 
     public static Status saveStatus = Status.NONE;
     public static Status dumpStatus = Status.NONE;
-    public static long seed = 0L;
+    public static long seed = Random.create().nextLong();
 
     @Override
     public void onInitializeClient() {

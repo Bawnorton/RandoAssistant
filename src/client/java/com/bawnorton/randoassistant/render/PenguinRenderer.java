@@ -23,9 +23,6 @@ public class PenguinRenderer extends MobEntityRenderer<Penguin, PenguinModel> {
 
     @Override
     public Identifier getTexture(Penguin entity) {
-        if (entity.isBaby()) {
-            return new Identifier(RandoAssistant.MOD_ID, "textures/entity/baby_penguin.png");
-        }
         return new Identifier(RandoAssistant.MOD_ID, "textures/entity/penguin.png");
     }
 }

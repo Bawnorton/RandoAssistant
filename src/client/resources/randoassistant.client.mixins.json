@@ -2,7 +2,9 @@
   "required": true,
   "package": "com.bawnorton.randoassistant.mixin.client",
   "compatibilityLevel": "JAVA_17",
+  "plugin": "com.bawnorton.randoassistant.RandoAssistantMixinPlugin",
   "client": [
+    "BiomeMixin",
     "BlockColorsMixin",
     "HandledScreenMixin",
     "InventoryScreenMixin",
@@ -13,6 +15,6 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "BiomeMixin"
+    "LinearColorBlenderMixin"
   ]
 }
