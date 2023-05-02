@@ -21,9 +21,6 @@ public class RandoAssistantMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if(!FabricLoader.getInstance().isModLoaded("sodium")) {
-            return !targetClassName.contains("me.jellysquid.mods.sodium.client");
-        }
         return true;
     }
 

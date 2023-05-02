@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.networking.Networking;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import net.minecraft.block.entity.LootableContainerBlockEntity;

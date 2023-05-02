@@ -7,17 +7,11 @@ import com.bawnorton.randoassistant.graph.InteractionMap;
 import com.bawnorton.randoassistant.graph.LootTableMap;
 import com.bawnorton.randoassistant.keybind.KeybindManager;
 import com.bawnorton.randoassistant.networking.client.Networking;
-import com.bawnorton.randoassistant.registry.Registrar;
-import com.bawnorton.randoassistant.render.PenguinRenderer;
-import com.bawnorton.randoassistant.render.model.PenguinModel;
 import com.bawnorton.randoassistant.util.Easing;
 import com.bawnorton.randoassistant.util.Status;
 import com.bawnorton.randoassistant.util.Wrapper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
@@ -48,9 +42,6 @@ public class RandoAssistantClient implements ClientModInitializer {
         FileManager.init();
         KeybindManager.init();
         EventManager.init();
-
-        EntityModelLayerRegistry.registerModelLayer(PenguinModel.LAYER_LOCATION, PenguinModel::createBodyLayer);
-        EntityRendererRegistry.register(Registrar.PENGUIN, PenguinRenderer::new);
     }
 
     public static void renderStar(MatrixStack matrices, int x, int y) {

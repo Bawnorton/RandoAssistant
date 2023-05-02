@@ -8,12 +8,14 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockRenderView;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Random;
 
+@Pseudo
 @Mixin(LinearColorBlender.class)
 public abstract class LinearColorBlenderMixin {
     @Inject(method = "getBlockColor", at = @At("RETURN"), cancellable = true)
