@@ -27,9 +27,9 @@ public class CenteredLabelWidget extends WLabel implements CenteredWidget {
         MinecraftClient mc = MinecraftClient.getInstance();
         TextRenderer renderer = mc.textRenderer;
         int yOffset = switch (verticalAlignment) {
-            case CENTER -> height / 2 - renderer.fontHeight / 2;
-            case BOTTOM -> height - renderer.fontHeight;
-            case TOP -> 0;
+            case VerticalAlignment.CENTER -> height / 2 - renderer.fontHeight / 2;
+            case VerticalAlignment.BOTTOM -> height - renderer.fontHeight;
+            case VerticalAlignment.TOP -> 0;
         };
 
         ScreenDrawing.drawString(matrices, text.asOrderedText(), horizontalAlignment, x, y + yOffset, this.getWidth(), -1);

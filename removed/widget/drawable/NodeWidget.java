@@ -10,7 +10,7 @@ import com.bawnorton.randoassistant.screen.widget.GraphDisplayWidget;
 import com.bawnorton.randoassistant.screen.widget.ShowOneLineWidget;
 import com.bawnorton.randoassistant.search.Searchable;
 import com.bawnorton.randoassistant.util.Line;
-import com.bawnorton.randoassistant.util.Wrapper;
+import com.bawnorton.randoassistant.util.tuples.Wrapper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.minecraft.block.*;
@@ -24,6 +24,7 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
@@ -180,14 +181,15 @@ public class NodeWidget extends DrawableHelper implements Searchable {
             }
         }
 
-        drawTexture(matrices, x - SIZE / 2 - 5, y - SIZE / 2 - 5, 0, 128 + 26, SIZE, SIZE);
+        DrawableHelper.drawTexture(matrices, x - SIZE / 2 - 5, y - SIZE / 2 - 5, 0, 128 + 26, SIZE, SIZE);
 
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-        if (vertex.isItem()) {
-            ItemStack icon = new ItemStack(vertex.getItem());
+        Object content = vertex.getContent();
+
+        if (content instanceof Item item) {
+            ItemStack icon = new ItemStack(item);
             MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
-        } else if (vertex.isBlock()) {
-            Block block = vertex.getBlock();
+        } else if (content instanceof Block block) {
             if (block instanceof FlowerPotBlock flowerPotBlock) {
                 ItemStack icon = new ItemStack(flowerPotBlock.getContent().asItem());
                 ItemStack pot = new ItemStack(Items.FLOWER_POT);
@@ -214,11 +216,10 @@ public class NodeWidget extends DrawableHelper implements Searchable {
                 if (icon.getItem() == Items.AIR) icon = new ItemStack(Items.BARRIER);
                 MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
             }
-        } else if (vertex.isEntity()) {
-            EntityType<?> entityType = vertex.getEntityType();
+        } else if (content instanceof EntityType<?> entityType) {
             MinecraftClient client = MinecraftClient.getInstance();
             drawEntity(x - 5, y + 2, (LivingEntity) Objects.requireNonNull(entityType.create(client.world)));
-        } else if (vertex.isLootTable()) {
+        } else if (content instanceof Identifier) {
             ItemStack icon = new ItemStack(Items.CHEST);
             MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(matrices, icon, x - SIZE / 2, y - SIZE / 2);
         }

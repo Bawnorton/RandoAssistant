@@ -19,14 +19,12 @@ import java.util.*;
 import java.util.concurrent.RejectedExecutionException;
 
 public class GraphTaskExecutor {
-    private final LootTableGraph graph;
     private final SerialExecutor executor;
     private final FailableSerialExecutor failableExecutor;
     private final HighlightTask highlightTask;
     private final DrawTask drawTask;
 
-    public GraphTaskExecutor(LootTableGraph graph) {
-        this.graph = graph;
+    public GraphTaskExecutor() {
         this.executor = new SerialExecutor();
         this.failableExecutor = new FailableSerialExecutor();
         this.highlightTask = new HighlightTask();
@@ -50,15 +48,15 @@ public class GraphTaskExecutor {
     }
 
     public void draw() {
-        drawTask.start(null, () -> {}, () -> {});
+        draw(() -> {});
     }
 
     public void draw(Runnable onSuccess) {
-        drawTask.start(null, onSuccess, () -> {});
+        draw(onSuccess, () -> {});
     }
 
     public void draw(Runnable onSuccess, Runnable onFailure) {
-        drawTask.start(null, onSuccess, onFailure);
+        draw(null, onSuccess, onFailure);
     }
 
     public void draw(LootTableGraph.Vertex vertex, Runnable onSuccess, Runnable onFailure) {
@@ -199,19 +197,22 @@ public class GraphTaskExecutor {
                     Set<LootTableGraph.Edge> edgeSet;
 
                     if (vertex == null) {
-                        vertexSet = graph.getVertices();
-                        edgeSet = graph.getEdges();
+                        vertexSet = graph.getEnabledVertices();
+                        edgeSet = graph.getEnabledEdges();
                     } else {
                         vertexSet = vertex.getVerticesAssociatedWith(true);
                         edgeSet = vertex.getEdgesAssociatedWithVertices(vertexSet);
                     }
+                    System.out.println("Drawing graph with " + vertexSet.size() + " vertices and " + edgeSet.size() + " edges");
 
                     List<LootTableGraph.Vertex> vertices = Collections.synchronizedList(new ArrayList<>(vertexSet));
                     List<LootTableGraph.Edge> edges = Collections.synchronizedList(new ArrayList<>(edgeSet));
 
                     Layouter<LootTableGraph.Vertex, LootTableGraph.Edge> layouter = new Layouter<>(vertices, edges, algorithm, layoutProperties);
 
+                    System.out.println("Started Layout at " + System.currentTimeMillis());
                     drawing = layouter.layout();
+                    System.out.println("Finished Layout at " + System.currentTimeMillis());
                     dirty = false;
                     // scale down the drawing width so it better fits in the screen
                     for (LootTableGraph.Edge edge : drawing.getEdgeMappings().keySet()) {

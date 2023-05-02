@@ -1,16 +1,13 @@
 package com.bawnorton.randoassistant.mixin.client;
 
-import com.bawnorton.randoassistant.RandoAssistantClient;
-import com.bawnorton.randoassistant.screen.LootTableScreen;
-import com.bawnorton.randoassistant.util.Wrapper;
-import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
+import com.bawnorton.randoassistant.screen.LootBookWidget;
+import com.bawnorton.randoassistant.util.tuples.Wrapper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.text.Text;
@@ -43,33 +40,13 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
     private void onInit(CallbackInfo ci) {
         ACTUAL_SCALE = Wrapper.of(MinecraftClient.getInstance().getWindow().getScaleFactor());
         if (SCALE.get() == null) SCALE.set(ACTUAL_SCALE.get());
-        lootButton = new TexturedButtonWidget(this.x + 126, this.height / 2 - 22, 20, 18, 0, 0, 19, LOOT_BUTTON_TEXTURE, (button) -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new LootTableScreen()) {
-            @Override
-            public void close() {
-                super.close();
-                if (client != null && client.player != null) {
-                    MinecraftClient.getInstance().getWindow().setScaleFactor(ACTUAL_SCALE.get());
-                    MinecraftClient.getInstance().setScreen(new InventoryScreen(client.player));
-                }
+        lootButton = new TexturedButtonWidget(this.x + 126, this.height / 2 - 22, 20, 18, 0, 0, 19, LOOT_BUTTON_TEXTURE, (button) -> {
+            LootBookWidget screen = LootBookWidget.getInstance();
+            screen.toggleOpen();
+            if(screen.isOpen() && recipeBook.isOpen()) {
+                recipeBook.toggleOpen();
             }
-
-            @Override
-            public void resize(MinecraftClient client, int width, int height) {
-                super.resize(client, width, height);
-                if (RandoAssistantClient.hideOtherNodes) {
-                    LootTableScreen.getInstance().redrawWithSelectedNode();
-                } else {
-                    LootTableScreen.getInstance().redraw();
-                }
-            }
-
-            @Override
-            public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
-                width = MinecraftClient.getInstance().getWindow().getScaledWidth();
-                height = MinecraftClient.getInstance().getWindow().getScaledHeight();
-                super.render(matrices, mouseX, mouseY, partialTicks);
-            }
-        }));
+        });
         addDrawableChild(lootButton);
     }
 
@@ -77,6 +54,9 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
     private ButtonWidget.PressAction onAddDrawableChild(ButtonWidget.PressAction pressAction) {
         return (button) -> {
             recipeBook.toggleOpen();
+            if(recipeBook.isOpen() && LootBookWidget.getInstance().isOpen()) {
+                LootBookWidget.getInstance().toggleOpen();
+            }
             this.x = this.recipeBook.findLeftEdge(this.width, this.backgroundWidth);
             button.setPosition(this.x + 104, this.height / 2 - 22);
             lootButton.setX(button.getX() + 22);

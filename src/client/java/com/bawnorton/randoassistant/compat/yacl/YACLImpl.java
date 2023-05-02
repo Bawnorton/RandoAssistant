@@ -1,7 +1,6 @@
 package com.bawnorton.randoassistant.compat.yacl;
 
 import com.bawnorton.randoassistant.config.Config;
-import com.bawnorton.randoassistant.file.FileManager;
 import dev.isxander.yacl.api.ConfigCategory;
 import dev.isxander.yacl.api.Option;
 import dev.isxander.yacl.api.OptionGroup;
@@ -13,8 +12,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
 public class YACLImpl {
-    private static boolean createFile = false;
-
     public static Screen getScreen() {
         return YetAnotherConfigLib.createBuilder()
                 .title(Text.literal("Random Assistant Config"))
@@ -61,15 +58,6 @@ public class YACLImpl {
                                         .tooltip(Text.literal("The maximum depth to search for parent nodes"))
                                         .binding(100, () -> Config.getInstance().parentDepth, (value) -> Config.getInstance().parentDepth = value)
                                         .controller(IntegerFieldController::new)
-                                        .build())
-                                .option(Option.createBuilder(boolean.class)
-                                        .name(Text.literal("Create Report"))
-                                        .tooltip(Text.literal("Create the failure report with the current state of the mod"))
-                                        .binding(false, () -> {
-                                            if(createFile) FileManager.createFailureZip();
-                                            return createFile;
-                                        }, (value) -> createFile = value)
-                                        .controller(TickBoxController::new)
                                         .build())
                                 .collapsed(true)
                                 .build())

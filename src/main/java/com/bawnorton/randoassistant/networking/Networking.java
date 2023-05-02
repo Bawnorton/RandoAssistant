@@ -12,8 +12,8 @@ public class Networking {
 
     private static boolean initialized = false;
 
-    public static void sendBrokeBlockPacket(ServerPlayerEntity player) {
-        waitForServer(() -> ServerPlayNetworking.send(player, NetworkingConstants.BROKE_BLOCK_PACKET, PacketByteBufs.create()));
+    public static void sendStatsPacket(ServerPlayerEntity player) {
+        player.getStatHandler().sendStats(player);
     }
 
     public static void sendLootTablePacket(ServerPlayerEntity player, SerializeableLootTable lootTable) {

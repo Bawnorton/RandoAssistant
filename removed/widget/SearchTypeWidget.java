@@ -35,9 +35,9 @@ public class SearchTypeWidget extends WButton {
         super.paint(matrices, x, y, mouseX, mouseY);
 
         Tooltip tooltip = Tooltip.of(Text.of(switch (SearchBarWidget.getInstance().getManager().getSearchType()) {
-            case CONTAINS -> "Search by name contains query";
-            case EXACT -> "Search by name matches query exactly";
-            case FUZZY -> "Search by closest name to query";
+            case SearchType.CONTAINS -> "Search by name contains query";
+            case SearchType.EXACT -> "Search by name matches query exactly";
+            case SearchType.FUZZY -> "Search by closest name to query";
         }));
 
         if (isWithinBounds(mouseX, mouseY)) {

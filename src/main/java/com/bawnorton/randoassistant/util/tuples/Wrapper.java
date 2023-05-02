@@ -1,4 +1,4 @@
-package com.bawnorton.randoassistant.util;
+package com.bawnorton.randoassistant.util.tuples;
 
 public class Wrapper<T> {
     private T element;

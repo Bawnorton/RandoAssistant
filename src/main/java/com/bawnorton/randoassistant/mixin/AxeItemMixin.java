@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant.mixin;
 
 import com.bawnorton.randoassistant.networking.Networking;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
+import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
@@ -25,6 +26,7 @@ public abstract class AxeItemMixin {
     private void onUseOnBlock(ItemUsageContext context, CallbackInfoReturnable<ActionResult> cir, World world, BlockPos blockPos, PlayerEntity playerEntity, BlockState originalState, Optional optional, Optional optional2, Optional optional3, ItemStack itemStack, Optional optional4) {
         if (optional4.isPresent() && playerEntity instanceof ServerPlayerEntity serverPlayer) {
             BlockState state = (BlockState) optional4.get();
+            serverPlayer.incrementStat(RandoAssistantStats.INTERACTED.getOrCreateStat(state.getBlock()));
             Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofBlockToBlock(originalState.getBlock(), state.getBlock()));
         }
     }

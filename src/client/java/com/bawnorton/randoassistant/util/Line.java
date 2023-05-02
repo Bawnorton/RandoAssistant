@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.util;
 
-import com.bawnorton.randoassistant.graph.LootTableGraph.Vertex;
+
+import com.bawnorton.randoassistant.tracking.graph.TrackingGraph.Vertex;
 
 import java.util.*;
 

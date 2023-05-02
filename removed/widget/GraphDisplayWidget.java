@@ -79,10 +79,10 @@ public class GraphDisplayWidget extends WWidget {
 
     @Override
     public InputResult onMouseScroll(int x, int y, double amount) {
-        SCALE.set(SCALE.get() + (amount > 0 ? 0.5d : -0.5d));
-        if (SCALE.get() > 8) SCALE.set(8d);
-        if (SCALE.get() < 1) SCALE.set(1d);
-        client.getWindow().setScaleFactor(SCALE.get());
+        RandoAssistantClient.SCALE.set(RandoAssistantClient.SCALE.get() + (amount > 0 ? 0.5d : -0.5d));
+        if (RandoAssistantClient.SCALE.get() > 8) RandoAssistantClient.SCALE.set(8d);
+        if (RandoAssistantClient.SCALE.get() < 1) RandoAssistantClient.SCALE.set(1d);
+        client.getWindow().setScaleFactor(RandoAssistantClient.SCALE.get());
         width = client.getWindow().getScaledWidth();
         height = client.getWindow().getScaledHeight();
         return super.onMouseScroll(x, y, amount);
@@ -101,8 +101,8 @@ public class GraphDisplayWidget extends WWidget {
     }
 
     public void resetScale() {
-        SCALE.set(RandoAssistantClient.ACTUAL_SCALE.get());
-        client.getWindow().setScaleFactor(SCALE.get());
+        RandoAssistantClient.SCALE.set(RandoAssistantClient.ACTUAL_SCALE.get());
+        client.getWindow().setScaleFactor(RandoAssistantClient.SCALE.get());
         width = client.getWindow().getScaledWidth();
         height = client.getWindow().getScaledHeight();
     }

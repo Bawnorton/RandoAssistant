@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.networking;
 
-import com.bawnorton.randoassistant.util.Triplet;
+import com.bawnorton.randoassistant.util.tuples.Triplet;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

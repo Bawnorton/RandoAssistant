@@ -1,4 +1,4 @@
-package com.bawnorton.randoassistant.util;
+package com.bawnorton.randoassistant.util.tuples;
 
 import java.io.Serializable;
 

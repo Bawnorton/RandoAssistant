@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.networking;
 
-import com.bawnorton.randoassistant.util.Pair;
+import com.bawnorton.randoassistant.util.tuples.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
@@ -133,5 +133,18 @@ public class SerializeableLootTable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("SerializeableLootTable{");
+        sb.append("source=").append(identifier);
+        sb.append(", items=[");
+        for(Item item : items) {
+            sb.append(item).append(", ");
+        }
+        sb.delete(sb.length() - 2, sb.length());
+        sb.append("]}");
+        return sb.toString();
     }
 }

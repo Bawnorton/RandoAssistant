@@ -19,7 +19,7 @@ public class HideOtherNodesWidget extends WButton {
     @Override
     public InputResult onClick(int x, int y, int button) {
         InputResult result = super.onClick(x, y, button);
-        RandoAssistantClient.lootTableMap.getGraph().getExecutor().markDrawTaskDirty();
+        RandoAssistantClient.getGraph().getExecutor().markDrawTaskDirty();
         if (RandoAssistantClient.hideOtherNodes) {
             LootTableScreen.getInstance().redraw();
             this.setLabel(Text.of("Hide Other Nodes"));

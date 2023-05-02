@@ -2,14 +2,11 @@ package com.bawnorton.randoassistant;
 
 import com.bawnorton.randoassistant.config.ConfigManager;
 import com.bawnorton.randoassistant.event.EventManager;
-import com.bawnorton.randoassistant.file.FileManager;
-import com.bawnorton.randoassistant.graph.InteractionMap;
-import com.bawnorton.randoassistant.graph.LootTableMap;
 import com.bawnorton.randoassistant.keybind.KeybindManager;
 import com.bawnorton.randoassistant.networking.client.Networking;
 import com.bawnorton.randoassistant.util.Easing;
 import com.bawnorton.randoassistant.util.Status;
-import com.bawnorton.randoassistant.util.Wrapper;
+import com.bawnorton.randoassistant.util.tuples.Wrapper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.gui.DrawableHelper;
@@ -23,13 +20,6 @@ public class RandoAssistantClient implements ClientModInitializer {
     public static Wrapper<Double> SCALE = Wrapper.ofNothing();
     public static Wrapper<Double> ACTUAL_SCALE = Wrapper.ofNothing();
 
-    public static boolean hideOtherNodes = false;
-    public static boolean hideChildren = false;
-    public static int showLine = -1;
-
-    public static LootTableMap lootTableMap;
-    public static InteractionMap interactionMap;
-
     public static Status saveStatus = Status.NONE;
     public static Status dumpStatus = Status.NONE;
     public static long seed = Random.create().nextLong();
@@ -39,7 +29,6 @@ public class RandoAssistantClient implements ClientModInitializer {
         Networking.init();
 
         ConfigManager.loadConfig();
-        FileManager.init();
         KeybindManager.init();
         EventManager.init();
     }

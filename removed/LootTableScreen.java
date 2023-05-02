@@ -3,11 +3,9 @@ package com.bawnorton.randoassistant.screen;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.file.FileManager;
-import com.bawnorton.randoassistant.graph.LootTableGraph;
 import com.bawnorton.randoassistant.screen.widget.*;
 import com.bawnorton.randoassistant.screen.widget.drawable.NodeWidget;
 import com.bawnorton.randoassistant.thread.GraphTaskExecutor;
-import grapher.graph.drawing.Drawing;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
@@ -29,7 +27,8 @@ public class LootTableScreen extends LightweightGuiDescription {
         instance = this;
 
         MinecraftClient.getInstance().getWindow().setScaleFactor(RandoAssistantClient.SCALE.get());
-        executor = RandoAssistantClient.lootTableMap.getGraph().getExecutor();
+        executor = RandoAssistantClient.getGraph().getExecutor();
+        executor.enableDrawTask();
 
         panel = new WPlainPanel() {
             @Override
@@ -83,7 +82,7 @@ public class LootTableScreen extends LightweightGuiDescription {
     }
 
     public void redraw() {
-        if(RandoAssistantClient.lootTableMap.getGraph().getVertices().isEmpty()) {
+        if(RandoAssistantClient.getGraph().getVertices().isEmpty()) {
             clearPanel();
             CenteredLabelWidget failedLabel = new CenteredLabelWidget("There is nothing to draw");
             panel.add(failedLabel, failedLabel.x(), failedLabel.y());

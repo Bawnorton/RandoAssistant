@@ -25,7 +25,7 @@ public abstract class BlockMixin {
         if(entity instanceof ServerPlayerEntity serverPlayer) {
             SerializeableLootTable lootTable = SerializeableLootTable.ofBlock(state.getBlock(), cir.getReturnValue());
             Networking.sendLootTablePacket(serverPlayer, lootTable);
-            Networking.sendBrokeBlockPacket(serverPlayer);
+            Networking.sendStatsPacket(serverPlayer);
         }
     }
 }
