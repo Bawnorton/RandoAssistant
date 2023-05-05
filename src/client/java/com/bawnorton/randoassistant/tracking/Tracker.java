@@ -25,7 +25,7 @@ public class Tracker {
     private final TrackableSet<EntityType<?>, KilledTrackable> TRACKABLE_ENTITIES;
     private final HashMap<Identifier, CustomTrackable> TRACKABLE_CUSTOM;
 
-    private final TrackingGraph TRACKED = new TrackingGraph();
+    private final TrackingGraph TRACKED = TrackingGraph.getInstance();
 
     public Tracker() {
         TRACKABLE_ITEMS = new TrackableSet<>();

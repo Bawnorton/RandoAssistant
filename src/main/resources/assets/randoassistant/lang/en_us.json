@@ -4,5 +4,7 @@
   "key.randoassistant.config": "Open RandoAssistant Config",
   "key.randoassistant.randomizer": "Toggle Colour Randomizer",
   "category.randoassistant": "RandoAssistant",
-  "randoassistant.homepage": "My Website"
+  "randoassistant.homepage": "My Website",
+  "randoassistant.tooltip.hide_interactables": "Hiding Interactables",
+  "randoassistant.tooltip.show_all": "Showing All"
 }
