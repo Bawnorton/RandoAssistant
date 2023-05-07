@@ -8,14 +8,12 @@ import net.minecraft.stat.StatHandler;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public abstract class Trackable<T> implements Comparable<Trackable<T>> {
     private final Stat<T> associatedStat;
-    private final Set<Trackable<?>> sources = Sets.newTreeSet(Comparator.comparing(Trackable::getIdentifier));
+    private final Set<Trackable<?>> sources = Sets.newHashSet();
     protected final StatHandler statHandler;
 
     private boolean enabledOverride = false;
@@ -32,7 +30,7 @@ public abstract class Trackable<T> implements Comparable<Trackable<T>> {
     }
 
     public Set<Trackable<?>> getEnabledSources() {
-        return sources.stream().filter(Trackable::isEnabled).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(Trackable::getIdentifier))));
+        return sources.stream().filter(Trackable::isEnabled).collect(Collectors.toSet());
     }
 
     public boolean isEnabled() {

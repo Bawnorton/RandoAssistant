@@ -101,7 +101,11 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
             drawBackground(matrices, delta, mouseX, mouseY);
             lootBook.render(matrices, mouseX, mouseY, delta);
         }
-        lootBook.drawTooltip(matrices, mouseX, mouseY);
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/recipebook/RecipeBookWidget;drawTooltip(Lnet/minecraft/client/util/math/MatrixStack;IIII)V", shift = At.Shift.AFTER))
+    private void onTooltipRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        LootBookWidget.getInstance().drawTooltip(matrices, mouseX, mouseY);
     }
 
     @ModifyExpressionValue(method = "isPointWithinBounds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/recipebook/RecipeBookWidget;isOpen()Z"))

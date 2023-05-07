@@ -7,12 +7,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 import java.awt.*;
+import java.util.Queue;
 import java.util.*;
 import java.util.stream.Collectors;
 
 // directed cyclic graph of loot tables and interactions
 public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, TrackingGraph.Edge> implements Iterable<TrackingGraph.Vertex> {
-    private final TreeMap<Trackable<?>, Vertex> VERTEX_MAP = Maps.newTreeMap(Comparator.comparing(Trackable::getIdentifier));
+    private final HashMap<Trackable<?>, Vertex> VERTEX_MAP = Maps.newHashMap();
 
     public TrackingGraph() {
         super(Edge.class);
@@ -140,6 +141,7 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
         private Vertex destination;
 
         // required for jgrapht
+        @SuppressWarnings("unused")
         public Edge() {
             this(null, null);
         }

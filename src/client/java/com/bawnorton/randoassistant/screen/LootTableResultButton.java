@@ -202,10 +202,8 @@ public class LootTableResultButton extends ClickableWidget {
 
     public boolean renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
         if (isHovered() && client.currentScreen != null) {
-            RenderSystem.disableDepthTest();
             Text text = Text.of(source.getPath() + " -> " + target.getContent().getName().getString());
             client.currentScreen.renderTooltip(matrices, text, mouseX, mouseY);
-            RenderSystem.enableDepthTest();
             return true;
         }
         return false;
