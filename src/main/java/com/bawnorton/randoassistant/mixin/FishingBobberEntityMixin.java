@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant.mixin;
 
 import com.bawnorton.randoassistant.networking.Networking;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
+import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -10,6 +11,7 @@ import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.LootTable;
+import net.minecraft.loot.LootTables;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +30,7 @@ public abstract class FishingBobberEntityMixin {
     private ObjectArrayList<ItemStack> onUse(LootTable instance, LootContext context, Operation<ObjectArrayList<ItemStack>> original) {
         ObjectArrayList<ItemStack> result = original.call(instance, context);
         if(getPlayerOwner() instanceof ServerPlayerEntity serverPlayer) {
+            serverPlayer.incrementStat(RandoAssistantStats.LOOTED.getOrCreateStat(LootTables.FISHING_GAMEPLAY));
             Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofItemToItemStacks(Items.FISHING_ROD, result));
         }
         return result;

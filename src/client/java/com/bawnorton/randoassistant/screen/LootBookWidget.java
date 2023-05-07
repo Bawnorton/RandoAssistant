@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.screen;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -166,7 +167,7 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         }
         if(this.lootTableArea.mouseClicked(mouseX, mouseY, button)) {
             Item target = this.lootTableArea.getLastTargetClicked();
-            TrackingGraph.Vertex vertex = TrackingGraph.getInstance().getVertex(target);
+            TrackingGraph.Vertex vertex = Tracker.getInstance().getGraph().getVertex(target);
             // display loot table graph for target
             return true;
         }

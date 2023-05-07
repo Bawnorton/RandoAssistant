@@ -15,7 +15,6 @@ public class CommandHandler {
 
     private static void registerUpdateDrawingCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("updatedrawing").executes(context -> {
-            Networking.sendUpdateDrawingPacket(context.getSource().getPlayer());
             return 0;
         }));
     }

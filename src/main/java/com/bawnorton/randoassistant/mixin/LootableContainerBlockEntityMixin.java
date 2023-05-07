@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant.mixin;
 
 import com.bawnorton.randoassistant.networking.Networking;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
+import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -29,6 +30,7 @@ public abstract class LootableContainerBlockEntityMixin {
     private void onCheckLootInteraction(PlayerEntity player, CallbackInfo ci) {
         if(player instanceof ServerPlayerEntity serverPlayer) {
             SerializeableLootTable lootTable = SerializeableLootTable.ofOther(id, getInvStackList());
+            serverPlayer.incrementStat(RandoAssistantStats.LOOTED.getOrCreateStat(id));
             Networking.sendLootTablePacket(serverPlayer, lootTable);
         }
     }

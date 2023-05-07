@@ -1,12 +1,13 @@
 package com.bawnorton.randoassistant.screen;
 
+import com.bawnorton.randoassistant.tracking.Tracker;
+import com.bawnorton.randoassistant.tracking.graph.GraphHelper;
 import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
 import com.google.common.collect.Lists;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
-import net.minecraft.util.Identifier;
 
 import java.util.List;
 import java.util.Set;
@@ -40,12 +41,15 @@ public class LootTableListWidget {
     }
 
     public void resetResults(boolean resetPage) {
-        TrackingGraph graph = TrackingGraph.getInstance();
-        graph.getVertices().forEach(vertex -> {
+        TrackingGraph graph = Tracker.getInstance().getGraph();
+        graph.forEach(vertex -> {
             if(!graph.isRoot(vertex)) {
-                Set<TrackingGraph.Vertex> parents = graph.getRootsOf(vertex);
-                List<Identifier> parentIds = parents.stream().map(TrackingGraph.Vertex::getIdentifier).toList();
-                LootTableResultButton button = new LootTableResultButton(parentIds, vertex.getItem());
+                Set<TrackingGraph.Vertex> parentVertices = graph.getParentVertices(vertex);
+                parentVertices.add(vertex);
+                TrackingGraph subGraph = graph.createSubGraph(parentVertices);
+                GraphHelper.removeDisabled(subGraph, Tracker.getInstance().getDisabled());
+                if(!subGraph.containsVertex(vertex)) return;
+                LootTableResultButton button = new LootTableResultButton(subGraph, vertex.getItem());
                 button.setX(this.x);
                 buttons.add(button);
             }
@@ -80,6 +84,7 @@ public class LootTableListWidget {
 
     public void renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
         for(int i = 0; i < 4; i++) {
+            if (i + 4 * currentPage >= buttons.size()) break;
             LootTableResultButton button = buttons.get(i + 4 * currentPage);
             if(button.renderTooltip(matrices, mouseX, mouseY)) {
                 return;
@@ -99,6 +104,7 @@ public class LootTableListWidget {
             return true;
         }
         for(int i = 0; i < 4; i++) {
+            if (i + 4 * currentPage >= buttons.size()) break;
             LootTableResultButton lootTableResultButton = buttons.get(i + 4 * currentPage);
             if(lootTableResultButton.mouseClicked(mouseX, mouseY, button)) {
                 this.lastTargetClicked = lootTableResultButton.getTarget();

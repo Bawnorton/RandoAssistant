@@ -9,12 +9,12 @@
     "HandledScreenMixin",
     "InventoryScreenMixin",
     "LinearColorBlenderMixin",
-    "LivingEntityRendererMixin",
-    "TitleScreenMixin"
+    "LivingEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
+    "StatMixin"
   ]
 }

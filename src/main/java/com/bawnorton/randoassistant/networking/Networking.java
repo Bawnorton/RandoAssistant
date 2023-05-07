@@ -32,8 +32,11 @@ public class Networking {
         });
     }
 
-    public static void sendUpdateDrawingPacket(ServerPlayerEntity player) {
-        waitForServer(() -> ServerPlayNetworking.send(player, NetworkingConstants.UPDATE_DRAWING_PACKET, PacketByteBufs.create()));
+    public static void sendFinishedPacket(ServerPlayerEntity serverPlayer) {
+        waitForServer(() -> {
+            PacketByteBuf buf = PacketByteBufs.create();
+            ServerPlayNetworking.send(serverPlayer, NetworkingConstants.FINISHED_PACKET, buf);
+        });
     }
 
     private static void waitForServer(Runnable runnable) {

@@ -26,6 +26,7 @@ public class SerializeableLootTable {
     private boolean isOther;
 
     private SerializeableLootTable(Identifier id, List<ItemStack> items) {
+        if(id == null) throw new IllegalArgumentException("Identifier cannot be null");
         this.identifier = id;
         this.items = new ArrayList<>();
         for(ItemStack itemStack : items) {

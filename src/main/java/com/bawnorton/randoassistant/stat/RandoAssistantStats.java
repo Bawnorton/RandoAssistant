@@ -9,6 +9,7 @@ import net.minecraft.util.Identifier;
 
 public class RandoAssistantStats {
     public static final StatType<Block> INTERACTED = Registry.register(Registries.STAT_TYPE, new Identifier("randoassistant", "interacted_with_block"), new StatType<>(Registries.BLOCK));
+    public static final StatType<Identifier> LOOTED = Registry.register(Registries.STAT_TYPE, new Identifier("randoassistant", "looted_block"), new StatType<>(Registries.CUSTOM_STAT));
 
     public static void init() {
         RandoAssistant.LOGGER.debug("Initializing RandoAssistantStats");

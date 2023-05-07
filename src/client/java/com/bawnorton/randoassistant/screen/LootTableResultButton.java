@@ -3,6 +3,8 @@ package com.bawnorton.randoassistant.screen;
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.mixin.AbstractPlantPartBlockInvoker;
 import com.bawnorton.randoassistant.mixin.AttachedStemBlockAccessor;
+import com.bawnorton.randoassistant.tracking.graph.GraphHelper;
+import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -14,17 +16,23 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.mob.SlimeEntity;
+import net.minecraft.entity.passive.BatEntity;
+import net.minecraft.entity.passive.FoxEntity;
+import net.minecraft.entity.passive.SquidEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.ScreenTexts;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.RotationAxis;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class LootTableResultButton extends ClickableWidget {
@@ -33,15 +41,16 @@ public class LootTableResultButton extends ClickableWidget {
     private static final int height = 25;
 
     private final MinecraftClient client;
-
-    private final List<Identifier> sources;
+    private final TrackingGraph associatedGraph;
     private final Item target;
+    private final Identifier source;
 
-    public LootTableResultButton(List<Identifier> sources, Item target) {
+    public LootTableResultButton(TrackingGraph associatedGraph, Item target) {
         super(0, 0, width, height, ScreenTexts.EMPTY);
-        this.sources = sources;
-        this.target = target;
         client = MinecraftClient.getInstance();
+        this.associatedGraph = associatedGraph;
+        this.target = target;
+        this.source = GraphHelper.getBestSource(associatedGraph, associatedGraph.getVertex(target));
     }
 
     @Override
@@ -49,58 +58,71 @@ public class LootTableResultButton extends ClickableWidget {
         RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
         int u = 29;
         int v = 206;
+        if(this.isHovered()) {
+            v += height;
+        }
         drawTexture(matrices, getX(), getY(), u, v, width, height);
-        renderSources(matrices, getX(), getY());
+        renderSource(matrices, getX(), getY());
         renderTarget(matrices, getX() + 100, getY());
     }
-    
-    private void renderSources(MatrixStack matrices, int x, int y) {
-        List<Identifier> topSources = new ArrayList<>();
-        if(sources.size() >= 2) topSources.add(sources.get(1));
-        if(sources.size() >= 1) topSources.add(sources.get(0));
-        x -= 2; y -= 2;
-        for(Identifier source: topSources) {
-            x += 2; y += 2;
-            if(Registries.ITEM.containsId(source)) {
-                Item item = Registries.ITEM.get(source);
-                ItemStack icon = new ItemStack(item);
-                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x - height / 2, y - height / 2);
-            } else if (Registries.BLOCK.containsId(source)) {
-                Block block = Registries.BLOCK.get(source);
-                if (block instanceof FlowerPotBlock flowerPotBlock) {
-                    ItemStack icon = new ItemStack(flowerPotBlock.getContent().asItem());
-                    ItemStack pot = new ItemStack(Items.FLOWER_POT);
-                    client.getItemRenderer().renderGuiItemIcon(matrices, icon, x - height / 2, y - height / 2);
-                    client.getItemRenderer().renderGuiItemIcon(matrices, pot, x - height / 2, y + height / 2);
-                } else if (block instanceof CandleCakeBlock candleCakeBlock) {
-                    ItemStack icon = new ItemStack(Items.CAKE);
-                    ItemStack candle = new ItemStack(RandoAssistant.CANDLE_CAKE_MAP.get(candleCakeBlock));
-                    client.getItemRenderer().renderGuiItemIcon(matrices, icon, x - height / 2, y - height / 2);
-                    client.getItemRenderer().renderGuiItemIcon(matrices, candle, x - height / 2, y + height / 2);
-                } else if (block instanceof AbstractPlantPartBlock abstractPlantBlock) {
-                    AbstractPlantStemBlock stemBlock = ((AbstractPlantPartBlockInvoker) abstractPlantBlock).getStem();
-                    ItemStack icon = new ItemStack(stemBlock.getDefaultState().getBlock().asItem());
-                    client.getItemRenderer().renderGuiItemIcon(matrices, icon, x - height / 2, y - height / 2);
-                } else if (block instanceof AttachedStemBlock attachedStemBlock) {
-                    GourdBlock gourdBlock = ((AttachedStemBlockAccessor) attachedStemBlock).getGourdBlock();
-                    ItemStack icon = new ItemStack(gourdBlock.getStem().asItem());
-                    client.getItemRenderer().renderGuiItemIcon(matrices, icon, x - height / 2, y - height / 2);
-                } else if (block instanceof TallSeagrassBlock) {
-                    ItemStack icon = new ItemStack(Items.SEAGRASS);
-                    client.getItemRenderer().renderGuiItemIcon(matrices, icon, x - height / 2, y - height / 2);
-                } else {
-                    ItemStack icon = new ItemStack(block.asItem());
-                    if (icon.getItem() == Items.AIR) icon = new ItemStack(Items.BARRIER);
-                    client.getItemRenderer().renderGuiItemIcon(matrices, icon, x - height / 2, y - height / 2);
-                }
-            } else if (Registries.ENTITY_TYPE.containsId(source)) {
-                EntityType<?> entityType = Registries.ENTITY_TYPE.get(source);
-                drawEntity(x - 5, y + 2, (LivingEntity) Objects.requireNonNull(entityType.create(client.world)));
-            } else {
-                ItemStack icon = new ItemStack(Items.CHEST);
-                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x - height / 2, y - height / 2);
-            }
+
+    private void renderSource(MatrixStack matrices, int x, int y) {
+        y += 4; x += 4;
+        if (Registries.ENTITY_TYPE.containsId(source)) {
+            EntityType<?> entityType = Registries.ENTITY_TYPE.get(source);
+            drawEntity(x + 11, y + 12, (LivingEntity) Objects.requireNonNull(entityType.create(client.world)));
+            return;
         }
+        if (Registries.BLOCK.containsId(source)) {
+            Block block = Registries.BLOCK.get(source);
+            if (block instanceof FlowerPotBlock flowerPotBlock) {
+//                ItemStack icon = new ItemStack(flowerPotBlock.getContent().asItem());
+//                ItemStack pot = new ItemStack(Items.FLOWER_POT);
+//                client.getItemRenderer().renderGuiItemIcon(matrices, pot, x, y);
+//                client.textRenderer.draw(matrices, Text.of("+"), x + 17, y + 5, 0);
+//                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x + 24, y - 2);
+                VertexConsumerProvider.Immediate immediate = client.getBufferBuilders().getEntityVertexConsumers();
+                client.getBlockRenderManager().renderBlockAsEntity(flowerPotBlock.getDefaultState(), matrices, immediate, 0xFFFFFF, 0);
+                return;
+            }
+            if (block instanceof CandleCakeBlock candleCakeBlock) {
+                ItemStack icon = new ItemStack(Items.CAKE);
+                ItemStack candle = new ItemStack(RandoAssistant.CANDLE_CAKE_MAP.get(candleCakeBlock));
+                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
+                client.textRenderer.draw(matrices, Text.of("+"), x + 20, y + 5, 0);
+                client.getItemRenderer().renderGuiItemIcon(matrices, candle, x + 26, y);
+                return;
+            }
+            if (block instanceof AbstractPlantPartBlock abstractPlantBlock) {
+                AbstractPlantStemBlock stemBlock = ((AbstractPlantPartBlockInvoker) abstractPlantBlock).getStem();
+                ItemStack icon = new ItemStack(stemBlock.getDefaultState().getBlock().asItem());
+                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
+                return;
+            }
+            if (block instanceof AttachedStemBlock attachedStemBlock) {
+                GourdBlock gourdBlock = ((AttachedStemBlockAccessor) attachedStemBlock).getGourdBlock();
+                ItemStack icon = new ItemStack(gourdBlock.getStem().asItem());
+                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
+                return;
+            }
+            if (block instanceof TallSeagrassBlock) {
+                ItemStack icon = new ItemStack(Items.SEAGRASS);
+                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
+                return;
+            }
+            ItemStack icon = new ItemStack(block.asItem());
+            if (icon.getItem() == Items.AIR) icon = new ItemStack(Items.BARRIER);
+            client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
+            return;
+        }
+        if(Registries.ITEM.containsId(source)) {
+            Item item = Registries.ITEM.get(source);
+            ItemStack icon = new ItemStack(item);
+            client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
+            return;
+        }
+        ItemStack icon = new ItemStack(Items.CHEST);
+        client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
     }
     
     private void renderTarget(MatrixStack matrices, int x, int y) {
@@ -115,12 +137,38 @@ public class LootTableResultButton extends ClickableWidget {
         matrixStack.scale(1.0F, 1.0F, -1.0F);
         RenderSystem.applyModelViewMatrix();
         MatrixStack matrixStack2 = new MatrixStack();
-        matrixStack2.translate(0.0F, 0.0F, 1000.0F);
-        matrixStack2.scale((float) 10, (float) 10, (float) 10);
+        matrixStack2.translate(0.0F, 0.0F, 100.0F);
+
+        Box box = entity.getBoundingBox();
+        float scale = 1.0f / (float) (Math.max(box.getXLength(), Math.max(box.getYLength(), box.getZLength())));
+        matrixStack2.scale(scale, scale, scale);
+
+        if(entity instanceof SquidEntity) {
+            matrixStack2.translate(5, -3, 0);
+            matrixStack2.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90));
+            matrixStack2.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-123));
+            matrixStack2.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(22.5F));
+        } else if (entity instanceof SlimeEntity) {
+            matrixStack2.scale(4, 4, 4);
+        } else if (entity instanceof EnderDragonEntity) {
+            matrixStack2.scale(-4, 4, 4);
+            matrixStack2.translate(-20, 0, 0);
+            matrixStack2.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(45));
+            matrixStack2.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45));
+        } else if (entity instanceof BatEntity) {
+            matrixStack2.scale(2, 2, 2);
+            matrixStack2.translate(2, 5, 0);
+        } else if (entity instanceof FoxEntity) {
+            matrixStack2.translate(2, 2, 0);
+        }
+
+        matrixStack2.scale(10, 10, 10);
         Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
         Quaternionf quaternionf2 = (new Quaternionf()).rotateX((float) (-30 * Math.PI / 180));
         quaternionf.mul(quaternionf2);
         matrixStack2.multiply(quaternionf);
+
+
         float h = entity.bodyYaw;
         float i = entity.getYaw();
         float j = entity.getPitch();
@@ -153,7 +201,8 @@ public class LootTableResultButton extends ClickableWidget {
     public boolean renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
         if (isHovered() && client.currentScreen != null) {
             RenderSystem.disableDepthTest();
-            client.currentScreen.renderTooltip(matrices, target.getName(), mouseX, mouseY);
+            Text text = Text.of(source.getPath() + " -> " + target.getName().getString());
+            client.currentScreen.renderTooltip(matrices, text, mouseX, mouseY);
             RenderSystem.enableDepthTest();
             return true;
         }

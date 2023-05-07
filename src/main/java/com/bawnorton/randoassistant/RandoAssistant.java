@@ -9,9 +9,12 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.block.CandleBlock;
 import net.minecraft.block.CandleCakeBlock;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.loot.LootManager;
+import net.minecraft.loot.LootPool;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
@@ -41,39 +44,44 @@ public class RandoAssistant implements ModInitializer {
         LootManager lootManager = Networking.server.getLootManager();
         LootContextType lootContextType = new LootContextType.Builder().allow(LootContextParameters.THIS_ENTITY).allow(LootContextParameters.TOOL).build();
         LootContext.Builder builder = new LootContext.Builder( Networking.server.getWorld(World.OVERWORLD));
-        builder.optionalParameter(LootContextParameters.THIS_ENTITY, clientPlayer);
+        builder.luck(100f);
+        builder.optionalParameter(LootContextParameters.THIS_ENTITY, serverPlayer);
 
-        HashSet<Identifier> seen = new HashSet<>();
-        Registries.BLOCK.forEach(block -> {
-            LootTable table = lootManager.getTable(block.getLootTableId());
-            List<ItemStack> stacks = table.generateLoot(builder.build(lootContextType));
-            Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofBlock(block, stacks));
-            ItemStack pickaxe = new ItemStack(Items.NETHERITE_PICKAXE);
-            pickaxe.addEnchantment(Enchantments.SILK_TOUCH, 1);
-            builder.optionalParameter(LootContextParameters.TOOL, pickaxe);
-            stacks = table.generateLoot(builder.build(lootContextType));
-            Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofBlock(block, stacks));
-            seen.add(block.getLootTableId());
-        });
+        for(int i = 0; i < 100; i++) {
+            HashSet<Identifier> seen = new HashSet<>();
+            Registries.BLOCK.forEach(block -> {
+                seen.add(block.getLootTableId());
+                LootTable table = lootManager.getTable(block.getLootTableId());
+                List<ItemStack> stacks = table.generateLoot(builder.build(lootContextType));
+                Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofBlock(block, stacks));
+                ItemStack pickaxe = new ItemStack(Items.NETHERITE_PICKAXE);
+                pickaxe.addEnchantment(Enchantments.SILK_TOUCH, 1);
+                builder.optionalParameter(LootContextParameters.TOOL, pickaxe);
+                stacks = table.generateLoot(builder.build(lootContextType));
+                Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofBlock(block, stacks));
+            });
 
-        Registries.ENTITY_TYPE.forEach(entityType -> {
-            LootTable table = lootManager.getTable(entityType.getLootTableId());
-            List<ItemStack> stacks = table.generateLoot(builder.build(lootContextType));
-            Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofEntity(entityType, stacks));
-            ItemStack sword = new ItemStack(Items.NETHERITE_SWORD);
-            sword.addEnchantment(Enchantments.FIRE_ASPECT, 1);
-            builder.optionalParameter(LootContextParameters.TOOL, sword);
-            stacks = table.generateLoot(builder.build(lootContextType));
-            Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofEntity(entityType, stacks));
-            seen.add(entityType.getLootTableId());
-        });
+            Registries.ENTITY_TYPE.forEach(entityType -> {
+                seen.add(entityType.getLootTableId());
+                Entity entity = entityType.create(Networking.server.getWorld(World.OVERWORLD));
+                if (!(entity instanceof LivingEntity)) return;
+                LootTable table = lootManager.getTable(entityType.getLootTableId());
+                List<ItemStack> stacks = table.generateLoot(builder.build(lootContextType));
+                Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofEntity(entityType, stacks));
+                ItemStack sword = new ItemStack(Items.NETHERITE_SWORD);
+                sword.addEnchantment(Enchantments.FIRE_ASPECT, 1);
+                builder.optionalParameter(LootContextParameters.TOOL, sword);
+                stacks = table.generateLoot(builder.build(lootContextType));
+                Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofEntity(entityType, stacks));
+            });
 
-        lootManager.getTableIds().forEach(id -> {
-            if (seen.contains(id)) return;
-            LootTable table = lootManager.getTable(id);
-            List<ItemStack> stacks = table.generateLoot(builder.build(lootContextType));
-            Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofOther(id, stacks));
-        });
+            lootManager.getTableIds().forEach(id -> {
+                if (seen.contains(id)) return;
+                LootTable table = lootManager.getTable(id);
+                List<ItemStack> stacks = table.generateLoot(builder.build(lootContextType));
+                Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofOther(id, stacks));
+            });
+        }
     }
 
     public static void getAllInteractions(PlayerEntity clientPlayer) {
@@ -96,7 +104,7 @@ public class RandoAssistant implements ModInitializer {
         HoneycombItem.WAXED_TO_UNWAXED_BLOCKS.get().forEach((input, output) -> Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
         AxeItem.STRIPPED_BLOCKS.forEach((input, output) -> Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
 
-        Networking.sendUpdateDrawingPacket(serverPlayer);
+        Networking.sendFinishedPacket(serverPlayer);
     }
 
     @Override
