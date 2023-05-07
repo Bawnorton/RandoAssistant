@@ -54,7 +54,7 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
         try {
             addEdge(sourceVertex, destinationVertex);
         } catch (IllegalArgumentException ignored) {
-            // silently ignore looping edges
+            // silently ignore self-looping edges
         }
     }
 

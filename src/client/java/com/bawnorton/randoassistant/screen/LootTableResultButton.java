@@ -82,7 +82,7 @@ public class LootTableResultButton extends ClickableWidget {
                 ItemStack icon = new ItemStack(Items.FLOWER_POT);
                 ItemStack flower = new ItemStack(flowerPotBlock.getContent());
                 client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
-                if(flowerPotBlock.getContent().equals(Blocks.AIR)) {
+                if(!flowerPotBlock.getContent().equals(Blocks.AIR)) {
                     client.textRenderer.draw(matrices, Text.of("+"), x + 20, y + 5, 0);
                     client.getItemRenderer().renderGuiItemIcon(matrices, flower, x + 26, y);
                 }
