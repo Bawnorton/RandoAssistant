@@ -1,7 +1,5 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.networking.Networking;
-import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,7 +25,6 @@ public abstract class AxeItemMixin {
         if (optional4.isPresent() && playerEntity instanceof ServerPlayerEntity serverPlayer) {
             BlockState state = (BlockState) optional4.get();
             serverPlayer.incrementStat(RandoAssistantStats.INTERACTED.getOrCreateStat(state.getBlock()));
-            Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofBlockToBlock(originalState.getBlock(), state.getBlock()));
         }
     }
 }

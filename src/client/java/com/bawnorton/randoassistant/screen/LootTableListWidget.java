@@ -1,8 +1,9 @@
 package com.bawnorton.randoassistant.screen;
 
 import com.bawnorton.randoassistant.tracking.Tracker;
-import com.bawnorton.randoassistant.tracking.graph.GraphHelper;
+import com.bawnorton.randoassistant.tracking.graph.TrackableCrawler;
 import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
+import com.bawnorton.randoassistant.tracking.trackable.Trackable;
 import com.google.common.collect.Lists;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
@@ -10,7 +11,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 
 import java.util.List;
-import java.util.Set;
 
 // list of loot table buttons
 public class LootTableListWidget {
@@ -40,19 +40,13 @@ public class LootTableListWidget {
         resetResults(false);
     }
 
+    @SuppressWarnings("unchecked")
     public void resetResults(boolean resetPage) {
-        TrackingGraph graph = Tracker.getInstance().getGraph();
-        graph.forEach(vertex -> {
-            if(!graph.isRoot(vertex)) {
-                Set<TrackingGraph.Vertex> parentVertices = graph.getParentVertices(vertex);
-                parentVertices.add(vertex);
-                TrackingGraph subGraph = graph.createSubGraph(parentVertices);
-                GraphHelper.removeDisabled(subGraph, Tracker.getInstance().getDisabled());
-                if(!subGraph.containsVertex(vertex)) return;
-                LootTableResultButton button = new LootTableResultButton(subGraph, vertex.getItem());
-                button.setX(this.x);
-                buttons.add(button);
-            }
+        Tracker.getInstance().getEnabled(trackable -> trackable.getContent() instanceof Item).forEach(trackable -> {
+            TrackingGraph graph = TrackableCrawler.crawl(trackable);
+            LootTableResultButton button = new LootTableResultButton(graph, (Trackable<Item>) trackable);
+            button.setX(this.x);
+            buttons.add(button);
         });
         this.pageCount = (int) Math.ceil(buttons.size() / 4.0);
         if (this.pageCount <= currentPage || resetPage) {
@@ -107,7 +101,7 @@ public class LootTableListWidget {
             if (i + 4 * currentPage >= buttons.size()) break;
             LootTableResultButton lootTableResultButton = buttons.get(i + 4 * currentPage);
             if(lootTableResultButton.mouseClicked(mouseX, mouseY, button)) {
-                this.lastTargetClicked = lootTableResultButton.getTarget();
+                this.lastTargetClicked = lootTableResultButton.getTarget().getContent();
                 return true;
             }
         }

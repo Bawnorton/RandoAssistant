@@ -1,4 +1,4 @@
-package com.bawnorton.randoassistant.mixin;
+package com.bawnorton.randoassistant.mixin.client;
 
 import net.minecraft.block.AbstractPlantPartBlock;
 import net.minecraft.block.AbstractPlantStemBlock;

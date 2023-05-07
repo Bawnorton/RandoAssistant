@@ -4,17 +4,20 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "com.bawnorton.randoassistant.RandoAssistantMixinPlugin",
   "client": [
+    "AbstractPlantPartBlockInvoker",
+    "AttachedStemBlockAccessor",
     "BiomeMixin",
     "BlockColorsMixin",
     "HandledScreenMixin",
     "InventoryScreenMixin",
     "LinearColorBlenderMixin",
-    "LivingEntityRendererMixin"
+    "LivingEntityRendererMixin",
+    "AbstractInventoryScreenMixin",
+    "StatMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "StatMixin"
   ]
 }

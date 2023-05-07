@@ -1,13 +1,21 @@
 package com.bawnorton.randoassistant.tracking.trackable;
 
+import com.google.common.collect.Sets;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.StatHandler;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 
-public abstract class Trackable<T> {
+import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+public abstract class Trackable<T> implements Comparable<Trackable<T>> {
     private final Stat<T> associatedStat;
+    private final Set<Trackable<?>> sources = Sets.newTreeSet(Comparator.comparing(Trackable::getIdentifier));
     protected final StatHandler statHandler;
 
     private boolean enabledOverride = false;
@@ -17,6 +25,14 @@ public abstract class Trackable<T> {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if(player == null) throw new IllegalStateException("Player is null");
         statHandler = player.getStatHandler();
+    }
+
+    public void addSource(Trackable<?> source) {
+        sources.add(source);
+    }
+
+    public Set<Trackable<?>> getEnabledSources() {
+        return sources.stream().filter(Trackable::isEnabled).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(Trackable::getIdentifier))));
     }
 
     public boolean isEnabled() {
@@ -32,6 +48,19 @@ public abstract class Trackable<T> {
     }
 
     public abstract Identifier getIdentifier();
+
+    @Override
+    public int compareTo(@NotNull Trackable<T> tTrackable) {
+        return getIdentifier().compareTo(tTrackable.getIdentifier());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Trackable<?> other) {
+            return other.getIdentifier().equals(getIdentifier());
+        }
+        return false;
+    }
 
     @Override
     public String toString() {

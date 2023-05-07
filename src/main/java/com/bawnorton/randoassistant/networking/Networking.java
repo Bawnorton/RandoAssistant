@@ -12,10 +12,6 @@ public class Networking {
 
     private static boolean initialized = false;
 
-    public static void sendStatsPacket(ServerPlayerEntity player) {
-        player.getStatHandler().sendStats(player);
-    }
-
     public static void sendLootTablePacket(ServerPlayerEntity player, SerializeableLootTable lootTable) {
         waitForServer(() -> {
             PacketByteBuf buf = PacketByteBufs.create();
@@ -36,6 +32,20 @@ public class Networking {
         waitForServer(() -> {
             PacketByteBuf buf = PacketByteBufs.create();
             ServerPlayNetworking.send(serverPlayer, NetworkingConstants.FINISHED_PACKET, buf);
+        });
+    }
+
+    public static void sendEnableAllPacket(ServerPlayerEntity serverPlayer) {
+        waitForServer(() -> {
+            PacketByteBuf buf = PacketByteBufs.create();
+            ServerPlayNetworking.send(serverPlayer, NetworkingConstants.ENABLE_ALL_PACKET, buf);
+        });
+    }
+
+    public static void sendDisableAllPacket(ServerPlayerEntity serverPlayer) {
+        waitForServer(() -> {
+            PacketByteBuf buf = PacketByteBufs.create();
+            ServerPlayNetworking.send(serverPlayer, NetworkingConstants.DISABLE_ALL_PACKET, buf);
         });
     }
 

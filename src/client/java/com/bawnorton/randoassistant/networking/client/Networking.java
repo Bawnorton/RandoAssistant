@@ -30,13 +30,15 @@ public class Networking {
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.FINISHED_PACKET, (client, handler, buf, responseSender) -> {
             client.execute(() -> {
-                Set<Identifier> trackedLootTables = new HashSet<>();
-                Tracker.getInstance().getGraph().forEach(vertex -> {
-                    if(!trackedLootTables.add(vertex.getIdentifier())) {
-                        RandoAssistant.LOGGER.warn("Duplicate loot table: " + vertex.getIdentifier().toString());
-                    }
-                });
             });
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.ENABLE_ALL_PACKET, (client, handler, buf, responseSender) -> {
+            client.execute(() -> Tracker.getInstance().enableAll());
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.DISABLE_ALL_PACKET, (client, handler, buf, responseSender) -> {
+            client.execute(() -> Tracker.getInstance().disableAll());
         });
     }
 }

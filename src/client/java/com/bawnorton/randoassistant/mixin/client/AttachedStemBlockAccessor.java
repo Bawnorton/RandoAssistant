@@ -1,4 +1,4 @@
-package com.bawnorton.randoassistant.mixin;
+package com.bawnorton.randoassistant.mixin.client;
 
 import net.minecraft.block.AttachedStemBlock;
 import net.minecraft.block.GourdBlock;

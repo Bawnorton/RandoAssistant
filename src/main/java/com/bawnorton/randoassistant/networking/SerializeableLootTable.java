@@ -116,6 +116,7 @@ public class SerializeableLootTable {
         return items;
     }
 
+    @SuppressWarnings("unchecked")
     public static SerializeableLootTable fromBytes(byte[] bytes) {
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             ObjectInputStream ois = new ObjectInputStream(bais);

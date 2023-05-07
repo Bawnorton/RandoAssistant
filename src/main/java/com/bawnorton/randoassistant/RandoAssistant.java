@@ -14,7 +14,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.loot.LootManager;
-import net.minecraft.loot.LootPool;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
@@ -40,13 +39,14 @@ public class RandoAssistant implements ModInitializer {
     public static void getAllLootTables(PlayerEntity clientPlayer) {
         ServerPlayerEntity serverPlayer = Networking.server.getPlayerManager().getPlayer(clientPlayer.getUuid());
         assert serverPlayer != null;
-        Networking.sendStatsPacket(serverPlayer);
+        serverPlayer.getStatHandler().sendStats(serverPlayer);
         LootManager lootManager = Networking.server.getLootManager();
         LootContextType lootContextType = new LootContextType.Builder().allow(LootContextParameters.THIS_ENTITY).allow(LootContextParameters.TOOL).build();
         LootContext.Builder builder = new LootContext.Builder( Networking.server.getWorld(World.OVERWORLD));
         builder.luck(100f);
         builder.optionalParameter(LootContextParameters.THIS_ENTITY, serverPlayer);
 
+        // will thread this later
         for(int i = 0; i < 100; i++) {
             HashSet<Identifier> seen = new HashSet<>();
             Registries.BLOCK.forEach(block -> {

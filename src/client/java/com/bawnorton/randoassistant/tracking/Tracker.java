@@ -3,41 +3,41 @@ package com.bawnorton.randoassistant.tracking;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import com.bawnorton.randoassistant.stat.RandoAssistantStats;
-import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
 import com.bawnorton.randoassistant.tracking.trackable.*;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
 
+import javax.sound.midi.Track;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Tracker {
     private static Tracker INSTANCE;
 
-    private final TrackableSet<Item, PickedUpTrackable> TRACKABLE_ITEMS;
-    private final TrackableSet<Block, MinedTrackable> TRACKABLE_BLOCKS;
-    private final TrackableSet<EntityType<?>, KilledTrackable> TRACKABLE_ENTITIES;
-    private final TrackableSet<Block, InteractedTrackable> TRACKABLE_INTERACTED;
-    private final TrackableSet<Identifier, LootedTrackable> TRACKABLE_LOOTED;
-
-    private final TrackingGraph TRACKED = new TrackingGraph();
+    private final TrackableMap<Item, PickedUpTrackable> TRACKABLE_ITEMS;
+    private final TrackableMap<Block, MinedTrackable> TRACKABLE_BLOCKS;
+    private final TrackableMap<EntityType<?>, KilledTrackable> TRACKABLE_ENTITIES;
+    private final TrackableMap<Block, InteractedTrackable> TRACKABLE_INTERACTED;
+    private final TrackableMap<Identifier, LootedTrackable> TRACKABLE_LOOTED;
 
     public Tracker() {
-        TRACKABLE_ITEMS = new TrackableSet<>();
-        TRACKABLE_BLOCKS = new TrackableSet<>();
-        TRACKABLE_ENTITIES = new TrackableSet<>();
-        TRACKABLE_INTERACTED = new TrackableSet<>();
-        TRACKABLE_LOOTED = new TrackableSet<>();
+        TRACKABLE_ITEMS = new TrackableMap<>();
+        TRACKABLE_BLOCKS = new TrackableMap<>();
+        TRACKABLE_ENTITIES = new TrackableMap<>();
+        TRACKABLE_INTERACTED = new TrackableMap<>();
+        TRACKABLE_LOOTED = new TrackableMap<>();
     }
 
     public static Tracker getInstance() {
@@ -47,43 +47,37 @@ public class Tracker {
         return INSTANCE;
     }
 
-    public TrackingGraph getGraph() {
-        return TRACKED;
-    }
-
     public void track(SerializeableLootTable lootTable) {
         if(lootTable.isBlock()) {
             Block source = lootTable.getBlock();
             List<Item> targets = lootTable.getItems();
             Stat<Block> minedStat = Stats.MINED.getOrCreateStat(source);
-            TRACKABLE_BLOCKS.createTrackable(minedStat, MinedTrackable.class);
+            MinedTrackable trackableSource = TRACKABLE_BLOCKS.getOrCreate(minedStat, MinedTrackable.class);
             targets.forEach(item -> {
                 Stat<Item> pickedUpStat = Stats.PICKED_UP.getOrCreateStat(item);
-                TRACKABLE_ITEMS.createTrackable(pickedUpStat, PickedUpTrackable.class);
+                TRACKABLE_ITEMS.getOrCreate(pickedUpStat, PickedUpTrackable.class).addSource(trackableSource);
             });
         } else if (lootTable.isEntity()) {
             EntityType<?> source = lootTable.getEntity();
             List<Item> targets = lootTable.getItems();
             Stat<EntityType<?>> killedStat = Stats.KILLED.getOrCreateStat(source);
-            TRACKABLE_ENTITIES.createTrackable(killedStat, KilledTrackable.class);
+            KilledTrackable trackableSource = TRACKABLE_ENTITIES.getOrCreate(killedStat, KilledTrackable.class);
             targets.forEach(item -> {
                 Stat<Item> pickedUpStat = Stats.PICKED_UP.getOrCreateStat(item);
-                TRACKABLE_ITEMS.createTrackable(pickedUpStat, PickedUpTrackable.class);
+                TRACKABLE_ITEMS.getOrCreate(pickedUpStat, PickedUpTrackable.class).addSource(trackableSource);
             });
         } else if (lootTable.isOther()) {
             Identifier source = lootTable.getIdentifier();
             List<Item> targets = lootTable.getItems();
             Stat<Identifier> lootedStat = RandoAssistantStats.LOOTED.getOrCreateStat(source);
-            TRACKABLE_LOOTED.createTrackable(lootedStat, LootedTrackable.class);
+            LootedTrackable trackableSource = TRACKABLE_LOOTED.getOrCreate(lootedStat, LootedTrackable.class);
             targets.forEach(item -> {
                 Stat<Item> pickedUpStat = Stats.PICKED_UP.getOrCreateStat(item);
-                TRACKABLE_ITEMS.createTrackable(pickedUpStat, PickedUpTrackable.class);
+                TRACKABLE_ITEMS.getOrCreate(pickedUpStat, PickedUpTrackable.class).addSource(trackableSource);
             });
         } else {
             throw new UnsupportedOperationException();
         }
-        List<Identifier> itemIds = lootTable.getItems().stream().map(Registries.ITEM::getId).toList();
-        TRACKED.addEdges(lootTable.getIdentifier(), itemIds);
     }
     
     public void track(SerializeableInteraction interaction) {
@@ -92,42 +86,29 @@ public class Tracker {
         if(interaction.isCrafting()) {
             Item item = output.get(0);
             Stat<Item> craftedStat = Stats.CRAFTED.getOrCreateStat(item);
-            TRACKABLE_ITEMS.createTrackable(craftedStat, PickedUpTrackable.class);
+            PickedUpTrackable trackableTarget = TRACKABLE_ITEMS.getOrCreate(craftedStat, PickedUpTrackable.class);
             for(Item inputItem : input) {
                 Stat<Item> pickedUpStat = Stats.PICKED_UP.getOrCreateStat(inputItem);
-                TRACKABLE_ITEMS.createTrackable(pickedUpStat, PickedUpTrackable.class);
+                trackableTarget.addSource(TRACKABLE_ITEMS.getOrCreate(pickedUpStat, PickedUpTrackable.class));
             }
         } else {
             for(Item source : input) {
                 Block sourceBlock = Block.getBlockFromItem(source);
                 if(sourceBlock == Blocks.AIR) continue;
                 Stat<Block> interactedStat = RandoAssistantStats.INTERACTED.getOrCreateStat(sourceBlock);
-                TRACKABLE_BLOCKS.createTrackable(interactedStat, MinedTrackable.class);
+                TRACKABLE_INTERACTED.getOrCreate(interactedStat, InteractedTrackable.class);
             }
         }
-        List<Identifier> inputIds = input.stream().map(Registries.ITEM::getId).toList();
-        List<Identifier> outputIds = output.stream().map(Registries.ITEM::getId).toList();
-        TRACKED.addEdges(inputIds, outputIds);
     }
 
-    public List<Trackable<?>> getEnabled() {
-        List<Trackable<?>> enabled = new ArrayList<>();
-        enabled.addAll(TRACKABLE_ITEMS.getEnabled());
-        enabled.addAll(TRACKABLE_BLOCKS.getEnabled());
-        enabled.addAll(TRACKABLE_ENTITIES.getEnabled());
-        enabled.addAll(TRACKABLE_INTERACTED.getEnabled());
-        enabled.addAll(TRACKABLE_LOOTED.getEnabled());
+    public Set<Trackable<?>> getEnabled(Predicate<Trackable<?>> filter) {
+        Set<Trackable<?>> enabled = Sets.newHashSet();
+        enabled.addAll(TRACKABLE_ITEMS.getEnabled(filter));
+        enabled.addAll(TRACKABLE_BLOCKS.getEnabled(filter));
+        enabled.addAll(TRACKABLE_ENTITIES.getEnabled(filter));
+        enabled.addAll(TRACKABLE_INTERACTED.getEnabled(filter));
+        enabled.addAll(TRACKABLE_LOOTED.getEnabled(filter));
         return enabled;
-    }
-
-    public List<Trackable<?>> getDisabled() {
-        List<Trackable<?>> disabled = new ArrayList<>();
-        disabled.addAll(TRACKABLE_ITEMS.getDisabled());
-        disabled.addAll(TRACKABLE_BLOCKS.getDisabled());
-        disabled.addAll(TRACKABLE_ENTITIES.getDisabled());
-        disabled.addAll(TRACKABLE_INTERACTED.getDisabled());
-        disabled.addAll(TRACKABLE_LOOTED.getDisabled());
-        return disabled;
     }
 
     public void enableAll() {
@@ -146,51 +127,29 @@ public class Tracker {
         TRACKABLE_LOOTED.disableAll();
     }
 
-    private static class TrackableSet<V, T extends Trackable<V>> {
+    private static class TrackableMap<V, T extends Trackable<V>> {
         private final HashMap<Stat<V>, T> trackables;
-        
-        public TrackableSet(HashMap<Stat<V>, T> trackables) {
-            this.trackables = trackables;
-        }
 
-        public TrackableSet() {
+        public TrackableMap() {
             this.trackables = new HashMap<>();
         }
 
-        public void createTrackable(Stat<V> stat, Class<T> tClass) {
+        public T getOrCreate(Stat<V> stat, Class<T> tClass) {
             if(trackables.containsKey(stat)) {
-                trackables.get(stat);
+                return trackables.get(stat);
             } else {
                 try {
-                    trackables.put(stat, tClass.getConstructor(Stat.class).newInstance(stat));
+                    T trackable = tClass.getConstructor(Stat.class).newInstance(stat);
+                    trackables.put(stat, trackable);
+                    return trackable;
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     throw new RuntimeException(e);
                 }
             }
         }
 
-        public void add(T trackable) {
-            trackables.put(trackable.getStat(), trackable);
-        }
-
-        public void remove(T trackable) {
-            trackables.remove(trackable.getStat());
-        }
-
-        public void clear() {
-            trackables.clear();
-        }
-
-        public HashMap<Stat<V>, T> getTrackables() {
-            return trackables;
-        }
-
-        public Collection<T> getEnabled() {
-            return trackables.values().stream().filter(Trackable::isEnabled).collect(Collectors.toList());
-        }
-
-        public Collection<T> getDisabled() {
-            return trackables.values().stream().filter(trackable -> !trackable.isEnabled()).collect(Collectors.toList());
+        public Set<T> getEnabled(Predicate<? super T> filter) {
+            return trackables.values().stream().filter(Trackable::isEnabled).filter(filter).collect(Collectors.toSet());
         }
 
         public void enableAll() {

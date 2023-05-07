@@ -1,20 +1,23 @@
 package com.bawnorton.randoassistant.screen;
 
 import com.bawnorton.randoassistant.RandoAssistant;
-import com.bawnorton.randoassistant.mixin.AbstractPlantPartBlockInvoker;
-import com.bawnorton.randoassistant.mixin.AttachedStemBlockAccessor;
+import com.bawnorton.randoassistant.mixin.client.AbstractPlantPartBlockInvoker;
+import com.bawnorton.randoassistant.mixin.client.AttachedStemBlockAccessor;
 import com.bawnorton.randoassistant.tracking.graph.GraphHelper;
 import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
+import com.bawnorton.randoassistant.tracking.trackable.Trackable;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.render.DiffuseLighting;
+import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.EntityType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.mob.SlimeEntity;
@@ -33,8 +36,6 @@ import net.minecraft.util.math.RotationAxis;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.Objects;
-
 public class LootTableResultButton extends ClickableWidget {
     private static final Identifier BACKGROUND_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/loot_book.png");
     private static final int width = 125;
@@ -42,10 +43,10 @@ public class LootTableResultButton extends ClickableWidget {
 
     private final MinecraftClient client;
     private final TrackingGraph associatedGraph;
-    private final Item target;
+    private final Trackable<Item> target;
     private final Identifier source;
 
-    public LootTableResultButton(TrackingGraph associatedGraph, Item target) {
+    public LootTableResultButton(TrackingGraph associatedGraph, Trackable<Item> target) {
         super(0, 0, width, height, ScreenTexts.EMPTY);
         client = MinecraftClient.getInstance();
         this.associatedGraph = associatedGraph;
@@ -69,20 +70,22 @@ public class LootTableResultButton extends ClickableWidget {
     private void renderSource(MatrixStack matrices, int x, int y) {
         y += 4; x += 4;
         if (Registries.ENTITY_TYPE.containsId(source)) {
-            EntityType<?> entityType = Registries.ENTITY_TYPE.get(source);
-            drawEntity(x + 11, y + 12, (LivingEntity) Objects.requireNonNull(entityType.create(client.world)));
-            return;
+            Entity entity = Registries.ENTITY_TYPE.get(source).create(client.world);
+            if (entity instanceof LivingEntity livingEntity) {
+                drawEntity(x + 11, y + 12, livingEntity);
+                return;
+            }
         }
         if (Registries.BLOCK.containsId(source)) {
             Block block = Registries.BLOCK.get(source);
             if (block instanceof FlowerPotBlock flowerPotBlock) {
-//                ItemStack icon = new ItemStack(flowerPotBlock.getContent().asItem());
-//                ItemStack pot = new ItemStack(Items.FLOWER_POT);
-//                client.getItemRenderer().renderGuiItemIcon(matrices, pot, x, y);
-//                client.textRenderer.draw(matrices, Text.of("+"), x + 17, y + 5, 0);
-//                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x + 24, y - 2);
-                VertexConsumerProvider.Immediate immediate = client.getBufferBuilders().getEntityVertexConsumers();
-                client.getBlockRenderManager().renderBlockAsEntity(flowerPotBlock.getDefaultState(), matrices, immediate, 0xFFFFFF, 0);
+                ItemStack icon = new ItemStack(Items.FLOWER_POT);
+                ItemStack flower = new ItemStack(flowerPotBlock.getContent());
+                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
+                if(flowerPotBlock.getContent().equals(Blocks.AIR)) {
+                    client.textRenderer.draw(matrices, Text.of("+"), x + 20, y + 5, 0);
+                    client.getItemRenderer().renderGuiItemIcon(matrices, flower, x + 26, y);
+                }
                 return;
             }
             if (block instanceof CandleCakeBlock candleCakeBlock) {
@@ -126,7 +129,7 @@ public class LootTableResultButton extends ClickableWidget {
     }
     
     private void renderTarget(MatrixStack matrices, int x, int y) {
-        ItemStack icon = new ItemStack(target);
+        ItemStack icon = new ItemStack(target.getContent());
         client.getItemRenderer().renderGuiItemIcon(matrices, icon, x + 4, y + 4);
     }
 
@@ -168,7 +171,6 @@ public class LootTableResultButton extends ClickableWidget {
         quaternionf.mul(quaternionf2);
         matrixStack2.multiply(quaternionf);
 
-
         float h = entity.bodyYaw;
         float i = entity.getYaw();
         float j = entity.getPitch();
@@ -201,7 +203,7 @@ public class LootTableResultButton extends ClickableWidget {
     public boolean renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
         if (isHovered() && client.currentScreen != null) {
             RenderSystem.disableDepthTest();
-            Text text = Text.of(source.getPath() + " -> " + target.getName().getString());
+            Text text = Text.of(source.getPath() + " -> " + target.getContent().getName().getString());
             client.currentScreen.renderTooltip(matrices, text, mouseX, mouseY);
             RenderSystem.enableDepthTest();
             return true;
@@ -228,7 +230,7 @@ public class LootTableResultButton extends ClickableWidget {
         return button == 0 || button == 1;
     }
 
-    public Item getTarget() {
+    public Trackable<Item> getTarget() {
         return target;
     }
 }

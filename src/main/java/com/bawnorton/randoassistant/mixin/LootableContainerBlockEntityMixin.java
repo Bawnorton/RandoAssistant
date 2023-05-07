@@ -23,15 +23,10 @@ public abstract class LootableContainerBlockEntityMixin {
     protected Identifier lootTableId;
     private Identifier id;
 
-    @Shadow
-    protected abstract DefaultedList<ItemStack> getInvStackList();
-
     @Inject(method = "checkLootInteraction", at = @At(value = "INVOKE", target = "Lnet/minecraft/loot/LootTable;supplyInventory(Lnet/minecraft/inventory/Inventory;Lnet/minecraft/loot/context/LootContext;)V", shift = At.Shift.AFTER))
     private void onCheckLootInteraction(PlayerEntity player, CallbackInfo ci) {
         if(player instanceof ServerPlayerEntity serverPlayer) {
-            SerializeableLootTable lootTable = SerializeableLootTable.ofOther(id, getInvStackList());
             serverPlayer.incrementStat(RandoAssistantStats.LOOTED.getOrCreateStat(id));
-            Networking.sendLootTablePacket(serverPlayer, lootTable);
         }
     }
 

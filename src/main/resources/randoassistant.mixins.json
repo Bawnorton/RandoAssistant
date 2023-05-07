@@ -3,18 +3,13 @@
   "package": "com.bawnorton.randoassistant.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AbstractPlantPartBlockInvoker",
-    "AttachedStemBlockAccessor",
     "AxeItemMixin",
-    "BlockMixin",
     "CandleCakeBlockMixin",
     "FishingBobberEntityMixin",
     "HoneycombItemMixin",
-    "LivingEntityMixin",
     "LootableContainerBlockEntityMixin",
     "MinecraftServerMixin",
-    "RecipeUnlockerMixin",
-    "ServerWorldAccessor"
+    "ServerStatHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
