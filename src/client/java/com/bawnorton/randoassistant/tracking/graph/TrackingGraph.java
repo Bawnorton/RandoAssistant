@@ -51,7 +51,11 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
             add(destination);
             destinationVertex = getVertex(destination);
         }
-        addEdge(sourceVertex, destinationVertex);
+        try {
+            addEdge(sourceVertex, destinationVertex);
+        } catch (IllegalArgumentException ignored) {
+            // silently ignore looping edges
+        }
     }
 
     public boolean contains(Trackable<?> trackable) {
