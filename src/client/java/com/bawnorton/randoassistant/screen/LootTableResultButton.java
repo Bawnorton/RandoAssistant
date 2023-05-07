@@ -78,33 +78,13 @@ public class LootTableResultButton extends ClickableWidget {
         }
         if (Registries.BLOCK.containsId(source)) {
             Block block = Registries.BLOCK.get(source);
-            if (block instanceof FlowerPotBlock flowerPotBlock) {
-                ItemStack icon = new ItemStack(Items.FLOWER_POT);
-                ItemStack flower = new ItemStack(flowerPotBlock.getContent());
-                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
-                if(!flowerPotBlock.getContent().equals(Blocks.AIR)) {
-                    client.textRenderer.draw(matrices, Text.of("+"), x + 20, y + 5, 0);
-                    client.getItemRenderer().renderGuiItemIcon(matrices, flower, x + 26, y);
-                }
-                return;
-            }
-            if (block instanceof CandleCakeBlock candleCakeBlock) {
-                ItemStack icon = new ItemStack(Items.CAKE);
-                ItemStack candle = new ItemStack(RandoAssistant.CANDLE_CAKE_MAP.get(candleCakeBlock));
-                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
-                client.textRenderer.draw(matrices, Text.of("+"), x + 20, y + 5, 0);
-                client.getItemRenderer().renderGuiItemIcon(matrices, candle, x + 26, y);
+            if (block instanceof FlowerPotBlock || block instanceof CandleCakeBlock || block instanceof AttachedStemBlock) {
+                drawBlock(matrices, block, x, y);
                 return;
             }
             if (block instanceof AbstractPlantPartBlock abstractPlantBlock) {
                 AbstractPlantStemBlock stemBlock = ((AbstractPlantPartBlockInvoker) abstractPlantBlock).getStem();
                 ItemStack icon = new ItemStack(stemBlock.getDefaultState().getBlock().asItem());
-                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
-                return;
-            }
-            if (block instanceof AttachedStemBlock attachedStemBlock) {
-                GourdBlock gourdBlock = ((AttachedStemBlockAccessor) attachedStemBlock).getGourdBlock();
-                ItemStack icon = new ItemStack(gourdBlock.getStem().asItem());
                 client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
                 return;
             }
@@ -131,6 +111,36 @@ public class LootTableResultButton extends ClickableWidget {
     private void renderTarget(MatrixStack matrices, int x, int y) {
         ItemStack icon = new ItemStack(target.getContent());
         client.getItemRenderer().renderGuiItemIcon(matrices, icon, x + 4, y + 4);
+    }
+
+    private void drawBlock(MatrixStack matrixStack, Block block, int x, int y) {
+        BlockState state = block.getDefaultState();
+
+        matrixStack.push();
+
+        matrixStack.translate(x + 16 / 2f, y + 12 / 2f, 100);
+        matrixStack.scale(40 * 24 / 64f, -40 * 24 / 64f, 40);
+
+        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(30));
+        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45 + 180));
+
+        matrixStack.translate(-.5, -.5, -.5);
+
+        RenderSystem.runAsFancy(() -> {
+            final var vertexConsumers = client.getBufferBuilders().getEntityVertexConsumers();
+            if (state.getRenderType() != BlockRenderType.ENTITYBLOCK_ANIMATED) {
+                this.client.getBlockRenderManager().renderBlockAsEntity(
+                    state, matrixStack, vertexConsumers,
+                    LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV
+                );
+            }
+
+            RenderSystem.setShaderLights(new Vector3f(-1.5f, -.5f, 0), new Vector3f(0, -1, 0));
+            vertexConsumers.draw();
+            DiffuseLighting.enableGuiDepthLighting();
+        });
+
+        matrixStack.pop();
     }
 
     private void drawEntity(int x, int y, LivingEntity entity) {
