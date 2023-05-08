@@ -19,10 +19,6 @@ public class Config {
     public Boolean toasts;
 
     @Expose
-    @SerializedName("search_type")
-    public SearchType searchType;
-
-    @Expose
     @SerializedName("child_depth")
     public Integer childDepth;
 
@@ -44,18 +40,5 @@ public class Config {
 
     public static void update(Config config) {
         INSTANCE = config;
-    }
-
-    public enum SearchType {
-        @Expose @SerializedName("fuzzy")
-        FUZZY,
-        @Expose @SerializedName("exact")
-        EXACT,
-        @Expose @SerializedName("contains")
-        CONTAINS;
-
-        public SearchType next() {
-            return values()[(ordinal() + 1) % values().length];
-        }
     }
 }

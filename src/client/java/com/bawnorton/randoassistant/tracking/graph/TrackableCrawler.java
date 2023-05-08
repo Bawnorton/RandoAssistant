@@ -14,7 +14,6 @@ public abstract class TrackableCrawler {
         graph.add(trackable);
         for(Trackable<?> source : trackable.getEnabledSources()) {
             if(graph.contains(source)) continue;
-            graph.add(source);
             graph.connect(source, trackable);
             crawl(source, graph);
         }

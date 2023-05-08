@@ -30,7 +30,7 @@ public class RandoAssistantClient implements ClientModInitializer {
         float timeOffset = Math.abs(((System.currentTimeMillis() % 2000) / 1000.0f) - 1.0f);
 
         matrices.push();
-        matrices.translate(0, -Easing.ease(0, 1, timeOffset), 130);
+        matrices.translate(0, -Easing.ease(0, 1, timeOffset), 300);
         RenderSystem.setShaderTexture(0, STAR);
         DrawableHelper.drawTexture(matrices, x, y, 0, 0, 8, 8, 16, 16);
         matrices.pop();

@@ -232,8 +232,12 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         String text = this.searchField.getText().toLowerCase(Locale.ROOT);
         if(!text.equals(this.searchText)) {
             this.searchText = text;
-            // update list of loot tables
+            lootTableArea.resetResults(true);
         }
+    }
+
+    public String getSearchText() {
+        return this.searchText;
     }
 
     private boolean isWide() {

@@ -85,7 +85,6 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // mod dependencies
-    modImplementation include("io.github.cottonmc:LibGui:${project.libgui_version}")
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
     modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 

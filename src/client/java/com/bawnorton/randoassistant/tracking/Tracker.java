@@ -98,13 +98,14 @@ public class Tracker {
         }
     }
 
-    public Set<Trackable<?>> getEnabled(Predicate<Trackable<?>> filter) {
+    @SafeVarargs
+    public final Set<Trackable<?>> getEnabled(Predicate<Trackable<?>>... filters) {
         Set<Trackable<?>> enabled = Sets.newHashSet();
-        enabled.addAll(TRACKABLE_ITEMS.getEnabled(filter));
-        enabled.addAll(TRACKABLE_BLOCKS.getEnabled(filter));
-        enabled.addAll(TRACKABLE_ENTITIES.getEnabled(filter));
-        enabled.addAll(TRACKABLE_INTERACTED.getEnabled(filter));
-        enabled.addAll(TRACKABLE_LOOTED.getEnabled(filter));
+        enabled.addAll(TRACKABLE_ITEMS.getEnabled(filters));
+        enabled.addAll(TRACKABLE_BLOCKS.getEnabled(filters));
+        enabled.addAll(TRACKABLE_ENTITIES.getEnabled(filters));
+        enabled.addAll(TRACKABLE_INTERACTED.getEnabled(filters));
+        enabled.addAll(TRACKABLE_LOOTED.getEnabled(filters));
         return enabled;
     }
 
@@ -145,8 +146,24 @@ public class Tracker {
             }
         }
 
-        public Set<T> getEnabled(Predicate<? super T> filter) {
-            return trackables.values().stream().filter(Trackable::isEnabled).filter(filter).collect(Collectors.toSet());
+        @SafeVarargs
+        public final Set<T> getEnabled(Predicate<? super T>... filters) {
+            Set<T> enabled = Sets.newHashSet();
+            for(T trackable : trackables.values()) {
+                if(trackable.isEnabled()) {
+                    boolean passes = true;
+                    for(Predicate<? super T> filter : filters) {
+                        if(!filter.test(trackable)) {
+                            passes = false;
+                            break;
+                        }
+                    }
+                    if(passes) {
+                        enabled.add(trackable);
+                    }
+                }
+            }
+            return enabled;
         }
 
         public void enableAll() {

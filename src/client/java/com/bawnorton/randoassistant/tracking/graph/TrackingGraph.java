@@ -1,7 +1,9 @@
 package com.bawnorton.randoassistant.tracking.graph;
 
+import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.tracking.trackable.Trackable;
 import com.google.common.collect.Maps;
+import grapher.graph.drawing.Drawing;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -13,10 +15,17 @@ import java.util.stream.Collectors;
 
 // directed cyclic graph of loot tables and interactions
 public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, TrackingGraph.Edge> implements Iterable<TrackingGraph.Vertex> {
-    private final HashMap<Trackable<?>, Vertex> VERTEX_MAP = Maps.newHashMap();
+    private final HashMap<Trackable<?>, Vertex> VERTEX_MAP;
+    private final GraphDrawer drawer;
 
     public TrackingGraph() {
         super(Edge.class);
+        VERTEX_MAP = Maps.newHashMap();
+        drawer = new GraphDrawer(this);
+    }
+
+    public Drawing<Vertex, Edge> draw() {
+        return drawer.draw();
     }
 
     @Override
@@ -37,6 +46,16 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
         return false;
     }
 
+    @Override
+    public Edge addEdge(Vertex sourceVertex, Vertex targetVertex) {
+        Edge edge = super.addEdge(sourceVertex, targetVertex);
+        if(edge != null) {
+            edge.setOrigin(sourceVertex);
+            edge.setDestination(targetVertex);
+        }
+        return edge;
+    }
+
     public void add(Trackable<?> trackable) {
         addVertex(new Vertex(trackable));
     }
@@ -54,8 +73,10 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
         }
         try {
             addEdge(sourceVertex, destinationVertex);
-        } catch (IllegalArgumentException ignored) {
-            // silently ignore self-looping edges
+        } catch (IllegalArgumentException e) {
+            if(!e.getMessage().equals("loops not allowed")) {
+                RandoAssistant.LOGGER.error("Error connecting " + source.getIdentifier() + " to " + destination.getIdentifier(), e);
+            }
         }
     }
 
@@ -65,10 +86,6 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
 
     public Vertex getVertex(Trackable<?> trackable) {
         return VERTEX_MAP.get(trackable);
-    }
-
-    public Edge getEdge(Trackable<?> source, Trackable<?> destination) {
-        return getEdge(getVertex(source), getVertex(destination));
     }
 
     public Set<Vertex> getRoots() {
@@ -128,6 +145,11 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
                 return content.equals(other.content);
             }
             return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return content.hashCode();
         }
 
         @Override

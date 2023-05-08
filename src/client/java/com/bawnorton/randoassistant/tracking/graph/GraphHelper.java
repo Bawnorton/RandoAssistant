@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.tracking.graph;
 
+import com.bawnorton.randoassistant.tracking.trackable.Trackable;
 import com.bawnorton.randoassistant.util.NaturalBlocks;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
@@ -10,20 +11,20 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class GraphHelper {
-    public static Identifier getBestSource(TrackingGraph graph, TrackingGraph.Vertex vertex) {
+    public static Trackable<?> getBestSource(TrackingGraph graph, TrackingGraph.Vertex vertex) {
         TrackingGraph.Vertex bestNaturalParent = getClosestNaturallyFoundParent(graph, vertex);
         if(bestNaturalParent != null) {
-            return bestNaturalParent.getIdentifier();
+            return bestNaturalParent.getContent();
         }
         TrackingGraph.Vertex cloesestRoot = getClosestRoot(graph, vertex);
         if(cloesestRoot != null) {
-            return cloesestRoot.getIdentifier();
+            return cloesestRoot.getContent();
         }
         Set<TrackingGraph.Vertex> roots = graph.getRoots();
         if(roots.size() == 1) {
-            return roots.iterator().next().getIdentifier();
+            return roots.iterator().next().getContent();
         }
-        return vertex.getIdentifier();
+        return vertex.getContent();
     }
 
     public static TrackingGraph.Vertex getClosestRoot(TrackingGraph graph, TrackingGraph.Vertex vertex) {
@@ -41,8 +42,6 @@ public class GraphHelper {
     }
 
     public static TrackingGraph.Vertex getClosestNaturallyFoundParent(TrackingGraph graph, TrackingGraph.Vertex vertex) {
-        if(vertex.getIdentifier().getPath().contains("acacia_button"))
-            System.out.println("test");
         Set<TrackingGraph.Vertex> vertices = new HashSet<>(graph.vertexSet());
         vertices.remove(vertex);
         int cloesestDistance = Integer.MAX_VALUE;

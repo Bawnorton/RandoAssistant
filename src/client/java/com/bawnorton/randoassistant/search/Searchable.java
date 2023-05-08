@@ -1,5 +1,7 @@
 package com.bawnorton.randoassistant.search;
 
+import java.util.Set;
+
 public interface Searchable {
-    String getSearchableString();
+    Set<String> getSearchableStrings();
 }

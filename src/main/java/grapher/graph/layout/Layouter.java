@@ -8,6 +8,7 @@ import grapher.graph.elements.exception.CannotBeAppliedException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Layouter accepts lists ofItems veritces and edges which might in fact form more than one graph
@@ -75,6 +76,10 @@ public class Layouter<V extends Vertex, E extends Edge<V>> {
     public Layouter(List<V> vertices, List<E> edges, LayoutAlgorithms algorithm, GraphLayoutProperties layoutProperties) {
         this(vertices, edges, algorithm);
         this.layoutProperties = layoutProperties;
+    }
+
+    public Layouter(Set<V> vertices, Set<E> edges, LayoutAlgorithms algorithm, GraphLayoutProperties layoutProperties) {
+        this(new ArrayList<>(vertices), new ArrayList<>(edges), algorithm, layoutProperties);
     }
 
     @SuppressWarnings("unchecked")

@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.screen;
 
+import com.bawnorton.randoassistant.search.SearchManager;
 import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.tracking.graph.TrackableCrawler;
 import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 
+import java.util.Comparator;
 import java.util.List;
 
 // list of loot table buttons
@@ -25,6 +27,8 @@ public class LootTableListWidget {
     private final ToggleButtonWidget nextPageButton;
     private final ToggleButtonWidget previousPageButton;
 
+    private final SearchManager<Trackable<?>> searchManager;
+
     private Item lastTargetClicked;
 
     public LootTableListWidget(MinecraftClient client, int x, int y) {
@@ -37,17 +41,21 @@ public class LootTableListWidget {
         this.nextPageButton.setTextureUV(1, 208, 12, 18, LootBookWidget.TEXTURE);
         this.previousPageButton.setTextureUV(2, 208, 12, 18, LootBookWidget.TEXTURE);
 
+        this.searchManager = new SearchManager<>(Tracker.getInstance().getEnabled());
+
         resetResults(false);
     }
 
     @SuppressWarnings("unchecked")
     public void resetResults(boolean resetPage) {
-        Tracker.getInstance().getEnabled(trackable -> trackable.getContent() instanceof Item).forEach(trackable -> {
+        this.buttons.clear();
+        Tracker.getInstance().getEnabled(trackable -> trackable.getContent() instanceof Item, trackable -> LootBookWidget.getInstance().getSearchText().isEmpty() || searchManager.getMatches(LootBookWidget.getInstance().getSearchText()).contains(trackable)).forEach(trackable -> {
             TrackingGraph graph = TrackableCrawler.crawl(trackable);
             LootTableResultButton button = new LootTableResultButton(graph, (Trackable<Item>) trackable);
             button.setX(this.x);
             buttons.add(button);
         });
+        buttons.sort(Comparator.comparing(LootTableResultButton::getTarget));
         this.pageCount = (int) Math.ceil(buttons.size() / 4.0);
         if (this.pageCount <= currentPage || resetPage) {
             this.currentPage = 0;

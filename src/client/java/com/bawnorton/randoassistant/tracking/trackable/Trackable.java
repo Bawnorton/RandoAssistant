@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.tracking.trackable;
 
+import com.bawnorton.randoassistant.search.Searchable;
 import com.google.common.collect.Sets;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class Trackable<T> implements Comparable<Trackable<T>> {
+public abstract class Trackable<T> implements Comparable<Trackable<T>>, Searchable {
     private final Stat<T> associatedStat;
     private final Set<Trackable<?>> sources = Sets.newHashSet();
     protected final StatHandler statHandler;
@@ -53,6 +54,11 @@ public abstract class Trackable<T> implements Comparable<Trackable<T>> {
     }
 
     @Override
+    public int hashCode() {
+        return getIdentifier().hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if(obj instanceof Trackable<?> other) {
             return other.getIdentifier().equals(getIdentifier());
@@ -62,7 +68,7 @@ public abstract class Trackable<T> implements Comparable<Trackable<T>> {
 
     @Override
     public String toString() {
-        return "Trackable{stat=" + associatedStat
+        return "Trackable{of=" + getContent()
                 + ", enabled=" + isEnabled()
                 + "}";
     }
