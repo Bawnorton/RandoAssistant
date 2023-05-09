@@ -166,4 +166,9 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
     protected void onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> cir) {
         LootBookWidget.getInstance().mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        return LootBookWidget.getInstance().mouseScrolled(mouseX, mouseY, amount);
+    }
 }

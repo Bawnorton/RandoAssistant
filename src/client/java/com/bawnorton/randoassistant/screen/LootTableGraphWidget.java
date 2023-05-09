@@ -31,6 +31,7 @@ public class LootTableGraphWidget {
 
     private double xOffset = 0;
     private double yOffset = 0;
+    private double scale = 1;
 
     private int x;
     private int y;
@@ -67,6 +68,10 @@ public class LootTableGraphWidget {
         yOffset += y;
     }
 
+    public void scale(double scale) {
+        this.scale *= scale;
+    }
+
     public void render(int x, int y, MatrixStack matrices) {
         this.x = x;
         this.y = y;
@@ -75,10 +80,13 @@ public class LootTableGraphWidget {
             renderPlaceholder(matrices, x + WIDTH / 2, y + HEIGHT / 2);
             return;
         }
+        matrices.push();
+//        matrices.scale((float) scale, (float) scale, 1);
         DrawableHelper.enableScissor(x + 8, y + 8, x + WIDTH - 8, y + HEIGHT - 8);
         renderArrows(matrices, x + xOffset, y + yOffset);
         renderGraph(matrices, x + xOffset, y + yOffset);
         DrawableHelper.disableScissor();
+        matrices.pop();
     }
 
     private void renderBackground(MatrixStack matrices, int x, int y) {
@@ -169,6 +177,15 @@ public class LootTableGraphWidget {
     public boolean mouseDragged(double mouseX, double mouseY, double deltaX, double deltaY) {
         if(mouseX >= x && mouseX <= x + WIDTH && mouseY >= y && mouseY <= y + HEIGHT) {
             move(deltaX, deltaY);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if(mouseX >= x && mouseX <= x + WIDTH && mouseY >= y && mouseY <= y + HEIGHT) {
+            double scale = Math.pow(1.1, amount);
+            scale(scale);
             return true;
         }
         return false;

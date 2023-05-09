@@ -160,6 +160,15 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
     }
 
     @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if(!this.isOpen()) return false;
+        LootTableResultButton lastClicked = LootTableResultButton.getLastClicked();
+        if(lastClicked == null) return false;
+        LootTableGraphWidget graphWidget = lastClicked.graphWidget;
+        return graphWidget != null && graphWidget.mouseScrolled(mouseX, mouseY, amount);
+    }
+
+    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if(!this.isOpen() || client.player.isSpectator()) return false;
         if (this.searchField.mouseClicked(mouseX, mouseY, button) || this.lootTableArea.mouseClicked(mouseX, mouseY, button)) {
