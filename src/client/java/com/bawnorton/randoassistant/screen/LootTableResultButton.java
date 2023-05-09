@@ -3,44 +3,60 @@ package com.bawnorton.randoassistant.screen;
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.render.RenderingHelper;
 import com.bawnorton.randoassistant.tracking.graph.GraphHelper;
+import com.bawnorton.randoassistant.tracking.graph.TrackableCrawler;
 import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
-import com.bawnorton.randoassistant.tracking.trackable.Trackable;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+import java.util.Objects;
+import java.util.concurrent.*;
+
 public class LootTableResultButton extends ClickableWidget {
     private static final Identifier BACKGROUND_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/loot_book.png");
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(40, 40, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
     private static LootTableResultButton lastClicked;
     private static final int width = 125;
     private static final int height = 25;
 
     private final MinecraftClient client;
-    private final LootTableGraphWidget graphWidget;
-    private final Trackable<Item> target;
-    private final Trackable<?> source;
+    private final Identifier target;
+    private TrackingGraph graph;
+    private Identifier source;
 
-    private boolean graphOpen = false;
+    public LootTableGraphWidget graphWidget;
+    public boolean graphOpen;
 
-    public LootTableResultButton(TrackingGraph associatedGraph, Trackable<Item> target) {
+    public LootTableResultButton(Identifier target) {
         super(0, 0, width, height, ScreenTexts.EMPTY);
         client = MinecraftClient.getInstance();
-        this.graphWidget = new LootTableGraphWidget(associatedGraph);
         this.target = target;
-        this.source = GraphHelper.getBestSource(associatedGraph, associatedGraph.getVertex(target));
+        EXECUTOR_SERVICE.submit(() -> {
+            this.graph = TrackableCrawler.crawl(target);
+            this.source = GraphHelper.getBestSource(graph, graph.getVertex(target));
+        });
+    }
+
+    public static LootTableResultButton getLastClicked() {
+        return lastClicked;
     }
 
     @Override
     public void onClick(double mouseX, double mouseY) {
         if(lastClicked != null) {
             lastClicked.closeGraph();
+        }
+        if(lastClicked == this) {
+            lastClicked = null;
+            return;
         }
         lastClicked = this;
         lastClicked.openGraph();
@@ -51,6 +67,9 @@ public class LootTableResultButton extends ClickableWidget {
     }
 
     private void openGraph() {
+        if(graphWidget == null) {
+            graphWidget = new LootTableGraphWidget(graph);
+        }
         graphOpen = true;
     }
 
@@ -63,25 +82,29 @@ public class LootTableResultButton extends ClickableWidget {
             v += height;
         }
         drawTexture(matrices, getX(), getY(), u, v, width, height);
-        RenderingHelper.renderTrackable(source, matrices, getX() + 4, getY() + 4);
+        RenderingHelper.renderIdentifier(Objects.requireNonNullElse(source, Registries.ITEM.getId(Items.STRUCTURE_VOID)), matrices, getX() + 4, getY() + 4);
         renderTarget(matrices, getX() + 104, getY() + 4);
-        if(graphOpen) {
-            graphWidget.render(matrices, 200, 200);
-        }
     }
-    
+
     private void renderTarget(MatrixStack matrices, int x, int y) {
-        ItemStack icon = new ItemStack(target.getContent());
+        ItemStack icon = new ItemStack(Registries.ITEM.get(target));
         client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
     }
 
     public boolean renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
         if (isHovered() && client.currentScreen != null) {
-            Text text = Text.of(source.getIdentifier().getPath() + " -> " + target.getContent().getName().getString());
+            Text text = Text.of(Objects.requireNonNullElse(source, "Loading...") + " -> " + target);
             client.currentScreen.renderTooltip(matrices, text, mouseX, mouseY);
             return true;
         }
         return false;
+    }
+
+    public static boolean isGraphOpen() {
+        if(!LootBookWidget.getInstance().isOpen()) {
+            return false;
+        }
+        return lastClicked != null && lastClicked.graphOpen;
     }
 
     @Override
@@ -103,7 +126,20 @@ public class LootTableResultButton extends ClickableWidget {
         return button == 0 || button == 1;
     }
 
-    public Trackable<Item> getTarget() {
+    @Override
+    public int hashCode() {
+        return Objects.hash(target);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof LootTableResultButton other) {
+            return other.target.equals(target);
+        }
+        return false;
+    }
+
+    public Identifier getTarget() {
         return target;
     }
 }

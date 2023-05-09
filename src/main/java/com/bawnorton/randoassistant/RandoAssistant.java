@@ -6,8 +6,6 @@ import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.block.CandleBlock;
-import net.minecraft.block.CandleCakeBlock;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -28,13 +26,13 @@ import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 public class RandoAssistant implements ModInitializer {
     public static final String MOD_ID = "randoassistant";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-
-    public static final Map<CandleCakeBlock, CandleBlock> CANDLE_CAKE_MAP = new HashMap<>();
 
     public static void getAllLootTables(PlayerEntity clientPlayer) {
         ServerPlayerEntity serverPlayer = Networking.server.getPlayerManager().getPlayer(clientPlayer.getUuid());

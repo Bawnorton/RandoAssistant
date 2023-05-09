@@ -1,34 +1,31 @@
 package com.bawnorton.randoassistant.search;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class SearchManager<T extends Searchable> {
     private final Map<String, T> searchMap;
     private final Set<String> searchSet;
-    private String cachedQuery = "";
-    private Set<T> cachedMatches = Set.of();
 
     public SearchManager(Set<T> searchSet) {
         this.searchMap = new HashMap<>();
         this.searchSet = new HashSet<>();
-        searchSet.forEach(searchable -> {
-            searchable.getSearchableStrings().forEach(string -> {
-                searchMap.put(string, searchable);
-                this.searchSet.add(string);
-            });
-        });
+        searchSet.forEach(searchable -> searchable.getSearchableStrings().forEach(string -> {
+            string = filter(string);
+            searchMap.put(string, searchable);
+            this.searchSet.add(string);
+        }));
     }
 
     private String filter(String in) {
-        in = in.toLowerCase().replaceAll("\\s+", "");
+        in = in.toLowerCase().replaceAll("^[a-z]", "");
         if (in.isEmpty()) return null;
         return in;
     }
 
     public Set<T> getMatches(String query) {
-        if (query.equals(cachedQuery)) return cachedMatches;
-        cachedQuery = query;
         String adjustedQuery = filter(query);
         if (adjustedQuery == null) return Set.of();
         Set<T> matches = new HashSet<>();
@@ -37,7 +34,6 @@ public class SearchManager<T extends Searchable> {
                 matches.add(searchMap.get(match));
             }
         });
-        cachedMatches = matches;
         return matches;
     }
 }

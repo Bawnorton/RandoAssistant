@@ -1,17 +1,14 @@
 package com.bawnorton.randoassistant.tracking.graph;
 
-import com.bawnorton.randoassistant.tracking.trackable.Trackable;
 import com.bawnorton.randoassistant.util.NaturalBlocks;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 public class GraphHelper {
-    public static Trackable<?> getBestSource(TrackingGraph graph, TrackingGraph.Vertex vertex) {
+    public static Identifier getBestSource(TrackingGraph graph, TrackingGraph.Vertex vertex) {
         TrackingGraph.Vertex bestNaturalParent = getClosestNaturallyFoundParent(graph, vertex);
         if(bestNaturalParent != null) {
             return bestNaturalParent.getContent();

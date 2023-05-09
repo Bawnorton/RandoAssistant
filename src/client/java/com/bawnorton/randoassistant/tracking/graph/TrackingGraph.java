@@ -1,7 +1,6 @@
 package com.bawnorton.randoassistant.tracking.graph;
 
 import com.bawnorton.randoassistant.RandoAssistant;
-import com.bawnorton.randoassistant.tracking.trackable.Trackable;
 import com.google.common.collect.Maps;
 import grapher.graph.drawing.Drawing;
 import net.minecraft.util.Identifier;
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
 
 // directed cyclic graph of loot tables and interactions
 public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, TrackingGraph.Edge> implements Iterable<TrackingGraph.Vertex> {
-    private final HashMap<Trackable<?>, Vertex> VERTEX_MAP;
+    private final HashMap<Identifier, Vertex> VERTEX_MAP;
     private final GraphDrawer drawer;
 
     public TrackingGraph() {
@@ -56,40 +55,51 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
         return edge;
     }
 
-    public void add(Trackable<?> trackable) {
-        addVertex(new Vertex(trackable));
+    public void add(Identifier identifier) {
+        addVertex(new Vertex(identifier));
     }
 
-    public void connect(Trackable<?> source, Trackable<?> destination) {
+    public void connect(Identifier source, Identifier destination) {
+        if(!contains(source)) add(source);
+        if(!contains(destination)) add(destination);
         Vertex sourceVertex = getVertex(source);
-        if(sourceVertex == null) {
-            add(source);
-            sourceVertex = getVertex(source);
-        }
         Vertex destinationVertex = getVertex(destination);
-        if(destinationVertex == null) {
-            add(destination);
-            destinationVertex = getVertex(destination);
-        }
         try {
             addEdge(sourceVertex, destinationVertex);
         } catch (IllegalArgumentException e) {
             if(!e.getMessage().equals("loops not allowed")) {
-                RandoAssistant.LOGGER.error("Error connecting " + source.getIdentifier() + " to " + destination.getIdentifier(), e);
+                RandoAssistant.LOGGER.error("Error connecting " + source + " to " + destination, e);
             }
         }
     }
 
-    public boolean contains(Trackable<?> trackable) {
-        return VERTEX_MAP.containsKey(trackable);
+    public void merge(TrackingGraph vertices) {
+        for(Vertex vertex : vertices) {
+            addVertex(vertex);
+        }
+        for(Edge edge : vertices.edgeSet()) {
+            Vertex origin = edge.getOrigin();
+            Vertex destination = edge.getDestination();
+            connect(origin.getContent(), destination.getContent());
+        }
     }
 
-    public Vertex getVertex(Trackable<?> trackable) {
-        return VERTEX_MAP.get(trackable);
+    public boolean contains(Identifier identifier) {
+        return VERTEX_MAP.containsKey(identifier);
+    }
+
+    @NotNull
+    public Vertex getVertex(Identifier identifier) {
+        if(!contains(identifier)) throw new IllegalArgumentException("Identifier " + identifier + " not found");
+        return VERTEX_MAP.get(identifier);
     }
 
     public Set<Vertex> getRoots() {
         return vertexSet().stream().filter(vertex -> inDegreeOf(vertex) == 0).collect(Collectors.toSet());
+    }
+
+    public Set<Vertex> getLeaves() {
+        return vertexSet().stream().filter(vertex -> outDegreeOf(vertex) == 0).collect(Collectors.toSet());
     }
 
     @NotNull
@@ -120,18 +130,18 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
     }
 
     public static class Vertex implements grapher.graph.elements.Vertex {
-        private final Trackable<?> content;
+        private final Identifier content;
 
-        public Vertex(Trackable<?> trackable) {
-            this.content = trackable;
+        public Vertex(Identifier identifier) {
+            this.content = identifier;
         }
 
-        public Trackable<?> getContent() {
+        public Identifier getContent() {
             return content;
         }
 
         public Identifier getIdentifier() {
-            return content.getIdentifier();
+            return getContent();
         }
 
         @Override

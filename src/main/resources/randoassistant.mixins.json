@@ -3,10 +3,11 @@
   "package": "com.bawnorton.randoassistant.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AbstractBlockMixin",
     "AxeItemMixin",
-    "CandleCakeBlockMixin",
     "FishingBobberEntityMixin",
     "HoneycombItemMixin",
+    "LivingEntityMixin",
     "LootableContainerBlockEntityMixin",
     "MinecraftServerMixin",
     "ServerStatHandlerMixin"

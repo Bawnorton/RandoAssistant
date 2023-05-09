@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(AbstractInventoryScreen.class)
-public abstract class AbstractInventoryScreenMixin {
+public abstract class AbstractInventoryScreenMixin extends HandledScreenMixin {
     @ModifyVariable(method = "drawStatusEffects", at = @At("STORE"), ordinal = 2)
     private int modifyStatusEffectX(int x) {
         return x + (LootBookWidget.getInstance().isOpen() ? 147 : 0);

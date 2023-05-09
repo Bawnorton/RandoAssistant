@@ -7,10 +7,16 @@ import com.bawnorton.randoassistant.networking.client.Networking;
 import com.bawnorton.randoassistant.util.Easing;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
+import org.apache.commons.lang3.time.StopWatch;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class RandoAssistantClient implements ClientModInitializer {
     private static final Identifier STAR = new Identifier(RandoAssistant.MOD_ID, "textures/gui/item_stars.png");
@@ -28,7 +34,6 @@ public class RandoAssistantClient implements ClientModInitializer {
 
     public static void renderStar(MatrixStack matrices, int x, int y) {
         float timeOffset = Math.abs(((System.currentTimeMillis() % 2000) / 1000.0f) - 1.0f);
-
         matrices.push();
         matrices.translate(0, -Easing.ease(0, 1, timeOffset), 300);
         RenderSystem.setShaderTexture(0, STAR);

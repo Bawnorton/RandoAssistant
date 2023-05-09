@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.tracking.graph;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.RandoAssistantClient;
 import grapher.graph.drawing.Drawing;
 import grapher.graph.layout.GraphLayoutProperties;
 import grapher.graph.layout.LayoutAlgorithms;
@@ -60,8 +61,8 @@ public class GraphDrawer {
                 List<Point2D> points = drawing.getEdgeMappings().get(edge);
                 Point2D source = points.get(0);
                 Point2D target = points.get(1);
-                source.setLocation(source.getX() / 7, source.getY() / 2);
-                target.setLocation(target.getX() / 7, target.getY() / 2);
+                source.setLocation(source.getX() / 3, source.getY() / 2);
+                target.setLocation(target.getX() / 3, target.getY() / 2);
             }
             return drawing;
         } catch (Exception e) {
