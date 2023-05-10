@@ -95,6 +95,22 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
         return vertexSet().stream().filter(vertex -> inDegreeOf(vertex) == 0).collect(Collectors.toSet());
     }
 
+
+    public Set<Vertex> getChildren(Identifier identifier) {
+        return getChildren(getVertex(identifier), new HashSet<>(), new HashSet<>());
+    }
+
+    private Set<Vertex> getChildren(Vertex parent, Set<Vertex> children, Set<Vertex> visited) {
+        if(visited.contains(parent)) return children;
+        visited.add(parent);
+        for(Edge edge : outgoingEdgesOf(parent)) {
+            Vertex child = getEdgeTarget(edge);
+            children.add(child);
+            getChildren(child, children, visited);
+        }
+        return children;
+    }
+
     @NotNull
     @Override
     public Iterator<Vertex> iterator() {

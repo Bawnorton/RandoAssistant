@@ -2,7 +2,6 @@ package com.bawnorton.randoassistant.mixin.client;
 
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
-import me.jellysquid.mods.sodium.client.model.quad.blender.BiomeColorBlender;
 import me.jellysquid.mods.sodium.client.model.quad.blender.ColorSampler;
 import net.minecraft.world.BlockRenderView;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +14,7 @@ import java.util.Random;
 
 @SuppressWarnings("DuplicatedCode")
 @Pseudo
-@Mixin(BiomeColorBlender.class)
+@Mixin(targets = {"me.jellysquid.mods.sodium.client.model.quad.blender.BiomeColorBlender"})
 public abstract class BiomeColorBlenderMixin {
     @Inject(method = "getBlockColor", at = @At("RETURN"), cancellable = true)
     private <T> void onGetColor(BlockRenderView world, T state, ColorSampler<T> sampler, int x, int y, int z, int colorIdx, CallbackInfoReturnable<Integer> cir) {

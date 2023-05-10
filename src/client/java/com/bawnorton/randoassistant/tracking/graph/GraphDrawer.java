@@ -8,9 +8,7 @@ import grapher.graph.layout.Layouter;
 import grapher.graph.layout.PropertyEnums;
 
 import javax.swing.*;
-import java.awt.geom.Point2D;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 public class GraphDrawer {
@@ -55,14 +53,6 @@ public class GraphDrawer {
 
             drawing = layouter.layout();
             dirty = false;
-            // scale down the drawing width so it better fits in the screen
-            for (TrackingGraph.Edge edge : drawing.getEdgeMappings().keySet()) {
-                List<Point2D> points = drawing.getEdgeMappings().get(edge);
-                Point2D source = points.get(0);
-                Point2D target = points.get(1);
-                source.setLocation(source.getX() / 2, source.getY() / 2);
-                target.setLocation(target.getX() / 2, target.getY() / 2);
-            }
             return drawing;
         } catch (Exception e) {
             RandoAssistant.LOGGER.error("Failed to draw graph");

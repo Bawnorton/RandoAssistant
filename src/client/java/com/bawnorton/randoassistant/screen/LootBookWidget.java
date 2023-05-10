@@ -162,7 +162,7 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if(!this.isOpen()) return false;
+        if(!this.isOpen() || button == 1) return false;
         LootTableResultButton lastClicked = LootTableResultButton.getLastClicked();
         if(lastClicked == null) return false;
         LootTableGraphWidget graphWidget = lastClicked.graphWidget;

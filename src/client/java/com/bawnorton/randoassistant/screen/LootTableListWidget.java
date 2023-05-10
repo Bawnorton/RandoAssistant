@@ -151,6 +151,13 @@ public class LootTableListWidget {
                 return true;
             }
         }
+        LootTableResultButton lastClicked = LootTableResultButton.getLastClicked();
+        if(lastClicked != null) {
+            LootTableGraphWidget graphWidget = lastClicked.graphWidget;
+            if(graphWidget != null) {
+                return graphWidget.mouseClicked(mouseX, mouseY, button);
+            }
+        }
         return false;
     }
 

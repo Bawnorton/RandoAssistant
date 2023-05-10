@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.tracking.trackable;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import com.google.common.collect.Sets;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;

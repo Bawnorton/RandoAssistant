@@ -157,11 +157,6 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
         }
     }
 
-    @Inject(method = "isClickOutsideBounds", at = @At("RETURN"), cancellable = true)
-    private void checkOutsideLootBookBounds(double mouseX, double mouseY, int left, int top, int button, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(cir.getReturnValue() && LootBookWidget.getInstance().isClickOutsideBounds(mouseX, mouseY, left, top, backgroundWidth, backgroundHeight));
-    }
-
     @Override
     protected void onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> cir) {
         LootBookWidget.getInstance().mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
