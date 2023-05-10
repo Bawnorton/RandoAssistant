@@ -13,13 +13,13 @@
     "HandledScreenMixin",
     "InventoryScreenMixin",
     "LivingEntityRendererMixin",
+    "LinearColorBlenderMixin",
+    "ScreenMixin",
     "StatMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "LinearColorBlenderMixin",
-    "ScreenMixin"
   ]
 }

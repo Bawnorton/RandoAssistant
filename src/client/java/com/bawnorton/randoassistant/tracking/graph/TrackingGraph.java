@@ -27,6 +27,14 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
         return drawer.draw();
     }
 
+    public void markDirty() {
+        drawer.markDirty();
+    }
+
+    public boolean isDirty() {
+        return drawer.isDirty();
+    }
+
     @Override
     public boolean addVertex(Vertex vertex) {
         if(super.addVertex(vertex)) {
@@ -73,17 +81,6 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
         }
     }
 
-    public void merge(TrackingGraph vertices) {
-        for(Vertex vertex : vertices) {
-            addVertex(vertex);
-        }
-        for(Edge edge : vertices.edgeSet()) {
-            Vertex origin = edge.getOrigin();
-            Vertex destination = edge.getDestination();
-            connect(origin.getContent(), destination.getContent());
-        }
-    }
-
     public boolean contains(Identifier identifier) {
         return VERTEX_MAP.containsKey(identifier);
     }
@@ -96,10 +93,6 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
 
     public Set<Vertex> getRoots() {
         return vertexSet().stream().filter(vertex -> inDegreeOf(vertex) == 0).collect(Collectors.toSet());
-    }
-
-    public Set<Vertex> getLeaves() {
-        return vertexSet().stream().filter(vertex -> outDegreeOf(vertex) == 0).collect(Collectors.toSet());
     }
 
     @NotNull

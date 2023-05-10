@@ -19,12 +19,8 @@ public class Config {
     public Boolean toasts;
 
     @Expose
-    @SerializedName("child_depth")
-    public Integer childDepth;
-
-    @Expose
-    @SerializedName("parent_depth")
-    public Integer parentDepth;
+    @SerializedName("search_depth")
+    public Integer searchDepth;
 
     @Expose
     @SerializedName("randomize_colours")

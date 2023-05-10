@@ -1,12 +1,13 @@
 package com.bawnorton.randoassistant.screen;
 
-import com.bawnorton.randoassistant.search.SearchManager;
 import com.bawnorton.randoassistant.tracking.Tracker;
-import com.bawnorton.randoassistant.tracking.trackable.Trackable;
+import com.bawnorton.randoassistant.util.IdentifierType;
 import com.google.common.collect.Sets;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.Item;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
@@ -29,8 +30,6 @@ public class LootTableListWidget {
     private final ToggleButtonWidget nextPageButton;
     private final ToggleButtonWidget previousPageButton;
 
-    private final SearchManager<Trackable<?>> searchManager;
-
     public LootTableListWidget(MinecraftClient client, int x, int y) {
         this.client = client;
         this.x = x;
@@ -41,22 +40,47 @@ public class LootTableListWidget {
         this.nextPageButton.setTextureUV(1, 208, 12, 18, LootBookWidget.TEXTURE);
         this.previousPageButton.setTextureUV(2, 208, 12, 18, LootBookWidget.TEXTURE);
 
-        this.searchManager = new SearchManager<>(Tracker.getInstance().getEnabled());
+        resetResults(false);
+    }
 
+    public void clearCache() {
+        this.buttons.forEach(LootTableResultButton::markDirty);
         resetResults(false);
     }
 
     public void resetResults(boolean resetPage) {
         this.buttons.clear();
         Set<Identifier> identifiers = Sets.newHashSet();
-        Tracker.getInstance().getEnabled(trackable -> LootBookWidget.getInstance().getSearchText().isEmpty() || searchManager.getMatches(LootBookWidget.getInstance().getSearchText()).contains(trackable)).forEach(trackable -> identifiers.addAll(trackable.getOutput()));
-        identifiers.forEach(identifer -> {
-            LootTableResultButton button = new LootTableResultButton(identifer);
-            button.setX(this.x);
-            buttons.add(button);
+        String searchText = LootBookWidget.getInstance().getSearchText().toLowerCase().replace("^[a-z]", "");
+        Tracker.getInstance().getEnabledInteracted().forEach(trackable -> identifiers.addAll(trackable.getOutput()));
+        Tracker.getInstance().getEnabledLooted().forEach(trackable -> identifiers.addAll(trackable.getOutput()));
+        Tracker.getInstance().getEnabledCrafted().forEach(trackable -> trackable.getOutput().forEach(identifier -> {
+            if(IdentifierType.fromId(identifier).isItem()) {
+                Item item = Registries.ITEM.get(identifier);
+                if(Tracker.getInstance().hasCrafted(item)) {
+                    identifiers.add(identifier);
+                }
+            }
+        }));
+        identifiers.forEach(identifier -> {
+            String name = (switch (IdentifierType.fromId(identifier)) {
+                case ITEM -> Registries.ITEM.get(identifier).getName().getString();
+                case BLOCK -> Registries.BLOCK.get(identifier).getName().getString();
+                case ENTITY -> Registries.ENTITY_TYPE.get(identifier).getName().getString();
+                case OTHER -> identifier.toString();
+            }).toLowerCase().replace("^[a-z]", "");
+            if(name.contains(searchText) || identifier.getPath().contains(searchText)) {
+                LootTableResultButton button = new LootTableResultButton(identifier);
+                button.setX(this.x);
+                buttons.add(button);
+            }
         });
         buttons.sort(Comparator.comparing(LootTableResultButton::getTarget));
-        this.pageCount = (int) Math.ceil(identifiers.size() / 4.0);
+        updatePageCount(resetPage);
+    }
+
+    public void updatePageCount(boolean resetPage) {
+        this.pageCount = (int) Math.ceil(buttons.size() / 4.0);
         if (this.pageCount <= currentPage || resetPage) {
             this.currentPage = 0;
         }
@@ -87,12 +111,14 @@ public class LootTableListWidget {
 
         LootTableResultButton lastClicked = LootTableResultButton.getLastClicked();
         if(lastClicked != null && lastClicked.graphOpen) {
+            if(lastClicked.isDirty()) {
+                lastClicked.refresh();
+            }
             int invX = LootBookWidget.getInstance().getInvX();
-            int invY = LootBookWidget.getInstance().getInvY();
-            invY = Math.max(2, invY - 168);
+            int invY = LootBookWidget.getInstance().getInvY() - HEIGHT - 2;
             matrices.push();
             matrices.translate(0, 0, 600);
-            lastClicked.graphWidget.render(invX, invY, matrices);
+            lastClicked.graphWidget.render(matrices, invX, invY, mouseX, mouseY);
             matrices.pop();
         }
     }

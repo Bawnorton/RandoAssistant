@@ -3,10 +3,13 @@ package com.bawnorton.randoassistant.screen;
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.render.RenderingHelper;
 import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
+import com.bawnorton.randoassistant.util.IdentifierType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import grapher.graph.drawing.Drawing;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -14,9 +17,7 @@ import net.minecraft.util.Identifier;
 import org.joml.Matrix4f;
 
 import java.awt.geom.Point2D;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,42 +26,36 @@ import static net.minecraft.client.gui.DrawableHelper.drawTexture;
 public class LootTableGraphWidget {
     private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
     private static final Identifier BACKGROUND_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/graph.png");
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(5);
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
     private Map<Identifier, Point2D> vertexLocations;
     private Drawing<TrackingGraph.Vertex, TrackingGraph.Edge> drawing;
 
+    private final TrackingGraph graph;
+    private final Identifier target;
     private double xOffset = 0;
     private double yOffset = 0;
     private double scale = 1;
 
     private int x;
     private int y;
-    
+
     public static int WIDTH = 324;
     public static int HEIGHT = 167;
 
-    public LootTableGraphWidget(TrackingGraph graph) {
-        EXECUTOR_SERVICE.submit(() -> {
-            drawing = graph.draw();
-            this.vertexLocations = new HashMap<>();
-            Map<TrackingGraph.Edge, List<Point2D>> edgeLocations = drawing.getEdgeMappings();
+    public LootTableGraphWidget(TrackingGraph graph, Identifier target) {
+        this.target = target;
+        this.graph = graph;
+        refresh();
+    }
 
-            for (TrackingGraph.Edge edge : edgeLocations.keySet()) {
-                TrackingGraph.Vertex source = edge.getOrigin();
-                TrackingGraph.Vertex target = edge.getDestination();
-                Point2D sourceLocation = edgeLocations.get(edge).get(0);
-                Point2D targetLocation = edgeLocations.get(edge).get(1);
-                vertexLocations.put(source.getContent(), sourceLocation);
-                vertexLocations.put(target.getContent(), targetLocation);
-            }
+    private void centreOnPoint(Point2D point) {
+        xOffset = -point.getX() + (double) WIDTH / 2 - 8;
+        yOffset = -point.getY() + (double) HEIGHT / 2 - 8;
+    }
 
-            Point2D centreOnPoint = vertexLocations.get(graph.getLeaves().iterator().next().getIdentifier());
-            if(centreOnPoint == null) {
-                centreOnPoint = new Point2D.Double(0, 0);
-            }
-            xOffset = -centreOnPoint.getX() + (double) WIDTH / 2;
-            yOffset = -centreOnPoint.getY() + (double) HEIGHT / 2;
-        });
+    public void centreOnTarget() {
+        if(drawing == null) return;
+        centreOnPoint(vertexLocations.get(target));
     }
 
     public void move(double x, double y) {
@@ -70,9 +65,30 @@ public class LootTableGraphWidget {
 
     public void scale(double scale) {
         this.scale *= scale;
+        this.scale = Math.min(Math.max(this.scale, 0.43), 2);
     }
 
-    public void render(int x, int y, MatrixStack matrices) {
+    public void refresh() {
+        drawing = null;
+        EXECUTOR_SERVICE.submit(() -> {
+            drawing = graph.draw();
+            this.vertexLocations = Collections.synchronizedMap(new HashMap<>());
+            Map<TrackingGraph.Edge, List<Point2D>> edgeLocations = drawing.getEdgeMappings();
+
+            for (TrackingGraph.Edge edge : edgeLocations.keySet()) {
+                TrackingGraph.Vertex origin = edge.getOrigin();
+                TrackingGraph.Vertex destination = edge.getDestination();
+                Point2D originLocation = edgeLocations.get(edge).get(0);
+                Point2D destinationLocation = edgeLocations.get(edge).get(1);
+                vertexLocations.put(origin.getContent(), originLocation);
+                vertexLocations.put(destination.getContent(), destinationLocation);
+            }
+
+            centreOnPoint(vertexLocations.get(target));
+        });
+    }
+
+    public void render(MatrixStack matrices, int x, int y, double mouseX, double mouseY) {
         this.x = x;
         this.y = y;
         renderBackground(matrices, x, y);
@@ -81,11 +97,19 @@ public class LootTableGraphWidget {
             return;
         }
         matrices.push();
-//        matrices.scale((float) scale, (float) scale, 1);
+        matrices.scale((float) scale, (float) scale, 1);
         DrawableHelper.enableScissor(x + 8, y + 8, x + WIDTH - 8, y + HEIGHT - 8);
         renderArrows(matrices, x + xOffset, y + yOffset);
-        renderGraph(matrices, x + xOffset, y + yOffset);
+        Set<Tooltip> toolips = renderNodes(matrices, x + xOffset, y + yOffset, mouseX, mouseY);
         DrawableHelper.disableScissor();
+        toolips.forEach(tooltip -> {
+            Screen screen = MinecraftClient.getInstance().currentScreen;
+            assert screen != null;
+            matrices.push();
+            matrices.translate(0, 0, -200);
+            screen.renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), (int) (mouseX / scale), (int) (mouseY / scale));
+            matrices.pop();
+        });
         matrices.pop();
     }
 
@@ -103,16 +127,32 @@ public class LootTableGraphWidget {
         MinecraftClient.getInstance().textRenderer.draw(matrices, text, textX, textY, 0xFFFFFFFF);
     }
 
-    private void renderGraph(MatrixStack matrices, double x, double y) {
+    private Set<Tooltip> renderNodes(MatrixStack matrices, double x, double y, double mouseX, double mouseY) {
+        Set<Tooltip> tooltips = new HashSet<>();
+        final double mouseXf = mouseX / scale;
+        final double mouseYf = mouseY / scale;
+
         vertexLocations.forEach((identifier, location) -> {
-            int posX = (int) (location.getX() + x);
-            int posY = (int) (location.getY() + y);
+            int posX = (int) (location.getX() + x) - 5;
+            int posY = (int) (location.getY() + y) - 5;
+            boolean hovered = mouseXf >= posX  && mouseXf <= posX + 26 && mouseYf >= posY && mouseYf <= posY + 26;
+            boolean doesRender = posX * scale >= this.x - 8 && posX * scale <= this.x + WIDTH - 18 && posY * scale >= this.y - 8 && posY * scale <= this.y + HEIGHT - 18;
+            if(hovered && doesRender) {
+                tooltips.add(Tooltip.of(Text.of(IdentifierType.getName(identifier, !identifier.equals(target)))));
+            }
 
             RenderSystem.setShader(GameRenderer::getPositionTexProgram);
             RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
-            drawTexture(matrices, posX - 5, posY - 5, 0, 154, 26, 26);
-            RenderingHelper.renderIdentifier(identifier, matrices, posX, posY);
+            int u = 0;
+            int v = 154;
+            if (identifier.equals(target)) {
+                u += 26;
+                v -= 26;
+            }
+            drawTexture(matrices, posX, posY, u, v, 26, 26);
+            RenderingHelper.renderIdentifier(identifier, matrices, scale, posX + 5, posY + 5, !identifier.equals(target));
         });
+        return tooltips;
     }
 
     private void renderArrows(MatrixStack matrices, double x, double y) {
@@ -176,7 +216,7 @@ public class LootTableGraphWidget {
 
     public boolean mouseDragged(double mouseX, double mouseY, double deltaX, double deltaY) {
         if(mouseX >= x && mouseX <= x + WIDTH && mouseY >= y && mouseY <= y + HEIGHT) {
-            move(deltaX, deltaY);
+            move(deltaX / scale, deltaY / scale);
             return true;
         }
         return false;
@@ -186,6 +226,10 @@ public class LootTableGraphWidget {
         if(mouseX >= x && mouseX <= x + WIDTH && mouseY >= y && mouseY <= y + HEIGHT) {
             double scale = Math.pow(1.1, amount);
             scale(scale);
+            mouseX = mouseX - (double) WIDTH / 2;
+            mouseY = mouseY - (double) HEIGHT / 2;
+            xOffset -= mouseX * (scale - 1);
+            yOffset -= mouseY * (scale - 1);
             return true;
         }
         return false;

@@ -5,7 +5,7 @@ import net.minecraft.block.Blocks;
 
 import java.util.Set;
 
-public class NaturalBlocks {
+public abstract class NaturalBlocks {
     private static final Set<Block> NATURAL_BLOCKS = Set.of(
             Blocks.ACACIA_LEAVES,
             Blocks.ACACIA_LOG,

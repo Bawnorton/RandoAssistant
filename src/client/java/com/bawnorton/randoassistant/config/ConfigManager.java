@@ -28,8 +28,7 @@ public class ConfigManager {
         if (config.debug == null) config.debug = false;
         if (config.toasts == null) config.toasts = true;
         if (config.unbrokenBlockIcon == null) config.unbrokenBlockIcon = true;
-        if (config.childDepth == null) config.childDepth = 100;
-        if (config.parentDepth == null) config.parentDepth = 100;
+        if (config.searchDepth == null) config.searchDepth = 6;
         if (config.randomizeColours == null) config.randomizeColours = false;
 
         Config.update(config);

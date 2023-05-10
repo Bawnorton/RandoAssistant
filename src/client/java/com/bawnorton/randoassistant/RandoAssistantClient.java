@@ -19,8 +19,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class RandoAssistantClient implements ClientModInitializer {
-    private static final Identifier STAR = new Identifier(RandoAssistant.MOD_ID, "textures/gui/item_stars.png");
-
     public static long seed = Random.create().nextLong();
 
     @Override
@@ -30,14 +28,5 @@ public class RandoAssistantClient implements ClientModInitializer {
         ConfigManager.loadConfig();
         KeybindManager.init();
         EventManager.init();
-    }
-
-    public static void renderStar(MatrixStack matrices, int x, int y) {
-        float timeOffset = Math.abs(((System.currentTimeMillis() % 2000) / 1000.0f) - 1.0f);
-        matrices.push();
-        matrices.translate(0, -Easing.ease(0, 1, timeOffset), 300);
-        RenderSystem.setShaderTexture(0, STAR);
-        DrawableHelper.drawTexture(matrices, x, y, 0, 0, 8, 8, 16, 16);
-        matrices.pop();
     }
 }

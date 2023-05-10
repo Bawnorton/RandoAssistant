@@ -5,6 +5,8 @@
   "mixins": [
     "AbstractBlockMixin",
     "AxeItemMixin",
+    "BlockMixin",
+    "CraftingResultSlotMixin",
     "FishingBobberEntityMixin",
     "HoneycombItemMixin",
     "LivingEntityMixin",

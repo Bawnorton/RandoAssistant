@@ -6,6 +6,7 @@ import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.config.ConfigManager;
 import com.bawnorton.randoassistant.keybind.KeybindManager;
 import com.bawnorton.randoassistant.tracking.Tracker;
+import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
@@ -20,6 +21,8 @@ public class EventManager {
                 RandoAssistant.LOGGER.error("Client player is null, cannot load loot tables");
                 return;
             }
+            Tracker.getInstance().clear();
+            TrackableCrawler.clearCache();
             RandoAssistant.getAllLootTables(client.player);
             RandoAssistant.getAllInteractions(client.player);
         });

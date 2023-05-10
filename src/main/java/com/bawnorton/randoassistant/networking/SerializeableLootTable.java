@@ -1,6 +1,5 @@
 package com.bawnorton.randoassistant.networking;
 
-import com.bawnorton.randoassistant.util.tuples.Pair;
 import com.bawnorton.randoassistant.util.tuples.Triplet;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
@@ -11,6 +10,7 @@ import net.minecraft.util.Identifier;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class SerializeableLootTable {
@@ -20,7 +20,7 @@ public class SerializeableLootTable {
     private final Identifier sourceId;
     private final List<Item> items;
 
-    private SerializeableLootTable(Identifier lootTableId, Identifier sourceId, List<ItemStack> items) {
+    private SerializeableLootTable(Identifier lootTableId, Identifier sourceId, Collection<ItemStack> items) {
         if(lootTableId == null) throw new IllegalArgumentException("Identifier cannot be null");
         this.lootTableId = lootTableId;
         this.sourceId = sourceId;
@@ -50,15 +50,15 @@ public class SerializeableLootTable {
         return new SerializeableLootTable(new Identifier(lootTableId), new Identifier(sourceId), items);
     }
 
-    public static SerializeableLootTable ofBlock(Block block, List<ItemStack> items) {
+    public static SerializeableLootTable ofBlock(Block block, Collection<ItemStack> items) {
         return new SerializeableLootTable(block.getLootTableId(), Registries.BLOCK.getId(block), items);
     }
 
-    public static SerializeableLootTable ofEntity(EntityType<?> entity, List<ItemStack> items) {
+    public static SerializeableLootTable ofEntity(EntityType<?> entity, Collection<ItemStack> items) {
         return new SerializeableLootTable(entity.getLootTableId(), Registries.ENTITY_TYPE.getId(entity), items);
     }
 
-    public static SerializeableLootTable ofOther(Identifier id, List<ItemStack> items) {
+    public static SerializeableLootTable ofOther(Identifier id, Collection<ItemStack> items) {
         return new SerializeableLootTable(id, id, items);
     }
 

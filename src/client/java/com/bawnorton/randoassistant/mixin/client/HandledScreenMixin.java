@@ -1,7 +1,8 @@
 package com.bawnorton.randoassistant.mixin.client;
 
-import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
+import com.bawnorton.randoassistant.render.RenderingHelper;
+import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -35,9 +36,13 @@ public abstract class HandledScreenMixin extends ScreenMixin {
         if(block == Blocks.AIR) return;
 
         StatHandler stats = MinecraftClient.getInstance().player.getStatHandler();
-        if(stats.getStat(Stats.MINED.getOrCreateStat(block)) != 0) return;
-
-        RandoAssistantClient.renderStar(matrices, slot.x, slot.y);
+        boolean broken = stats.getStat(Stats.MINED.getOrCreateStat(block)) > 0;
+        boolean silkTouched = stats.getStat(RandoAssistantStats.SILK_TOUCHED.getOrCreateStat(block)) > 0;
+        if(!broken && !silkTouched) {
+            RenderingHelper.renderStar(matrices, slot.x, slot.y, false);
+        } else if (broken && !silkTouched) {
+            RenderingHelper.renderStar(matrices, slot.x, slot.y, true);
+        }
     }
 
     @Inject(method = "mouseDragged", at = @At("HEAD"))

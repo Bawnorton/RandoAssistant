@@ -112,6 +112,16 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         this.open = open;
     }
 
+    public void clearCache() {
+        if(this.searchField != null) {
+            this.searchField.setText("");
+            this.searchText = "";
+        }
+        if(this.lootTableArea != null) {
+            this.lootTableArea.clearCache();
+        }
+    }
+
     public void tick() {
         if(!this.isOpen()) return;
         this.searchField.tick();

@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.mixin;
 
+import com.bawnorton.randoassistant.networking.Networking;
 import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -24,6 +25,9 @@ public abstract class ServerStatHandlerMixin {
     private void onSetStat(PlayerEntity player, Stat<?> stat, int value, CallbackInfo ci) {
         if (player instanceof ServerPlayerEntity serverPlayer) {
             sendStats(serverPlayer);
+            if(RandoAssistantStats.isOf(stat)) {
+                Networking.sendClearCachePacket(serverPlayer);
+            }
         }
     }
 
@@ -41,6 +45,6 @@ public abstract class ServerStatHandlerMixin {
             cir.setReturnValue(Optional.of((Stat<T>) RandoAssistantStats.LOOTED.getOrCreateStat(Identifier.tryParse(id))));
         } else if (type.equals(RandoAssistantStats.INTERACTED)) {
             cir.setReturnValue(Optional.of((Stat<T>) RandoAssistantStats.INTERACTED.getOrCreateStat(Identifier.tryParse(id))));
-}
+        }
     }
 }

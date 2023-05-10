@@ -3,8 +3,11 @@ package com.bawnorton.randoassistant.networking.client;
 import com.bawnorton.randoassistant.networking.NetworkingConstants;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
+import com.bawnorton.randoassistant.screen.LootBookWidget;
 import com.bawnorton.randoassistant.tracking.Tracker;
+import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.item.ItemStack;
 
 public class Networking {
     public static void init() {
@@ -18,8 +21,10 @@ public class Networking {
             client.execute(() -> Tracker.getInstance().track(interaction));
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.FINISHED_PACKET, (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.CLEAR_CACHE_PACKET, (client, handler, buf, responseSender) -> {
             client.execute(() -> {
+                TrackableCrawler.clearCache();
+                Tracker.getInstance().clearCache();
             });
         });
 
@@ -29,6 +34,11 @@ public class Networking {
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.DISABLE_ALL_PACKET, (client, handler, buf, responseSender) -> {
             client.execute(() -> Tracker.getInstance().disableAll());
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.DEBUG_PACKET, (client, handler, buf, responseSender) -> {
+            ItemStack stack = buf.readItemStack();
+            client.execute(() -> Tracker.getInstance().debug(stack.getItem()));
         });
     }
 }

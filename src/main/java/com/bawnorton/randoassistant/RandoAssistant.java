@@ -6,6 +6,8 @@ import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.OxidizableBlock;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class RandoAssistant implements ModInitializer {
     public static final String MOD_ID = "randoassistant";
@@ -44,18 +47,16 @@ public class RandoAssistant implements ModInitializer {
         builder.luck(100f);
         builder.optionalParameter(LootContextParameters.THIS_ENTITY, serverPlayer);
 
-        // will thread this later
-        for(int i = 0; i < 100; i++) {
+        for(int i = 0; i < 50; i++) {
             HashSet<Identifier> seen = new HashSet<>();
             Registries.BLOCK.forEach(block -> {
                 seen.add(block.getLootTableId());
                 LootTable table = lootManager.getTable(block.getLootTableId());
-                List<ItemStack> stacks = table.generateLoot(builder.build(lootContextType));
-                Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofBlock(block, stacks));
+                Set<ItemStack> stacks = new HashSet<>(table.generateLoot(builder.build(lootContextType)));
                 ItemStack pickaxe = new ItemStack(Items.NETHERITE_PICKAXE);
                 pickaxe.addEnchantment(Enchantments.SILK_TOUCH, 1);
                 builder.optionalParameter(LootContextParameters.TOOL, pickaxe);
-                stacks = table.generateLoot(builder.build(lootContextType));
+                stacks.addAll(table.generateLoot(builder.build(lootContextType)));
                 Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofBlock(block, stacks));
             });
 
@@ -64,12 +65,11 @@ public class RandoAssistant implements ModInitializer {
                 Entity entity = entityType.create(Networking.server.getWorld(World.OVERWORLD));
                 if (!(entity instanceof LivingEntity)) return;
                 LootTable table = lootManager.getTable(entityType.getLootTableId());
-                List<ItemStack> stacks = table.generateLoot(builder.build(lootContextType));
-                Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofEntity(entityType, stacks));
+                Set<ItemStack> stacks = new HashSet<>(table.generateLoot(builder.build(lootContextType)));
                 ItemStack sword = new ItemStack(Items.NETHERITE_SWORD);
                 sword.addEnchantment(Enchantments.FIRE_ASPECT, 1);
                 builder.optionalParameter(LootContextParameters.TOOL, sword);
-                stacks = table.generateLoot(builder.build(lootContextType));
+                stacks.addAll(table.generateLoot(builder.build(lootContextType)));
                 Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofEntity(entityType, stacks));
             });
 
@@ -100,9 +100,8 @@ public class RandoAssistant implements ModInitializer {
 
         HoneycombItem.UNWAXED_TO_WAXED_BLOCKS.get().forEach((input, output) -> Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
         HoneycombItem.WAXED_TO_UNWAXED_BLOCKS.get().forEach((input, output) -> Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
+        OxidizableBlock.OXIDATION_LEVEL_DECREASES.get().forEach((input, output) -> Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
         AxeItem.STRIPPED_BLOCKS.forEach((input, output) -> Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
-
-        Networking.sendFinishedPacket(serverPlayer);
     }
 
     @Override

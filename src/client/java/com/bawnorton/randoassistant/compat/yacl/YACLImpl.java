@@ -6,7 +6,6 @@ import dev.isxander.yacl.api.Option;
 import dev.isxander.yacl.api.OptionGroup;
 import dev.isxander.yacl.api.YetAnotherConfigLib;
 import dev.isxander.yacl.gui.controllers.TickBoxController;
-import dev.isxander.yacl.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl.gui.controllers.string.number.IntegerFieldController;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
@@ -42,15 +41,9 @@ public class YACLImpl {
                                         .controller(TickBoxController::new)
                                         .build())
                                 .option(Option.createBuilder(int.class)
-                                        .name(Text.literal("Child Depth"))
-                                        .tooltip(Text.literal("The maximum depth to search for child nodes"))
-                                        .binding(100, () -> Config.getInstance().childDepth, (value) -> Config.getInstance().childDepth = value)
-                                        .controller(IntegerFieldController::new)
-                                        .build())
-                                .option(Option.createBuilder(int.class)
-                                        .name(Text.literal("Parent Depth"))
+                                        .name(Text.literal("Search Depth"))
                                         .tooltip(Text.literal("The maximum depth to search for parent nodes"))
-                                        .binding(100, () -> Config.getInstance().parentDepth, (value) -> Config.getInstance().parentDepth = value)
+                                        .binding(100, () -> Config.getInstance().searchDepth, (value) -> Config.getInstance().searchDepth = value)
                                         .controller(IntegerFieldController::new)
                                         .build())
                                 .collapsed(true)
