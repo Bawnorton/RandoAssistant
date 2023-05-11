@@ -26,6 +26,3 @@ Drag and drop these files here to help me figure out what broke.
 
 - latest.log
   - Found in `.minecraft/logs`
-- RandoAssistant files
-  - Found in `.minecraft/RandoAssistant`
-  - The files will be named `seed.json` and `seed_interaction.json`
