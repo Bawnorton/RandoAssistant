@@ -54,6 +54,7 @@ public enum IdentifierType {
                 } else if (path.contains("fishing")) {
                     String[] parts = path.split("/");
                     String name = parts[parts.length - 1].replaceAll("_", " ");
+                    if(name.equals("fishing")) yield "Fishing";
                     yield "Fishing " + name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
                 }
                 yield path;

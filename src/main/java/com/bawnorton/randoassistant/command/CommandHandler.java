@@ -12,27 +12,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 public class CommandHandler {
     public static void init() {
         CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) -> {
-            registerEnableAllCommand(dispatcher);
-            registerDisableAllCommand(dispatcher);
             if(FabricLoader.getInstance().isDevelopmentEnvironment()) {
                 registerDebugCommend(dispatcher);
             }
-        }));
-    }
-
-    private static void registerEnableAllCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(CommandManager.literal("enableall").executes(context -> {
-            ServerPlayerEntity player = context.getSource().getPlayer();
-            Networking.sendEnableAllPacket(player);
-            return 0;
-        }));
-    }
-
-    private static void registerDisableAllCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(CommandManager.literal("disableall").executes(context -> {
-            ServerPlayerEntity player = context.getSource().getPlayer();
-            Networking.sendDisableAllPacket(player);
-            return 0;
         }));
     }
 

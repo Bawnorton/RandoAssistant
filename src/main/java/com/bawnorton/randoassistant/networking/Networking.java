@@ -29,22 +29,6 @@ public class Networking {
         });
     }
 
-    public static void sendEnableAllPacket(ServerPlayerEntity serverPlayer) {
-        waitForServer(() -> {
-            PacketByteBuf buf = PacketByteBufs.create();
-            ServerPlayNetworking.send(serverPlayer, NetworkingConstants.ENABLE_ALL_PACKET, buf);
-        });
-        sendClearCachePacket(serverPlayer);
-    }
-
-    public static void sendDisableAllPacket(ServerPlayerEntity serverPlayer) {
-        waitForServer(() -> {
-            PacketByteBuf buf = PacketByteBufs.create();
-            ServerPlayNetworking.send(serverPlayer, NetworkingConstants.DISABLE_ALL_PACKET, buf);
-        });
-        sendClearCachePacket(serverPlayer);
-    }
-
     public static void sendClearCachePacket(ServerPlayerEntity serverPlayer) {
         waitForServer(() -> {
             PacketByteBuf buf = PacketByteBufs.create();

@@ -1,10 +1,8 @@
 package com.bawnorton.randoassistant.networking.client;
 
-import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.networking.NetworkingConstants;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
-import com.bawnorton.randoassistant.screen.LootBookWidget;
 import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -27,14 +25,6 @@ public class Networking {
                 TrackableCrawler.clearCache();
                 Tracker.getInstance().clearCache();
             });
-        });
-
-        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.ENABLE_ALL_PACKET, (client, handler, buf, responseSender) -> {
-            client.execute(() -> Config.getInstance().enableOverride = true);
-        });
-
-        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.DISABLE_ALL_PACKET, (client, handler, buf, responseSender) -> {
-            client.execute(() -> Config.getInstance().enableOverride = false);
         });
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.DEBUG_PACKET, (client, handler, buf, responseSender) -> {

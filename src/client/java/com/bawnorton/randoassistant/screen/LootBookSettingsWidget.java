@@ -57,7 +57,7 @@ public class LootBookSettingsWidget {
         searchDepth.setVisible(true);
         searchDepth.setEditableColor(0xFFFFFF);
         searchDepth.setText(String.valueOf(Config.getInstance().searchDepth));
-        searchDepth.setTooltip(Tooltip.of(Text.of("How far to search up the loot table tree for sources \n\n§6Warning: §rValues over §c15§r are not recommended!")));
+        searchDepth.setTooltip(Tooltip.of(Text.of("The maximum number of steps to search for a path to the target item\n\n§6Warning: §rValues over §c15§r are not recommended!")));
     }
 
     private ToggleButtonWidget createButton(int x, int y, String tooltip, boolean toggled) {

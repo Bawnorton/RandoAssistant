@@ -6,55 +6,49 @@ This is a mod that provides a hierarchical drop-tracking graph for Minecraft wit
 [![CurseForge](https://cf.way2muchnoise.eu/full_828527_downloads.svg)](https://curseforge.com/minecraft/mc-mods/random-assistant)
 [![Time Spent](https://wakatime.com/badge/user/d3cfc009-c727-4c07-bf46-94032e69d457/project/87bd5b80-7bb8-45de-a574-cc6f38f8fff3.svg)]()
 
-### <span style="color:#CC1010">PLEASE READ</span>
-#### This mod is quite technical and still in development, please read the entire description before using it.
+## The Red Book
+Inside the survival inventory, there is a new book next to the recipe book. This is the loot table tracking book.
 
-## GUI
+### Loot Table Tracking
+- The book will automatically track loot tables that have been found in the world.
+  - This includes block breaking, entity killing, fishing, chest looting, and more.
+  - The book will also track recipes you have crafted and blocks you interact with in the world.
+    - This includes stripping logs, waxing copper, and more.
+    - Crafting recipes and interactions are tracked so that you can see the paths you took to get to a specific item.
+- All tracking is done via a custom implementation of the in-game statistics system so there is no need to worry about data loss.
+  - **Consequently, unless this mod is installed server-side, the book will not be able to track loot tables as statistics are stored server-side.**
 
-Open the GUI with the red book in the inventory. 
-- #### Graph
-  - The GUI will display a graph of nodes, containing all the discovered loot tables in the game as well as interactions in the world.
-    - Interactions are things like smelting, brewing, stripping logs, etc.
-  - Each node contains a block, item or entity.
-- #### Paths
-  - Paths connect nodes to each other and when a node is selected, its paths will render.
-  - Paths are coloured, and directional and will point from the parent node to the child node.
-    - Red paths are paths to **blocks/entities** that drop the selected node. (Parents)
-    - Blue paths are paths to **blocks/items** that are dropped by the selected node. (Children)
-    - Yellow paths are paths to **blocks/items** that are gotten from **crafting / interacting** with the selected item/block in the world.
-      - Interactions can be parent or child nodes.
-- #### Search Bar (At the top of the GUI) 
-  - Type in the name of a block or entity to search for it and the graph will centre on it.
-  - Search is either "exact", "contains" or "fuzzy". Search ignores whitespaces and is case-insensitive.
-    - Exact: The search term must match the name of the node exactly.
-    - Contains: The search term must be contained in the name of the node.
-    - Fuzzy: The search term must closely match the name of the node.
-      - This uses Levenshtein distance to determine closeness, thus, the length of the search term plays a big part in the result.
-- #### Buttons and Sliders
-  - There is a repositioning button in the bottom left which will reposition and scale the graph back to the origin.
-  - In the bottom right there are 2 buttons and a slider.
-    - The slider will change which line is displayed, the left-most slider position is all lines.
-      - As you move the slider to left, the length of the paths will decrease, such that, Line 1 is the shortest path to get the selected item.
-      - This is useful when the graph is cluttered and you want to see the paths to a specific node.
-    - The "Hide Other Nodes" toggle button will re-render the graph with only the nodes associated with the selected node.
-      - When in selected node mode, the button will change to "Show Other Nodes" and will re-render the graph with all nodes.
-      - Depending on the size of the graph, or the number of selected nodes, this can take a second or two.
-    - The "Hide Children" toggle button will hide the connections to children nodes, thus, reducing screen clutter.
-- #### Zooming
-  - Use the scroll wheel to zoom in and out.
-  - This uses Minecraft's GUI scale setting and will reset back when the UI is closed.
-    - This is the cleanest way to implement zooming as Minecraft does not play nice with scaling GUI elements any other way, unfortunately, this means that all the buttons will also scale.
+### Red Book Display
+- The red book will open up a new widget to the right of the inventory, closing the recipe book if it is open.
+  - This widget will contain a list of every loot table that has been discovered, i.e. the loot table to get diamonds.
+  - Each loot table entry will have a preview of "Best Source == Number of Steps ==> Target Item"
+    - The "Best Source" is the block, entity or recipe that is naturally found (if possible) and has the least number of steps to get to the target item.
+  - Clicking on a loot table entry will open up that loot table's graph above the inventory.
+- There is a settings button in the top right which will take you to the mod's settings.
 
+### Loot Table Graph
+- The loot table graph will show the target item you selected in the red book.
+  - In the top left, there will be an icon indicating what your current target item is and a compass which you can click to re-center the graph on the target item.
+  - The graph will contain nodes and arrows connecting the nodes.
+    - **Right-click a node to highlight the path from that node to the target item.**
+    - Use the mouse wheel to zoom in and out.
 
-### Inventory Block Highlighting
-- Blocks that haven't been broken will be indicated by a star
-  - This can be turned off in the config
+## Settings
+The settings menu can be accessed by clicking the settings button in the top right of the red book.
+- **Unbroken Stars** (default: `on`)
+  - Display star icons on unbroken blocks
+- **Silk-Touch Stars** (default: `on`)
+  - Display star icons on broken but not silk-touched blocks
+  - Requires **Unbroken Stars** to be `on`
+- **Enable Override** (default: `off`)
+  - Enable all undiscovered loot tables
+  - This is not permanent and can be disabled at any time
+- **Randomize Colours** (default: `off`)
+  - Randomize world and entity colours (Cosmetic)
+- **Search Depth** (default: `6`)
+  - The maximum number of steps to search for a path to the target item
+  - Increasing this will increase the size of the graph and time it takes to generate the graph, thus, values over 15 are not recommended
 
-
-### Keybinds
-Press `k` to reveal all drops. This will fill the graph with all blocks and entities that have a drop.<br>
-Press `j` to remove all drops from the graph.<br>
-Press `m` to open the in-game config. Requires [YACL](https://www.curseforge.com/minecraft/mc-mods/yacl).
 
 ## Dependencies
 - [Minecraft Fabric 1.19.4](https://fabricmc.net/)
