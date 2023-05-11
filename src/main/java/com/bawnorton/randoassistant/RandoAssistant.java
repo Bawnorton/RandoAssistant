@@ -37,15 +37,13 @@ public class RandoAssistant implements ModInitializer {
     public static final String MOD_ID = "randoassistant";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static void getAllLootTables(PlayerEntity clientPlayer) {
-        ServerPlayerEntity serverPlayer = Networking.server.getPlayerManager().getPlayer(clientPlayer.getUuid());
-        assert serverPlayer != null;
-        serverPlayer.getStatHandler().sendStats(serverPlayer);
+    public static void getAllLootTables(ServerPlayerEntity player) {
+        player.getStatHandler().sendStats(player);
         LootManager lootManager = Networking.server.getLootManager();
         LootContextType lootContextType = new LootContextType.Builder().allow(LootContextParameters.THIS_ENTITY).allow(LootContextParameters.TOOL).build();
         LootContext.Builder builder = new LootContext.Builder( Networking.server.getWorld(World.OVERWORLD));
         builder.luck(100f);
-        builder.optionalParameter(LootContextParameters.THIS_ENTITY, serverPlayer);
+        builder.optionalParameter(LootContextParameters.THIS_ENTITY, player);
 
         for(int i = 0; i < 50; i++) {
             HashSet<Identifier> seen = new HashSet<>();
@@ -57,7 +55,7 @@ public class RandoAssistant implements ModInitializer {
                 pickaxe.addEnchantment(Enchantments.SILK_TOUCH, 1);
                 builder.optionalParameter(LootContextParameters.TOOL, pickaxe);
                 stacks.addAll(table.generateLoot(builder.build(lootContextType)));
-                Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofBlock(block, stacks));
+                Networking.sendLootTablePacket(player, SerializeableLootTable.ofBlock(block, stacks));
             });
 
             Registries.ENTITY_TYPE.forEach(entityType -> {
@@ -70,21 +68,19 @@ public class RandoAssistant implements ModInitializer {
                 sword.addEnchantment(Enchantments.FIRE_ASPECT, 1);
                 builder.optionalParameter(LootContextParameters.TOOL, sword);
                 stacks.addAll(table.generateLoot(builder.build(lootContextType)));
-                Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofEntity(entityType, stacks));
+                Networking.sendLootTablePacket(player, SerializeableLootTable.ofEntity(entityType, stacks));
             });
 
             lootManager.getTableIds().forEach(id -> {
                 if (seen.contains(id)) return;
                 LootTable table = lootManager.getTable(id);
                 List<ItemStack> stacks = table.generateLoot(builder.build(lootContextType));
-                Networking.sendLootTablePacket(serverPlayer, SerializeableLootTable.ofOther(id, stacks));
+                Networking.sendLootTablePacket(player, SerializeableLootTable.ofOther(id, stacks));
             });
         }
     }
 
-    public static void getAllInteractions(PlayerEntity clientPlayer) {
-        ServerPlayerEntity serverPlayer = Networking.server.getPlayerManager().getPlayer(clientPlayer.getUuid());
-        assert serverPlayer != null;
+    public static void getAllInteractions(ServerPlayerEntity player) {
         RecipeManager recipeManager = Networking.server.getRecipeManager();
         recipeManager.values().forEach(recipe -> {
             Item output = recipe.getOutput(DynamicRegistryManager.of(Registries.REGISTRIES)).getItem();
@@ -95,13 +91,13 @@ public class RandoAssistant implements ModInitializer {
                     input.add(stack.getItem());
                 }
             });
-            Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofCrafting(input, output));
+            Networking.sendInteractionPacket(player, SerializeableInteraction.ofCrafting(input, output));
         });
 
-        HoneycombItem.UNWAXED_TO_WAXED_BLOCKS.get().forEach((input, output) -> Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
-        HoneycombItem.WAXED_TO_UNWAXED_BLOCKS.get().forEach((input, output) -> Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
-        OxidizableBlock.OXIDATION_LEVEL_DECREASES.get().forEach((input, output) -> Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
-        AxeItem.STRIPPED_BLOCKS.forEach((input, output) -> Networking.sendInteractionPacket(serverPlayer, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
+        HoneycombItem.UNWAXED_TO_WAXED_BLOCKS.get().forEach((input, output) -> Networking.sendInteractionPacket(player, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
+        HoneycombItem.WAXED_TO_UNWAXED_BLOCKS.get().forEach((input, output) -> Networking.sendInteractionPacket(player, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
+        OxidizableBlock.OXIDATION_LEVEL_DECREASES.get().forEach((input, output) -> Networking.sendInteractionPacket(player, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
+        AxeItem.STRIPPED_BLOCKS.forEach((input, output) -> Networking.sendInteractionPacket(player, SerializeableInteraction.ofItemToItem(input.asItem(), output.asItem())));
     }
 
     @Override
