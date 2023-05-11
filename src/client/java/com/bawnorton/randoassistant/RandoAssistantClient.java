@@ -12,8 +12,6 @@ public class RandoAssistantClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         Networking.init();
-
         ConfigManager.loadConfig();
-        EventManager.init();
     }
 }

@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant;
 
 import com.bawnorton.randoassistant.command.CommandHandler;
+import com.bawnorton.randoassistant.event.EventManager;
 import com.bawnorton.randoassistant.networking.Networking;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
@@ -105,5 +106,6 @@ public class RandoAssistant implements ModInitializer {
         LOGGER.info("RandoAssistant Initialised");
         CommandHandler.init();
         RandoAssistantStats.init();
+        EventManager.init();
     }
 }
