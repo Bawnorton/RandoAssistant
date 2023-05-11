@@ -1,31 +1,29 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.networking.Networking;
-import com.bawnorton.randoassistant.networking.SerializeableLootTable;
+import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.List;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Block.class)
 public abstract class BlockMixin {
-
-    @Inject(method = "getDroppedStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)Ljava/util/List;", at = @At("RETURN"))
-    private static void getDroppedStacks(BlockState state, ServerWorld world, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemStack stack, CallbackInfoReturnable<List<ItemStack>> cir) {
-        if(entity instanceof ServerPlayerEntity serverPlayer) {
-            SerializeableLootTable lootTable = SerializeableLootTable.ofBlock(state.getBlock(), cir.getReturnValue());
-            Networking.sendLootTablePacket(serverPlayer, lootTable);
-            Networking.sendBrokeBlockPacket(serverPlayer);
+    @Inject(method = "afterBreak", at = @At("HEAD"))
+    private void onAfterBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack tool, CallbackInfo ci) {
+        if(player instanceof ServerPlayerEntity serverPlayer) {
+            ItemStack handStack = player.getMainHandStack();
+            if(EnchantmentHelper.hasSilkTouch(handStack)) {
+                serverPlayer.incrementStat(RandoAssistantStats.SILK_TOUCHED.getOrCreateStat(state.getBlock()));
+            }
         }
     }
 }

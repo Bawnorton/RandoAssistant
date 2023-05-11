@@ -1,5 +1,6 @@
 package grapher.graph.drawing;
 
+import com.bawnorton.randoassistant.RandoAssistant;
 import grapher.graph.elements.Edge;
 import grapher.graph.elements.Vertex;
 
@@ -56,7 +57,6 @@ public class Drawing<V extends Vertex, E extends Edge<V>> {
             //check if the edge's origin and destination vertices are the same
 
             if (e.getDestination() == e.getOrigin()) {
-
                 //position edge nodes near the top edge ofItems the vertex, to the side, and near the bottom
 
                 int vertexHeight = (int) e.getOrigin().getSize().getHeight();

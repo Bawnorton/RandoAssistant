@@ -21,15 +21,6 @@
     ],
     "client": [
       "com.bawnorton.randoassistant.RandoAssistantClient"
-    ],
-    "fabric-datagen": [
-      "com.bawnorton.randoassistant.RandoAssistantDataGenerator"
-    ],
-    "preLaunch": [
-      "com.bawnorton.randoassistant.RandoAssistantPreLaunch"
-    ],
-    "modmenu": [
-      "com.bawnorton.randoassistant.compat.modmenu.RandoAssistantModMenuApiImpl"
     ]
   },
   "mixins": [
@@ -41,14 +32,12 @@
   ],
   "accessWidener": "randoassistant.accesswidener",
   "depends": {
-    "fabricloader": ">=0.14.18",
+    "fabricloader": ">=0.14.19",
     "minecraft": "~1.19.4",
     "java": ">=17",
-    "fabric-api": ">=0.76.0"
+    "fabric-api": ">=0.80.0"
   },
   "suggests": {
-    "yet-another-config-lib": ">=2.3.0",
-    "modmenu": ">=6.1.0"
   },
   "custom" : {
     "modmenu" : {

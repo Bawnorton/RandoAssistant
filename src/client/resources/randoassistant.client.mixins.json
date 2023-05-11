@@ -2,19 +2,24 @@
   "required": true,
   "package": "com.bawnorton.randoassistant.mixin.client",
   "compatibilityLevel": "JAVA_17",
-  "plugin": "com.bawnorton.randoassistant.RandoAssistantMixinPlugin",
   "client": [
+    "AbstractInventoryScreenMixin",
+    "AbstractPlantPartBlockInvoker",
+    "AttachedStemBlockAccessor",
+    "BiomeColorBlenderMixin",
     "BiomeMixin",
     "BlockColorsMixin",
     "HandledScreenMixin",
     "InventoryScreenMixin",
+    "LinearColorBlenderMixin",
     "LivingEntityRendererMixin",
-    "TitleScreenMixin"
+    "ScreenMixin",
+    "StatMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "LinearColorBlenderMixin"
+    "HoveredTooltipPositionerMixin"
   ]
 }

@@ -15,24 +15,21 @@ public class Config {
     public Boolean unbrokenBlockIcon;
 
     @Expose
-    @SerializedName("toasts")
-    public Boolean toasts;
+    @SerializedName("silktouch_unbroken_block_icon")
+    public Boolean silktouchUnbrokenBlockIcon;
 
     @Expose
-    @SerializedName("search_type")
-    public SearchType searchType;
-
-    @Expose
-    @SerializedName("child_depth")
-    public Integer childDepth;
-
-    @Expose
-    @SerializedName("parent_depth")
-    public Integer parentDepth;
+    @SerializedName("enable_override")
+    public Boolean enableOverride;
 
     @Expose
     @SerializedName("randomize_colours")
     public Boolean randomizeColours;
+
+    @Expose
+    @SerializedName("search_depth")
+    public Integer searchDepth;
+
 
     private Config() {
     }
@@ -44,18 +41,5 @@ public class Config {
 
     public static void update(Config config) {
         INSTANCE = config;
-    }
-
-    public enum SearchType {
-        @Expose @SerializedName("fuzzy")
-        FUZZY,
-        @Expose @SerializedName("exact")
-        EXACT,
-        @Expose @SerializedName("contains")
-        CONTAINS;
-
-        public SearchType next() {
-            return values()[(ordinal() + 1) % values().length];
-        }
     }
 }

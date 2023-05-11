@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant.networking;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.item.Item;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -11,10 +12,6 @@ public class Networking {
     public static MinecraftServer server;
 
     private static boolean initialized = false;
-
-    public static void sendBrokeBlockPacket(ServerPlayerEntity player) {
-        waitForServer(() -> ServerPlayNetworking.send(player, NetworkingConstants.BROKE_BLOCK_PACKET, PacketByteBufs.create()));
-    }
 
     public static void sendLootTablePacket(ServerPlayerEntity player, SerializeableLootTable lootTable) {
         waitForServer(() -> {
@@ -32,8 +29,19 @@ public class Networking {
         });
     }
 
-    public static void sendUpdateDrawingPacket(ServerPlayerEntity player) {
-        waitForServer(() -> ServerPlayNetworking.send(player, NetworkingConstants.UPDATE_DRAWING_PACKET, PacketByteBufs.create()));
+    public static void sendClearCachePacket(ServerPlayerEntity serverPlayer) {
+        waitForServer(() -> {
+            PacketByteBuf buf = PacketByteBufs.create();
+            ServerPlayNetworking.send(serverPlayer, NetworkingConstants.CLEAR_CACHE_PACKET, buf);
+        });
+    }
+
+    public static void sendDebugPacket(ServerPlayerEntity player, Item item) {
+        waitForServer(() -> {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeItemStack(item.getDefaultStack());
+            ServerPlayNetworking.send(player, NetworkingConstants.DEBUG_PACKET, buf);
+        });
     }
 
     private static void waitForServer(Runnable runnable) {

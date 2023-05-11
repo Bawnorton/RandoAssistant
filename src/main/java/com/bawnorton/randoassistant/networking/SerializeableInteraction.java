@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.networking;
 
-import com.bawnorton.randoassistant.util.Triplet;
+import com.bawnorton.randoassistant.util.tuples.Triplet;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -68,18 +68,6 @@ public class SerializeableInteraction {
         return ofItemToItems(input, List.of(output));
     }
 
-    public static SerializeableInteraction ofItemToItemStacks(Item input, List<ItemStack> output) {
-        List<Item> outputItems = new ArrayList<>();
-        for(ItemStack itemStack : output) {
-            outputItems.add(itemStack.getItem());
-        }
-        return ofItemToItems(input, outputItems);
-    }
-
-    public static SerializeableInteraction ofBlockToBlock(Block input, Block output) {
-        return ofItemToItem(input.asItem(), output.asItem());
-    }
-
     public List<Item> getInput() {
         return input;
     }
@@ -103,6 +91,7 @@ public class SerializeableInteraction {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static SerializeableInteraction fromBytes(byte[] bytes) {
         try(ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             ObjectInputStream ois = new ObjectInputStream(bais);
