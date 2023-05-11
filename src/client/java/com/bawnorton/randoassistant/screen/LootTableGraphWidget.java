@@ -57,6 +57,7 @@ public class LootTableGraphWidget {
     }
 
     private void centreOnPoint(Point2D point) {
+        if(point == null) return;
         scale = 1;
         xOffset = -point.getX() / ABSOLUTE_SCALE + (double) WIDTH / 2 - 8;
         yOffset = -point.getY() / ABSOLUTE_SCALE + (double) HEIGHT / 2 - 8;
