@@ -21,7 +21,7 @@ Inside the survival inventory, there is a new book next to the recipe book. This
 ### Red Book Display
 - The red book will open up a new widget to the right of the inventory, closing the recipe book if it is open.
   - This widget will contain a list of every loot table that has been discovered, i.e. the loot table to get diamonds.
-  - Each loot table entry will have a preview of "Best Source == Number of Steps ==> Target Item"
+  - Each loot table entry will have a preview of "Best Source == Number of Steps ==&gt; Target Item"
     - The "Best Source" is the block, entity or recipe that is naturally found (if possible) and has the least number of steps to get to the target item.
   - Clicking on a loot table entry will open up that loot table's graph above the inventory.
 - There is a settings button in the top right which will take you to the mod's settings.
