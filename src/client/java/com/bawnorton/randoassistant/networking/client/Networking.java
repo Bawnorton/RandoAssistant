@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.networking.client;
 
+import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.networking.NetworkingConstants;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
@@ -29,11 +30,11 @@ public class Networking {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.ENABLE_ALL_PACKET, (client, handler, buf, responseSender) -> {
-            client.execute(() -> Tracker.getInstance().enableAll());
+            client.execute(() -> Config.getInstance().enableOverride = true);
         });
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.DISABLE_ALL_PACKET, (client, handler, buf, responseSender) -> {
-            client.execute(() -> Tracker.getInstance().disableAll());
+            client.execute(() -> Config.getInstance().enableOverride = false);
         });
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.DEBUG_PACKET, (client, handler, buf, responseSender) -> {

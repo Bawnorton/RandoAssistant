@@ -108,7 +108,10 @@ public class LootTableListWidget {
         }
         this.nextPageButton.render(matrices, mouseX, mouseY, delta);
         this.previousPageButton.render(matrices, mouseX, mouseY, delta);
+        this.renderLastClickedGraph(matrices, mouseX, mouseY);
+    }
 
+    public void renderLastClickedGraph(MatrixStack matrices, int mouseX, int mouseY) {
         LootTableResultButton lastClicked = LootTableResultButton.getLastClicked();
         if(lastClicked != null && lastClicked.graphOpen) {
             if(lastClicked.isDirty()) {

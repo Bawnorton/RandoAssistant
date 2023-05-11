@@ -28,8 +28,6 @@ import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
 
 /*
 To be implemented:
-- Loot table preview from source
-- Settings button
 - Settings screen
  */
 @SuppressWarnings("DataFlowIssue")
@@ -40,16 +38,17 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
     private MinecraftClient client;
     private InventoryScreen screen;
 
-    private ToggleButtonWidget toggleInteractablesButton;
+    private ToggleButtonWidget settingsButton;
     private TextFieldWidget searchField;
     private LootTableListWidget lootTableArea;
+    private LootBookSettingsWidget settingsWidget;
 
     private String searchText = "";
     private int rightOffset;
     private int parentWidth;
     private int parentHeight;
     private boolean open;
-    private boolean showInteractables = false;
+    private boolean settingsOpen = false;
     private boolean searching;
 
 
@@ -75,28 +74,18 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         int x = (this.parentWidth - 147) / 2 + this.rightOffset;
         int y = (this.parentHeight - 166) / 2;
         String search = this.searchField != null ? this.searchField.getText() : "";
-        this.searchField = new TextFieldWidget(client.textRenderer, x + 26, y + 14, 79, client.textRenderer.fontHeight + 3, Text.translatable("itemGroup.search"));
+        this.searchField = new TextFieldWidget(client.textRenderer, x + 26, y + 14, 89, client.textRenderer.fontHeight + 3, Text.of(""));
         this.searchField.setMaxLength(50);
         this.searchField.setVisible(true);
         this.searchField.setEditableColor(0xFFFFFF);
         this.searchField.setText(search);
         this.searchField.setPlaceholder(Text.translatable("gui.recipebook.search_hint").formatted(Formatting.ITALIC).formatted(Formatting.GRAY));
         this.lootTableArea = new LootTableListWidget(client, x + 11, y + 32);
-        this.toggleInteractablesButton = new ToggleButtonWidget(x + 110, y + 12, 26, 16, showInteractables);
-        this.updateTooltip();
-        this.setInteractableButtonTexture();
-        // init settings button
-        // update tooltip
+        this.settingsWidget = new LootBookSettingsWidget(client, x, y);
+        this.settingsButton = new ToggleButtonWidget(x + 120, y + 12, 16, 16, false);
+        this.settingsButton.setTextureUV(152, 41, 0, 18, TEXTURE);
+        this.settingsButton.setTooltip(Tooltip.of(Text.of("Settings")));
     }
-
-    private void updateTooltip() {
-        this.toggleInteractablesButton.setTooltip(!showInteractables ? Tooltip.of(Text.translatable("randoassistant.tooltip.show_all")) : Tooltip.of(Text.translatable("randoassistant.tooltip.hide_interactables")));
-    }
-
-    private void setInteractableButtonTexture() {
-        this.toggleInteractablesButton.setTextureUV(152, 41, 28, 18, TEXTURE);
-    }
-
     public void toggleOpen() {
         this.setOpen(!this.isOpen());
     }
@@ -122,6 +111,10 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         }
     }
 
+    public void closeSettings() {
+        this.settingsOpen = false;
+    }
+
     public void tick() {
         if(!this.isOpen()) return;
         this.searchField.tick();
@@ -137,10 +130,14 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         int y = (this.parentHeight - 166) / 2;
         if(LootTableResultButton.isGraphOpen()) y += HEIGHT / 2;
         drawTexture(matrices, x, y, 1, 1, 147, 166);
-        this.searchField.render(matrices, mouseX, mouseY, delta);
-        this.lootTableArea.render(matrices, mouseX, mouseY, delta);
-        this.toggleInteractablesButton.render(matrices, mouseX, mouseY, delta);
-        // draw settings button
+        if(settingsOpen) {
+            this.settingsWidget.render(matrices, mouseX, mouseY, delta);
+            this.lootTableArea.renderLastClickedGraph(matrices, mouseX, mouseY);
+        } else {
+            this.searchField.render(matrices, mouseX, mouseY, delta);
+            this.lootTableArea.render(matrices, mouseX, mouseY, delta);
+            this.settingsButton.render(matrices, mouseX, mouseY, delta);
+        }
         matrices.pop();
     }
 
@@ -150,14 +147,9 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
 
     public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY) {
         if(!this.isOpen()) return;
-        this.lootTableArea.renderTooltip(matrices, mouseX, mouseY);
-    }
-
-    public boolean isClickOutsideBounds(double mouseX, double mouseY, int left, int top, int backgroundWidth, int backgroundHeight) {
-        if(!this.isOpen()) return true;
-        boolean outside = mouseX < left || mouseY < top || mouseX >= left + backgroundWidth || mouseY >= top + backgroundHeight;
-        boolean inside = left - 147 < mouseX && mouseX < left && top < mouseY && mouseY < top + backgroundHeight;
-        return outside && !inside;
+        if(!settingsOpen) {
+            this.lootTableArea.renderTooltip(matrices, mouseX, mouseY);
+        }
     }
 
     @Override
@@ -181,22 +173,17 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if(!this.isOpen() || client.player.isSpectator()) return false;
+        if(this.settingsOpen) {
+            return this.settingsWidget.mouseClicked(mouseX, mouseY, button);
+        }
         if (this.searchField.mouseClicked(mouseX, mouseY, button) || this.lootTableArea.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        if(this.toggleInteractablesButton.mouseClicked(mouseX, mouseY, button)) {
-            this.toggleInteractablesButton.setToggled(toggleShowInteractables());
-            this.updateTooltip();
-            this.refreshSearchResults();
+        if(this.settingsButton.mouseClicked(mouseX, mouseY, button)) {
+            this.settingsOpen = true;
             return true;
         }
-        // check settings button
         return false;
-    }
-
-    private boolean toggleShowInteractables() {
-        this.showInteractables = !this.showInteractables;
-        return this.showInteractables;
     }
 
     @Override
@@ -213,6 +200,9 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         }
         if(this.searchField.isFocused() && this.searchField.isVisible() && keyCode != GLFW.GLFW_KEY_ESCAPE) {
             return true;
+        }
+        if(this.settingsOpen) {
+            return this.settingsWidget.keyPressed(keyCode, scanCode, modifiers);
         }
         if(client.options.chatKey.matchesKey(keyCode, scanCode) && !this.searchField.isFocused()) {
             this.searching = true;
@@ -237,6 +227,9 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         if(this.searchField.charTyped(chr, modifiers)) {
             this.refreshSearchResults();
             return true;
+        }
+        if(this.settingsOpen) {
+            return this.settingsWidget.charTyped(chr, modifiers);
         }
         return Element.super.charTyped(chr, modifiers);
     }
@@ -280,12 +273,13 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
 
     public void moveWidgets(boolean up) {
         this.lootTableArea.movePageButtons(up);
+        this.settingsWidget.moveWidgets(up);
         if(up) {
             this.searchField.setY(this.searchField.getY() - HEIGHT / 2);
-            this.toggleInteractablesButton.setY(this.toggleInteractablesButton.getY() - HEIGHT / 2);
+            this.settingsButton.setY(this.settingsButton.getY() - HEIGHT / 2);
         } else {
             this.searchField.setY(this.searchField.getY() + HEIGHT / 2);
-            this.toggleInteractablesButton.setY(this.toggleInteractablesButton.getY() + HEIGHT / 2);
+            this.settingsButton.setY(this.settingsButton.getY() + HEIGHT / 2);
         }
     }
 
@@ -298,9 +292,8 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
     public void appendNarrations(NarrationMessageBuilder builder) {
         ArrayList<ClickableWidget> list = Lists.newArrayList();
         list.add(this.searchField);
-        list.add(this.toggleInteractablesButton);
+        list.add(this.settingsButton);
         list.addAll(this.lootTableArea.getButtons());
-        // add settings button
         Screen.SelectedElementNarrationData selectedElementNarrationData = Screen.findSelectedElementData(list, null);
         if (selectedElementNarrationData != null) {
             selectedElementNarrationData.selectable.appendNarrations(builder.nextMessage());

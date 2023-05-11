@@ -6,6 +6,7 @@ import com.bawnorton.randoassistant.tracking.graph.GraphHelper;
 import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
 import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
 import com.bawnorton.randoassistant.util.IdentifierType;
+import com.bawnorton.randoassistant.util.tuples.Pair;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
@@ -25,6 +26,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class LootTableResultButton extends ClickableWidget {
+    private static final Identifier ARROW_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/arrow.png");
     private static final Identifier BACKGROUND_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/loot_book.png");
     private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(40, 40, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
     private static LootTableResultButton lastClicked;
@@ -35,6 +37,7 @@ public class LootTableResultButton extends ClickableWidget {
     private final Identifier target;
     private TrackingGraph graph;
     private Identifier source;
+    private int distance;
 
     public LootTableGraphWidget graphWidget;
     public boolean graphOpen;
@@ -45,7 +48,9 @@ public class LootTableResultButton extends ClickableWidget {
         this.target = target;
         EXECUTOR_SERVICE.submit(() -> {
             this.graph = TrackableCrawler.crawl(target);
-            this.source = GraphHelper.getBestSource(graph, graph.getVertex(target));
+            Pair<Identifier, Integer> bestSource = GraphHelper.getBestSource(graph, graph.getVertex(target));
+            this.source = bestSource.a();
+            this.distance = bestSource.b();
         });
     }
 
@@ -66,7 +71,7 @@ public class LootTableResultButton extends ClickableWidget {
         lastClicked.openGraph();
     }
 
-    private void closeGraph() {
+    public void closeGraph() {
         graphOpen = false;
     }
 
@@ -90,7 +95,11 @@ public class LootTableResultButton extends ClickableWidget {
     }
 
     public void refresh() {
-        this.graphWidget.refresh();
+        EXECUTOR_SERVICE.submit(() -> {
+            this.graph = TrackableCrawler.crawl(target);
+            graphWidget.setGraph(graph);
+            this.graphWidget.refresh();
+        });
     }
 
     @Override
@@ -103,6 +112,7 @@ public class LootTableResultButton extends ClickableWidget {
         }
         drawTexture(matrices, getX(), getY(), u, v, width, height);
         RenderingHelper.renderIdentifier(Objects.requireNonNullElse(source, Registries.ITEM.getId(Items.STRUCTURE_VOID)), matrices, 1, getX() + 4, getY() + 4, true);
+        renderArrow(matrices, getX() + 24, getY() + 3);
         renderTarget(matrices, getX() + 104, getY() + 4);
     }
 
@@ -111,9 +121,20 @@ public class LootTableResultButton extends ClickableWidget {
         client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
     }
 
+    private void renderArrow(MatrixStack matices, int x, int y) {
+        RenderSystem.setShaderTexture(0, ARROW_TEXTURE);
+        drawTexture(matices, x + 1, y, 0, 0, 76, 17, 76, 17);
+        Text text = Text.of(String.valueOf(distance));
+        int textWidth = client.textRenderer.getWidth(text);
+        int textHeight = client.textRenderer.fontHeight;
+        int textX = x + 39 - textWidth / 2;
+        int textY = y + 9 - textHeight / 2;
+        client.textRenderer.draw(matices, text, textX, textY, 0x000000);
+    }
+
     public boolean renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
         if (isHovered() && client.currentScreen != null) {
-            Text text = Text.of((source == null ? "Loading..." : IdentifierType.getName(source, true)) + " => " + IdentifierType.getName(target, false));
+            Text text = Text.of((source == null ? "Loading..." : IdentifierType.getName(source, true)) + " -> " + IdentifierType.getName(target, false));
             client.currentScreen.renderTooltip(matrices, text, mouseX, mouseY);
             return true;
         }

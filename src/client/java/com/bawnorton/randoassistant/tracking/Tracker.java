@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.tracking;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import com.bawnorton.randoassistant.screen.LootBookWidget;
@@ -8,7 +9,6 @@ import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import com.bawnorton.randoassistant.tracking.trackable.Trackable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
@@ -76,16 +76,10 @@ public class Tracker {
     }
 
     public boolean hasCrafted(Item item) {
+        if(Config.getInstance().enableOverride) return true;
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if(player == null) throw new IllegalStateException("Player is null");
         int count = player.getStatHandler().getStat(Stats.CRAFTED.getOrCreateStat(item));
-        return count > 0;
-    }
-
-    public boolean hasSilkTouched(Block block) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if(player == null) throw new IllegalStateException("Player is null");
-        int count = player.getStatHandler().getStat(RandoAssistantStats.SILK_TOUCHED.getOrCreateStat(block));
         return count > 0;
     }
 
@@ -104,18 +98,6 @@ public class Tracker {
 
     public final Set<Trackable<Identifier>> getEnabledCrafted() {
         return TRACKABLE_CRAFTED.getEnabled();
-    }
-
-    public void enableAll() {
-        TRACKABLE_INTERACTED.enableAll();
-        TRACKABLE_CRAFTED.enableAll();
-        TRACKABLE_LOOTED.enableAll();
-    }
-
-    public void disableAll() {
-        TRACKABLE_INTERACTED.disableAll();
-        TRACKABLE_CRAFTED.disableAll();
-        TRACKABLE_LOOTED.disableAll();
     }
 
     public void clear() {
@@ -167,14 +149,6 @@ public class Tracker {
 
         public void clear() {
             trackables.clear();
-        }
-
-        public void enableAll() {
-            trackables.values().forEach(Trackable::enableOverride);
-        }
-
-        public void disableAll() {
-            trackables.values().forEach(Trackable::disableOverride);
         }
 
         @Override

@@ -15,16 +15,21 @@ public class Config {
     public Boolean unbrokenBlockIcon;
 
     @Expose
-    @SerializedName("toasts")
-    public Boolean toasts;
+    @SerializedName("silktouch_unbroken_block_icon")
+    public Boolean silktouchUnbrokenBlockIcon;
+
+    @Expose
+    @SerializedName("enable_override")
+    public Boolean enableOverride;
+
+    @Expose
+    @SerializedName("randomize_colours")
+    public Boolean randomizeColours;
 
     @Expose
     @SerializedName("search_depth")
     public Integer searchDepth;
 
-    @Expose
-    @SerializedName("randomize_colours")
-    public Boolean randomizeColours;
 
     private Config() {
     }

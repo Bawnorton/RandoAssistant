@@ -4,7 +4,6 @@ import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.extend.HoveredTooltipPositionerExtender;
 import com.bawnorton.randoassistant.render.RenderingHelper;
 import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
-import com.bawnorton.randoassistant.util.Boundary;
 import com.bawnorton.randoassistant.util.IdentifierType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import grapher.graph.drawing.Drawing;
@@ -13,11 +12,12 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.render.*;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.joml.Matrix4f;
 
 import java.awt.geom.Point2D;
 import java.util.*;
@@ -36,10 +36,10 @@ public class LootTableGraphWidget {
     public static int WIDTH = 324;
     public static int HEIGHT = 167;
 
-    private Map<Identifier, Point2D> vertexLocations;
+    private TrackingGraph graph;
     private Drawing<TrackingGraph.Vertex, TrackingGraph.Edge> drawing;
+    private Map<Identifier, Point2D> vertexLocations;
 
-    private final TrackingGraph graph;
     private final Identifier target;
     private final Set<Identifier> selected;
 
@@ -81,6 +81,10 @@ public class LootTableGraphWidget {
         return true;
     }
 
+    public void setGraph(TrackingGraph graph) {
+        this.graph = graph;
+    }
+
     public void refresh() {
         drawing = null;
         EXECUTOR_SERVICE.submit(() -> {
@@ -104,6 +108,7 @@ public class LootTableGraphWidget {
     public void render(MatrixStack matrices, int x, int y, double mouseX, double mouseY) {
         this.x = x;
         this.y = y;
+        Set<Tooltip> sideBarTooltips = renderSideBar(matrices, x - 30, y, mouseX, mouseY);
         renderBackground(matrices, x, y);
         if(drawing == null) {
             renderPlaceholder(matrices, x + WIDTH / 2, y + HEIGHT / 2);
@@ -112,20 +117,53 @@ public class LootTableGraphWidget {
         matrices.push();
         matrices.scale((float) scale, (float) scale, 1);
         DrawableHelper.enableScissor(x + 8, y + 8, x + WIDTH - 8, y + HEIGHT - 8);
-        renderArrows(matrices, x + xOffset, y + yOffset, mouseX, mouseY);
-        Set<Tooltip> toolips = renderNodes(matrices, x + xOffset, y + yOffset, mouseX, mouseY);
+        renderArrows(matrices, x + xOffset, y + yOffset);
+        Set<Tooltip> nodeTooltips = renderNodes(matrices, x + xOffset, y + yOffset, mouseX / scale, mouseY / scale);
         DrawableHelper.disableScissor();
-        toolips.forEach(tooltip -> {
+        renderTooltips(nodeTooltips, matrices, mouseX / scale, mouseY / scale);
+        matrices.pop();
+        renderTooltips(sideBarTooltips, matrices, mouseX, mouseY);
+    }
+
+    private void renderTooltips(Iterable<Tooltip> tooltips, MatrixStack matrices, double mouseX, double mouseY) {
+        tooltips.forEach(tooltip -> {
             Screen screen = MinecraftClient.getInstance().currentScreen;
             assert screen != null;
             matrices.push();
             matrices.translate(0, 0, -200);
             ((HoveredTooltipPositionerExtender) HoveredTooltipPositioner.INSTANCE).setIgnorePreventOverflow(true);
-            screen.renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), (int) (mouseX / scale), (int) (mouseY / scale));
+            screen.renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), (int) mouseX, (int) mouseY);
             ((HoveredTooltipPositionerExtender) HoveredTooltipPositioner.INSTANCE).setIgnorePreventOverflow(false);
             matrices.pop();
         });
-        matrices.pop();
+    }
+
+    private Set<Tooltip> renderSideBar(MatrixStack matrices, int x, int y, double mouseX, double mouseY) {
+        boolean hoverTarget = mouseX >= x && mouseX <= x + 26 && mouseY >= y && mouseY <= y + 26;
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
+        drawTexture(matrices, x, y, 52, 154, 26, 26);
+        RenderingHelper.renderIdentifier(target, matrices, 1, x + 5, y + 5, false);
+        y += 30;
+        boolean hoverCompass = mouseX >= x && mouseX <= x + 26 && mouseY >= y && mouseY <= y + 26;
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
+        drawTexture(matrices, x, y, 52, 154 - (hoverCompass ? 26 : 0), 26, 26);
+        RenderingHelper.renderIdentifier(Registries.ITEM.getId(Items.COMPASS), matrices, 1, x + 5, y + 5, false);
+
+        Set<Tooltip> tooltips = new HashSet<>();
+        if(hoverTarget) {
+            if(graph == null) {
+                tooltips.add(Tooltip.of(Text.of("Loading...")));
+            } else {
+                int numSources = graph.getRoots().size();
+                tooltips.add(Tooltip.of(Text.of(IdentifierType.getName(target, false) + "\n\n" +
+                        "There " + (numSources == 1 ? "is" : "are") + " §b" + numSources +
+                        " §rknown way" + (numSources == 1 ? "" : "s") +  " to get this item.")));
+            }
+        }
+        if(hoverCompass) tooltips.add(Tooltip.of(Text.of("Center on " + IdentifierType.getName(target, false))));
+        return tooltips;
     }
 
     private void renderBackground(MatrixStack matrices, int x, int y) {
@@ -144,18 +182,14 @@ public class LootTableGraphWidget {
 
     private Set<Tooltip> renderNodes(MatrixStack matrices, double x, double y, double mouseX, double mouseY) {
         Set<Tooltip> tooltips = new HashSet<>();
-        final double mouseXf = mouseX / scale;
-        final double mouseYf = mouseY / scale;
-
         vertexLocations.forEach((identifier, location) -> {
             int posX = (int) (location.getX() / ABSOLUTE_SCALE + x) - 5;
             int posY = (int) (location.getY() / ABSOLUTE_SCALE + y) - 5;
-            boolean hovered = mouseXf >= posX  && mouseXf <= posX + 26 && mouseYf >= posY && mouseYf <= posY + 26;
+            boolean hovered = mouseX >= posX  && mouseX <= posX + 26 && mouseY >= posY && mouseY <= posY + 26;
             boolean doesRender = posX * scale >= this.x - 8 && posX * scale <= this.x + WIDTH - 18 && posY * scale >= this.y - 8 && posY * scale <= this.y + HEIGHT - 18;
             if(hovered && doesRender) {
                 tooltips.add(Tooltip.of(Text.of(IdentifierType.getName(identifier, !identifier.equals(target)))));
             }
-
             RenderSystem.setShader(GameRenderer::getPositionTexProgram);
             RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
             int u = 0;
@@ -173,12 +207,11 @@ public class LootTableGraphWidget {
         return tooltips;
     }
 
-    private void renderArrows(MatrixStack matrices, double x, double y, double mouseX, double mouseY) {
-        mouseX /= scale;
-        mouseY /= scale;
-
-        for(TrackingGraph.Edge edge: drawing.getEdgeMappings().keySet()) {
-            List<Point2D> points = drawing.getEdgeMappings().get(edge);
+    private void renderArrows(MatrixStack matrices, double x, double y) {
+        if(drawing == null) return;
+        Map<TrackingGraph.Edge, List<Point2D>> mappings = drawing.getEdgeMappings();
+        for(TrackingGraph.Edge edge: mappings.keySet()) {
+            List<Point2D> points = mappings.get(edge);
             Point2D source = points.get(0);
             Point2D target = points.get(1);
 
@@ -192,64 +225,7 @@ public class LootTableGraphWidget {
                 colour = 0xFFFF2626;
             }
 
-            Matrix4f matrix = matrices.peek().getPositionMatrix();
-
-            RenderSystem.enableBlend();
-            RenderSystem.disableCull();
-            RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-            BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-            bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-
-            float angle = (float) Math.atan2(y2 - y1, x2 - x1);
-            float thickness = 1.2f;
-
-            float xOffset = (float) (Math.sin(angle) * thickness);
-            float yOffset = (float) (Math.cos(angle) * thickness);
-
-            Point2D.Float corner1 = new Point2D.Float(x1 + xOffset, y1 - yOffset);
-            Point2D.Float corner2 = new Point2D.Float(x1 - xOffset, y1 + yOffset);
-            Point2D.Float corner3 = new Point2D.Float(x2 - xOffset, y2 + yOffset);
-            Point2D.Float corner4 = new Point2D.Float(x2 + xOffset, y2 - yOffset);
-
-            double arrowHeadWidth = 6;
-            double arrowHeadDepth = 10;
-            double offset = 10;
-
-            x2 -= offset * Math.cos(angle);
-            y2 -= offset * Math.sin(angle);
-
-            double arrowX1 = x2 - arrowHeadDepth * Math.cos(angle) + arrowHeadWidth * Math.sin(angle);
-            double arrowY1 = y2 - arrowHeadDepth * Math.sin(angle) - arrowHeadWidth * Math.cos(angle);
-            double arrowX2 = x2 - arrowHeadDepth * Math.cos(angle) - arrowHeadWidth * Math.sin(angle);
-            double arrowY2 = y2 - arrowHeadDepth * Math.sin(angle) + arrowHeadWidth * Math.cos(angle);
-
-            Point2D.Float arrowCorner1 = new Point2D.Float((float) arrowX1, (float) arrowY1);
-            Point2D.Float arrowCorner2 = new Point2D.Float(x2, y2);
-            Point2D.Float arrowCorner3 = new Point2D.Float((float) arrowX2, (float) arrowY2);
-
-            Boundary lineBoundary = new Boundary(corner1, corner2, corner3, corner4);
-            Boundary arrowHeadBoundary = new Boundary(arrowCorner1, arrowCorner2, arrowCorner3);
-
-            if(lineBoundary.contains(mouseX, mouseY) || arrowHeadBoundary.contains(mouseX, mouseY)) {
-                // might do something here later
-            }
-
-            bufferBuilder.vertex(matrix, corner1.x, corner1.y, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, corner2.x, corner2.y, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, corner3.x, corner3.y, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, corner4.x, corner4.y, 0).color(colour).next();
-
-            Tessellator.getInstance().draw();
-
-            BufferBuilder arrowBufferBuilder = Tessellator.getInstance().getBuffer();
-            arrowBufferBuilder.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
-
-            bufferBuilder.vertex(matrix, arrowCorner1.x, arrowCorner1.y, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, arrowCorner2.x, arrowCorner2.y, 0).color(colour).next();
-            bufferBuilder.vertex(matrix, arrowCorner3.x, arrowCorner3.y, 0).color(colour).next();
-
-            Tessellator.getInstance().draw();
-            RenderSystem.enableCull();
+            RenderingHelper.renderGuiArrow(matrices, x1, y1, x2, y2, colour);
         }
     }
 
@@ -277,20 +253,22 @@ public class LootTableGraphWidget {
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if(mouseX >= x && mouseX <= x + WIDTH && mouseY >= y && mouseY <= y + HEIGHT) {
-            if(button == 1) {
+            if (button == 1) {
                 final double mouseXf = mouseX / scale;
                 final double mouseYf = mouseY / scale;
                 selected.clear();
                 vertexLocations.forEach((identifier, point) -> {
-                    if(selected.size() > 0) return;
+                    if (selected.size() > 0) return;
                     int posX = (int) (point.getX() / ABSOLUTE_SCALE + x + xOffset - 5);
                     int posY = (int) (point.getY() / ABSOLUTE_SCALE + y + yOffset - 5);
-                    if(mouseXf >= posX  && mouseXf <= posX + 26 && mouseYf >= posY && mouseYf <= posY + 26) {
+                    if (mouseXf >= posX && mouseXf <= posX + 26 && mouseYf >= posY && mouseYf <= posY + 26) {
                         selected.add(identifier);
                         selected.addAll(graph.getChildren(identifier).stream().map(TrackingGraph.Vertex::getIdentifier).collect(Collectors.toSet()));
                     }
                 });
             }
+        } else if(mouseX >= x - 30 && mouseX <= x - 4 && mouseY >= y + 30 && mouseY <= y + 56) {
+            centreOnTarget();
         }
         return false;
     }

@@ -39,7 +39,7 @@ public enum IdentifierType {
                     String[] parts = path.split("/");
                     String name = parts[parts.length - 1].replaceAll("_", " ");
                     name = Arrays.stream(name.split(" ")).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase()).collect(Collectors.joining(" "));
-                    yield name + " Chest";
+                    yield name + (name.endsWith("Chest") ? "" :  " Chest");
                 } else if (path.contains("hero")) {
                     String[] parts = path.split("/");
                     String name = parts[parts.length - 1].replaceAll("_", " ");

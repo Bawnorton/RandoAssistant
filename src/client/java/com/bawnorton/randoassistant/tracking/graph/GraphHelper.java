@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.tracking.graph;
 
 import com.bawnorton.randoassistant.util.NaturalBlocks;
+import com.bawnorton.randoassistant.util.tuples.Pair;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
@@ -8,23 +9,24 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class GraphHelper {
-    public static Identifier getBestSource(TrackingGraph graph, TrackingGraph.Vertex vertex) {
-        TrackingGraph.Vertex bestNaturalParent = getClosestNaturallyFoundParent(graph, vertex);
+    public static Pair<Identifier, Integer> getBestSource(TrackingGraph graph, TrackingGraph.Vertex vertex) {
+        Pair<Identifier, Integer> bestNaturalParent = getClosestNaturallyFoundParent(graph, vertex);
         if(bestNaturalParent != null) {
-            return bestNaturalParent.getContent();
+            return bestNaturalParent;
         }
-        TrackingGraph.Vertex cloesestRoot = getClosestRoot(graph, vertex);
+        Pair<Identifier, Integer> cloesestRoot = getClosestRoot(graph, vertex);
         if(cloesestRoot != null) {
-            return cloesestRoot.getContent();
+            return cloesestRoot;
         }
         Set<TrackingGraph.Vertex> roots = graph.getRoots();
         if(roots.size() == 1) {
-            return roots.iterator().next().getContent();
+            TrackingGraph.Vertex root = roots.iterator().next();
+            return Pair.of(root.getContent(), graph.distanceBetween(root, vertex));
         }
-        return vertex.getContent();
+        return Pair.of(vertex.getContent(), 0);
     }
 
-    public static TrackingGraph.Vertex getClosestRoot(TrackingGraph graph, TrackingGraph.Vertex vertex) {
+    public static Pair<Identifier, Integer> getClosestRoot(TrackingGraph graph, TrackingGraph.Vertex vertex) {
         Set<TrackingGraph.Vertex> roots = graph.getRoots();
         int cloesestDistance = Integer.MAX_VALUE;
         TrackingGraph.Vertex cloesestRoot = null;
@@ -35,10 +37,11 @@ public class GraphHelper {
                 cloesestRoot = root;
             }
         }
-        return cloesestRoot;
+        if(cloesestRoot == null) return null;
+        return Pair.of(cloesestRoot.getContent(), cloesestDistance);
     }
 
-    public static TrackingGraph.Vertex getClosestNaturallyFoundParent(TrackingGraph graph, TrackingGraph.Vertex vertex) {
+    public static Pair<Identifier, Integer> getClosestNaturallyFoundParent(TrackingGraph graph, TrackingGraph.Vertex vertex) {
         Set<TrackingGraph.Vertex> vertices = new HashSet<>(graph.vertexSet());
         vertices.remove(vertex);
         int cloesestDistance = Integer.MAX_VALUE;
@@ -52,7 +55,8 @@ public class GraphHelper {
                 }
             }
         }
-        return cloesestParent;
+        if(cloesestParent == null) return null;
+        return Pair.of(cloesestParent.getContent(), cloesestDistance);
     }
 
     public static boolean isNaturallyFound(TrackingGraph.Vertex vertex) {

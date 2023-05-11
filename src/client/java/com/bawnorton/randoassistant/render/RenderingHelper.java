@@ -8,10 +8,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
@@ -27,8 +24,11 @@ import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.RotationAxis;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+
+import java.awt.geom.Point2D;
 
 public class RenderingHelper {
     private static final Identifier STAR = new Identifier(RandoAssistant.MOD_ID, "textures/gui/item_stars.png");
@@ -205,5 +205,59 @@ public class RenderingHelper {
         RenderSystem.setShaderTexture(0, STAR);
         DrawableHelper.drawTexture(matrices, x, y, silkTouch ? 8 : 0, 0, 8, 8, 16, 16);
         matrices.pop();
+    }
+
+    public static void renderGuiArrow(MatrixStack matrices, int x1, int y1, int x2, int y2, int colour) {
+        Matrix4f matrix = matrices.peek().getPositionMatrix();
+
+        RenderSystem.enableBlend();
+        RenderSystem.disableCull();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+        bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+
+        float angle = (float) Math.atan2(y2 - y1, x2 - x1);
+        float thickness = 1.2f;
+
+        float xOffset = (float) (Math.sin(angle) * thickness);
+        float yOffset = (float) (Math.cos(angle) * thickness);
+
+        Point2D.Float corner1 = new Point2D.Float(x1 + xOffset, y1 - yOffset);
+        Point2D.Float corner2 = new Point2D.Float(x1 - xOffset, y1 + yOffset);
+        Point2D.Float corner3 = new Point2D.Float(x2 - xOffset, y2 + yOffset);
+        Point2D.Float corner4 = new Point2D.Float(x2 + xOffset, y2 - yOffset);
+
+        double arrowHeadWidth = 6;
+        double arrowHeadDepth = 10;
+        double offset = 10;
+
+        x2 -= offset * Math.cos(angle);
+        y2 -= offset * Math.sin(angle);
+
+        double arrowX1 = x2 - arrowHeadDepth * Math.cos(angle) + arrowHeadWidth * Math.sin(angle);
+        double arrowY1 = y2 - arrowHeadDepth * Math.sin(angle) - arrowHeadWidth * Math.cos(angle);
+        double arrowX2 = x2 - arrowHeadDepth * Math.cos(angle) - arrowHeadWidth * Math.sin(angle);
+        double arrowY2 = y2 - arrowHeadDepth * Math.sin(angle) + arrowHeadWidth * Math.cos(angle);
+
+        Point2D.Float arrowCorner1 = new Point2D.Float((float) arrowX1, (float) arrowY1);
+        Point2D.Float arrowCorner2 = new Point2D.Float(x2, y2);
+        Point2D.Float arrowCorner3 = new Point2D.Float((float) arrowX2, (float) arrowY2);
+
+        bufferBuilder.vertex(matrix, corner1.x, corner1.y, 0).color(colour).next();
+        bufferBuilder.vertex(matrix, corner2.x, corner2.y, 0).color(colour).next();
+        bufferBuilder.vertex(matrix, corner3.x, corner3.y, 0).color(colour).next();
+        bufferBuilder.vertex(matrix, corner4.x, corner4.y, 0).color(colour).next();
+
+        Tessellator.getInstance().draw();
+
+        BufferBuilder arrowBufferBuilder = Tessellator.getInstance().getBuffer();
+        arrowBufferBuilder.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
+
+        bufferBuilder.vertex(matrix, arrowCorner1.x, arrowCorner1.y, 0).color(colour).next();
+        bufferBuilder.vertex(matrix, arrowCorner2.x, arrowCorner2.y, 0).color(colour).next();
+        bufferBuilder.vertex(matrix, arrowCorner3.x, arrowCorner3.y, 0).color(colour).next();
+
+        Tessellator.getInstance().draw();
+        RenderSystem.enableCull();
     }
 }

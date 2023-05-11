@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.tracking.trackable;
 
+import com.bawnorton.randoassistant.config.Config;
 import com.google.common.collect.Sets;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -16,8 +17,6 @@ public class Trackable<T> implements Comparable<Trackable<T>> {
     private final Set<Identifier> output = Sets.newHashSet();
 
     private final StatHandler statHandler;
-
-    private boolean enabledOverride = false;
 
     public Trackable(Stat<T> associatedStat, Identifier identifier) {
         this.associatedStat = associatedStat;
@@ -36,7 +35,7 @@ public class Trackable<T> implements Comparable<Trackable<T>> {
     }
 
     public boolean isEnabled() {
-        return statHandler.getStat(getStat()) > 0 || enabledOverride;
+        return statHandler.getStat(getStat()) > 0 || Config.getInstance().enableOverride;
     }
 
     public Stat<T> getStat() {
@@ -76,13 +75,5 @@ public class Trackable<T> implements Comparable<Trackable<T>> {
                 + ", output=" + getOutput()
                 + ", enabled=" + isEnabled()
                 + "}";
-    }
-
-    public void enableOverride() {
-        enabledOverride = true;
-    }
-
-    public void disableOverride() {
-        enabledOverride = false;
     }
 }

@@ -34,13 +34,14 @@ public abstract class HandledScreenMixin extends ScreenMixin {
         ItemStack stack = slot.getStack();
         Block block = Block.getBlockFromItem(stack.getItem());
         if(block == Blocks.AIR) return;
+        if (MinecraftClient.getInstance().player == null) return;
 
         StatHandler stats = MinecraftClient.getInstance().player.getStatHandler();
         boolean broken = stats.getStat(Stats.MINED.getOrCreateStat(block)) > 0;
         boolean silkTouched = stats.getStat(RandoAssistantStats.SILK_TOUCHED.getOrCreateStat(block)) > 0;
-        if(!broken && !silkTouched) {
+        if(!broken) {
             RenderingHelper.renderStar(matrices, slot.x, slot.y, false);
-        } else if (broken && !silkTouched) {
+        } else if (!silkTouched && Config.getInstance().silktouchUnbrokenBlockIcon) {
             RenderingHelper.renderStar(matrices, slot.x, slot.y, true);
         }
     }
