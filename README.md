@@ -53,8 +53,3 @@ The settings menu can be accessed by clicking the settings button in the top rig
 ## Dependencies
 - [Minecraft Fabric 1.19.4](https://fabricmc.net/)
 - [Fabric API ≥ 0.80.0+1.19.4](https://modrinth.com/mod/fabric-api)
-
-## Installation
-- Download the latest release from releases.
-- Download the latest release of [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api).
-- Place the jar files in the mods folder
