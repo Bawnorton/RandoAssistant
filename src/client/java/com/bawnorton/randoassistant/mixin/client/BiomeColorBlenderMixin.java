@@ -16,6 +16,7 @@ import java.util.Random;
 @Pseudo
 @Mixin(targets = {"me.jellysquid.mods.sodium.client.model.quad.blender.BiomeColorBlender"})
 public abstract class BiomeColorBlenderMixin {
+    @SuppressWarnings("UnresolvedMixinReference")
     @Inject(method = "getBlockColor", at = @At("RETURN"), cancellable = true)
     private <T> void onGetColor(BlockRenderView world, T state, ColorSampler<T> sampler, int x, int y, int z, int colorIdx, CallbackInfoReturnable<Integer> cir) {
         try {

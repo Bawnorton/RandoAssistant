@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -127,10 +128,9 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
         LootBookWidget.getInstance().drawTooltip(matrices, mouseX, mouseY);
     }
 
-    @SuppressWarnings("unused")
-    @ModifyExpressionValue(method = "isPointWithinBounds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/recipebook/RecipeBookWidget;isOpen()Z"))
-    private boolean checkWithinLootBookBounds(boolean original) {
-        return original || !LootBookWidget.getInstance().isOpen();
+    @Redirect(method = "isPointWithinBounds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/recipebook/RecipeBookWidget;isOpen()Z"))
+    private boolean checkWithinLootBookBounds(RecipeBookWidget instance) {
+        return !instance.isOpen() || !LootBookWidget.getInstance().isOpen();
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)

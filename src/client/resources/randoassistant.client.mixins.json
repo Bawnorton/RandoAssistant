@@ -10,16 +10,17 @@
     "BiomeMixin",
     "BlockColorsMixin",
     "HandledScreenMixin",
+    "HoveredTooltipPositionerMixin",
     "InventoryScreenMixin",
     "LinearColorBlenderMixin",
     "LivingEntityRendererMixin",
     "ScreenMixin",
     "StatMixin"
   ],
+  "plugin": "com.bawnorton.randoassistant.RandoAssistantMixinPlugin",
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "HoveredTooltipPositionerMixin"
   ]
 }
