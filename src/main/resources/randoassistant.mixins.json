@@ -13,6 +13,7 @@
     "LivingEntityMixin",
     "LootableContainerBlockEntityMixin",
     "MinecraftServerMixin",
+    "PacketByteBufMixin",
     "ServerStatHandlerMixin"
   ],
   "injectors": {

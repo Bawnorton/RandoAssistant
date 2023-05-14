@@ -4,6 +4,8 @@ import com.bawnorton.randoassistant.config.ConfigManager;
 import com.bawnorton.randoassistant.event.EventManager;
 import com.bawnorton.randoassistant.networking.client.Networking;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.impl.datagen.FabricDataGenHelper;
+import net.minecraft.data.server.loottable.LootTableProvider;
 import net.minecraft.util.math.random.Random;
 
 public class RandoAssistantClient implements ClientModInitializer {

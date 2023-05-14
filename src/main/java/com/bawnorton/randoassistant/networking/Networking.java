@@ -2,8 +2,10 @@ package com.bawnorton.randoassistant.networking;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -39,7 +41,9 @@ public class Networking {
     public static void sendDebugPacket(ServerPlayerEntity player, Item item) {
         waitForServer(() -> {
             PacketByteBuf buf = PacketByteBufs.create();
+            Block block = Block.getBlockFromItem(item);
             buf.writeItemStack(item.getDefaultStack());
+            buf.writeRegistryValue(Registries.CUSTOM_STAT, block.getLootTableId());
             ServerPlayNetworking.send(player, NetworkingConstants.DEBUG_PACKET, buf);
         });
     }
