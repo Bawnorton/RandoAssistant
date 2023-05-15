@@ -73,6 +73,7 @@ public class LootTableResultButton extends ClickableWidget {
 
     public void closeGraph() {
         graphOpen = false;
+        lastClicked = null;
     }
 
     private void openGraph() {

@@ -52,7 +52,6 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
     private boolean settingsOpen = false;
     private boolean searching;
 
-
     public static LootBookWidget getInstance() {
         if(INSTANCE == null) {
             INSTANCE = new LootBookWidget();
@@ -128,7 +127,6 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         matrices.translate(0, 0, 100);
         RenderSystem.setShaderTexture(0, TEXTURE);
         if(!RandoAssistantClient.isInstalledOnServer) {
-            RenderSystem.setShaderColor(0.5f, 0.5f, 0.5f, 1);
             if(isOpen()) this.toggleOpen();
         }
         int x = (this.parentWidth - 147) / 2 + this.rightOffset;

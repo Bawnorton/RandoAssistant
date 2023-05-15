@@ -1,15 +1,21 @@
 package com.bawnorton.randoassistant.mixin.client;
 
+import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.extend.InventoryScreenExtender;
 import com.bawnorton.randoassistant.screen.LootBookWidget;
 import com.bawnorton.randoassistant.screen.LootTableResultButton;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,6 +55,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
         LootBookWidget lootBook = LootBookWidget.getInstance();
         lootBook.initialise((InventoryScreen) (Object) this);
         lootButton = new TexturedButtonWidget(this.x + 126, this.height / 2 - 22, 20, 18, 0, 0, 19, LOOT_BUTTON_TEXTURE, (button) -> {
+            if(!RandoAssistantClient.isInstalledOnServer) return;
             lootBook.toggleOpen();
             if (lootBook.isOpen() && recipeBook.isOpen()) {
                 recipeBook.toggleOpen();
@@ -68,7 +75,22 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
                 recipeButton.setY(recipeButton.getY() - HEIGHT / 2);
                 lootBook.moveWidgets(true);
             }
-        });
+        }) {
+            @Override
+            public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+                if(!RandoAssistantClient.isInstalledOnServer) RenderSystem.setShaderColor(0.5f, 0.5f, 0.5f, 1);
+                super.renderButton(matrices, mouseX, mouseY, delta);
+                if(!RandoAssistantClient.isInstalledOnServer) RenderSystem.setShaderColor(1, 1, 1, 1);
+            }
+
+            @Override
+            public boolean isSelected() {
+                return super.isSelected() && RandoAssistantClient.isInstalledOnServer;
+            }
+        };
+        if(!RandoAssistantClient.isInstalledOnServer) {
+            lootButton.setTooltip(Tooltip.of(Text.of("§cMod not installed on server§r\n\nThis mod requires the server to have it installed to work properly")));
+        }
         if (recipeBook.isOpen()) {
             this.x = this.recipeBook.findLeftEdge(this.width, this.backgroundWidth);
         } else if (lootBook.isOpen()) {
