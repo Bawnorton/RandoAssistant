@@ -20,7 +20,7 @@ public abstract class BiomeColorBlenderMixin {
     @Inject(method = "getBlockColor", at = @At("RETURN"), cancellable = true)
     private <T> void onGetColor(BlockRenderView world, T state, ColorSampler<T> sampler, int x, int y, int z, int colorIdx, CallbackInfoReturnable<Integer> cir) {
         try {
-            if(!Config.getInstance().randomizeColours) return;
+            if(!Config.getInstance().randomizeColours || !RandoAssistantClient.isInstalledOnServer) return;
             Random random = new Random(state.hashCode() + RandoAssistantClient.seed);
             Random posRandom = new Random(x * random.nextLong() + y * random.nextLong() + z * random.nextLong());
             int r = (random.nextInt(256) + (posRandom.nextBoolean() ? 10 : -10)) & 0xFF;
@@ -39,7 +39,7 @@ abstract class LinearColorBlenderMixin {
     @Inject(method = "getBlockColor", at = @At("RETURN"), cancellable = true)
     private <T> void onGetColor(BlockRenderView world, T state, ColorSampler<T> sampler, int x, int y, int z, int colorIdx, CallbackInfoReturnable<Integer> cir) {
         try {
-            if(!Config.getInstance().randomizeColours) return;
+            if(!Config.getInstance().randomizeColours || !RandoAssistantClient.isInstalledOnServer) return;
             Random random = new Random(state.hashCode() + RandoAssistantClient.seed);
             Random posRandom = new Random(x * random.nextLong() + y * random.nextLong() + z * random.nextLong());
             int r = (random.nextInt(256) + (posRandom.nextBoolean() ? 10 : -10)) & 0xFF;

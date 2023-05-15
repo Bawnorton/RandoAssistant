@@ -18,7 +18,7 @@ public abstract class BlockColorsMixin {
     @Inject(method = "getColor", at = @At("RETURN"), cancellable = true)
     private void onGetColor(BlockState state, BlockRenderView world, BlockPos pos, int tintIndex, CallbackInfoReturnable<Integer> cir) {
         try {
-            if(!Config.getInstance().randomizeColours) return;
+            if(!Config.getInstance().randomizeColours || !RandoAssistantClient.isInstalledOnServer) return;
             Random random = new Random(state.getBlock().hashCode() + RandoAssistantClient.seed);
             Random posRandom = new Random(pos.hashCode());
             int r = (random.nextInt(256) + (posRandom.nextBoolean() ? 10 : -10)) & 0xFF;
