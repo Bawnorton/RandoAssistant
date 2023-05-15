@@ -24,8 +24,8 @@ public abstract class ServerStatHandlerMixin {
     @Inject(method = "setStat", at = @At("TAIL"))
     private void onSetStat(PlayerEntity player, Stat<?> stat, int value, CallbackInfo ci) {
         if (player instanceof ServerPlayerEntity serverPlayer) {
-            sendStats(serverPlayer);
             if(RandoAssistantStats.isOf(stat)) {
+                sendStats(serverPlayer);
                 Networking.sendClearCachePacket(serverPlayer);
             }
         }

@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant.screen;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.extend.HoveredTooltipPositionerExtender;
+import com.bawnorton.randoassistant.extend.InventoryScreenExtender;
 import com.bawnorton.randoassistant.render.RenderingHelper;
 import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
 import com.bawnorton.randoassistant.util.IdentifierType;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Items;
@@ -109,7 +111,7 @@ public class LootTableGraphWidget {
     public void render(MatrixStack matrices, int x, int y, double mouseX, double mouseY) {
         this.x = x;
         this.y = y;
-        Set<Tooltip> sideBarTooltips = renderSideBar(matrices, x - 30, y, mouseX, mouseY);
+        Set<Tooltip> sideBarTooltips = renderSideBars(matrices, x - 30, y, mouseX, mouseY);
         renderBackground(matrices, x, y);
         if(drawing == null) {
             renderPlaceholder(matrices, x + WIDTH / 2, y + HEIGHT / 2);
@@ -139,7 +141,7 @@ public class LootTableGraphWidget {
         });
     }
 
-    private Set<Tooltip> renderSideBar(MatrixStack matrices, int x, int y, double mouseX, double mouseY) {
+    private Set<Tooltip> renderSideBars(MatrixStack matrices, int x, int y, double mouseX, double mouseY) {
         boolean hoverTarget = mouseX >= x && mouseX <= x + 26 && mouseY >= y && mouseY <= y + 26;
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
@@ -151,6 +153,12 @@ public class LootTableGraphWidget {
         RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
         drawTexture(matrices, x, y, 52, 154 - (hoverCompass ? 26 : 0), 26, 26);
         RenderingHelper.renderIdentifier(Registries.ITEM.getId(Items.COMPASS), matrices, 1, x + 5, y + 5, false);
+        x += WIDTH + 34;
+        y -= 26;
+        boolean hoverClose = mouseX >= x && mouseX <= x + 18 && mouseY >= y && mouseY <= y + 18;
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShaderTexture(0, LootBookWidget.TEXTURE);
+        drawTexture(matrices, x, y, 170, 41 - (hoverClose ? - 18 : 0), 18, 18);
 
         Set<Tooltip> tooltips = new HashSet<>();
         if(hoverTarget) {
@@ -164,6 +172,7 @@ public class LootTableGraphWidget {
             }
         }
         if(hoverCompass) tooltips.add(Tooltip.of(Text.of("Center on " + IdentifierType.getName(target, false))));
+        if(hoverClose) tooltips.add(Tooltip.of(Text.of("Close")));
         return tooltips;
     }
 
@@ -270,6 +279,15 @@ public class LootTableGraphWidget {
             }
         } else if(mouseX >= x - 30 && mouseX <= x - 4 && mouseY >= y + 30 && mouseY <= y + 56) {
             centreOnTarget();
+        } else if(mouseX >= x + WIDTH && mouseX <= x + WIDTH + 26 && mouseY >= y && mouseY <= y + 26) {
+            LootTableResultButton.getLastClicked().closeGraph();
+            LootBookWidget lootBook = LootBookWidget.getInstance();
+            lootBook.moveWidgets(true);
+            lootBook.getScreen().y -= HEIGHT / 2;
+            TexturedButtonWidget lootButton = ((InventoryScreenExtender) lootBook.getScreen()).getLootBookButton();
+            TexturedButtonWidget recipeButton = ((InventoryScreenExtender) lootBook.getScreen()).getRecipeBookButton();
+            lootButton.setY(lootButton.getY() - HEIGHT / 2);
+            recipeButton.setY(recipeButton.getY() - HEIGHT / 2);
         }
         return false;
     }

@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.mixin.client;
 
+import com.bawnorton.randoassistant.extend.InventoryScreenExtender;
 import com.bawnorton.randoassistant.screen.LootBookWidget;
 import com.bawnorton.randoassistant.screen.LootTableResultButton;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
@@ -24,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
 
 @Mixin(InventoryScreen.class)
-public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin {
+public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin implements InventoryScreenExtender {
 
     private static final Identifier LOOT_BUTTON_TEXTURE = new Identifier("randoassistant", "textures/gui/loot_button.png");
     @Shadow
@@ -165,5 +166,15 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         return LootBookWidget.getInstance().mouseScrolled(mouseX, mouseY, amount);
+    }
+
+    @Override
+    public TexturedButtonWidget getLootBookButton() {
+        return lootButton;
+    }
+
+    @Override
+    public TexturedButtonWidget getRecipeBookButton() {
+        return recipeButton;
     }
 }

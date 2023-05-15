@@ -1,13 +1,17 @@
 package com.bawnorton.randoassistant.networking.client;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.networking.NetworkingConstants;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
@@ -38,5 +42,13 @@ public class Networking {
                 Tracker.getInstance().debug(stack.getItem());
             });
         });
+
+        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.HANDSHAKE_PACKET, (client, handler, buf, responseSender) -> {
+            client.execute(() -> RandoAssistantClient.isInstalledOnServer = true);
+        });
+    }
+
+    public static void requestHandshakePacket() {
+        ClientPlayNetworking.send(NetworkingConstants.HANDSHAKE_PACKET, PacketByteBufs.create());
     }
 }

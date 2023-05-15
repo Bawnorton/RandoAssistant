@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.screen;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
@@ -126,6 +127,10 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         matrices.push();
         matrices.translate(0, 0, 100);
         RenderSystem.setShaderTexture(0, TEXTURE);
+        if(!RandoAssistantClient.isInstalledOnServer) {
+            RenderSystem.setShaderColor(0.5f, 0.5f, 0.5f, 1);
+            if(isOpen()) this.toggleOpen();
+        }
         int x = (this.parentWidth - 147) / 2 + this.rightOffset;
         int y = (this.parentHeight - 166) / 2;
         if(LootTableResultButton.isGraphOpen()) y += HEIGHT / 2;
@@ -172,6 +177,7 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if(!RandoAssistantClient.isInstalledOnServer) return false;
         if(!this.isOpen() || client.player.isSpectator()) return false;
         if(this.settingsOpen) {
             return this.settingsWidget.mouseClicked(mouseX, mouseY, button);

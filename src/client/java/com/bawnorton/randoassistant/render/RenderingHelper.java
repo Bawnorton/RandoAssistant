@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.render;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.mixin.client.AbstractPlantPartBlockInvoker;
 import com.bawnorton.randoassistant.util.Easing;
 import com.bawnorton.randoassistant.util.IdentifierType;
@@ -199,6 +200,7 @@ public class RenderingHelper {
     }
 
     public static void renderStar(MatrixStack matrices, int x, int y, boolean silkTouch) {
+        if(!RandoAssistantClient.isInstalledOnServer) return;
         float timeOffset = Math.abs(((System.currentTimeMillis() % 2000) / 1000.0f) - 1.0f);
         matrices.push();
         matrices.translate(0, -Easing.ease(0, 1, timeOffset), 300);

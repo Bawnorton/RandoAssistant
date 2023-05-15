@@ -107,5 +107,6 @@ public class RandoAssistant implements ModInitializer {
         CommandHandler.init();
         RandoAssistantStats.init();
         EventManager.init();
+        Networking.init();
     }
 }

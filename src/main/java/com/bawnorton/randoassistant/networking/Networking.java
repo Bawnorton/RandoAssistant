@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.networking;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -12,8 +13,11 @@ import net.minecraft.server.network.ServerPlayerEntity;
 public class Networking {
     public static final Object SERVER_LOCK = new Object();
     public static MinecraftServer server;
-
     private static boolean initialized = false;
+
+    public static void init() {
+        ServerPlayNetworking.registerGlobalReceiver(NetworkingConstants.HANDSHAKE_PACKET, (server, player, handler, buf, responseSender) -> sendHandshakePacket(player));
+    }
 
     public static void sendLootTablePacket(ServerPlayerEntity player, SerializeableLootTable lootTable) {
         waitForServer(() -> {
@@ -48,8 +52,12 @@ public class Networking {
         });
     }
 
+    public static void sendHandshakePacket(ServerPlayerEntity player) {
+        waitForServer(() -> ServerPlayNetworking.send(player, NetworkingConstants.HANDSHAKE_PACKET, PacketByteBufs.create()));
+    }
+
     private static void waitForServer(Runnable runnable) {
-        if(!initialized) {
+        if(server == null || !initialized) {
             new Thread(() -> {
                 synchronized (SERVER_LOCK) {
                     while (server == null) {

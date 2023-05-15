@@ -8,4 +8,5 @@ public class NetworkingConstants {
     public static final Identifier INTERACTION_PACKET = new Identifier(RandoAssistant.MOD_ID, "interaction");
     public static final Identifier CLEAR_CACHE_PACKET = new Identifier(RandoAssistant.MOD_ID, "clear_cache");
     public static final Identifier DEBUG_PACKET = new Identifier(RandoAssistant.MOD_ID, "debug");
+    public static final Identifier HANDSHAKE_PACKET = new Identifier(RandoAssistant.MOD_ID, "handshake");
 }
