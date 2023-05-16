@@ -31,6 +31,7 @@ public abstract class PacketByteBufMixin {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Redirect(method = "readRegistryValue", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/collection/IndexedIterable;get(I)Ljava/lang/Object;"))
     private <T> T onReadRegistryValue(IndexedIterable<T> registry, int i) {
         if(registry.equals(Registries.CUSTOM_STAT) && i == (int) Math.pow(2, 25)) {

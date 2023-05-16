@@ -11,13 +11,18 @@ import net.minecraft.util.Identifier;
 public class RandoAssistantStats {
     public static final StatType<Identifier> INTERACTED = Registry.register(Registries.STAT_TYPE, new Identifier("randoassistant", "interacted_with_block"), new StatType<>(Registries.CUSTOM_STAT));
     public static final StatType<Identifier> LOOTED = Registry.register(Registries.STAT_TYPE, new Identifier("randoassistant", "looted_block"), new StatType<>(Registries.CUSTOM_STAT));
+    public static final StatType<Identifier> CRAFTED = Registry.register(Registries.STAT_TYPE, new Identifier("randoassistant", "crafted_item"), new StatType<>(Registries.CUSTOM_STAT));
     public static final StatType<Block> SILK_TOUCHED = Registry.register(Registries.STAT_TYPE, new Identifier("randoassistant", "silk_touched_block"), new StatType<>(Registries.BLOCK));
 
     public static void init() {
         RandoAssistant.LOGGER.debug("Initializing RandoAssistantStats");
     }
 
-    public static boolean isOf(Stat<?> stat) {
-        return stat.getType().equals(INTERACTED) || stat.getType().equals(LOOTED) || stat.getType().equals(SILK_TOUCHED);
+    public static boolean isCustom(Stat<?> stat) {
+        return stat.getType().equals(INTERACTED) || stat.getType().equals(LOOTED) || stat.getType().equals(SILK_TOUCHED) || stat.getType().equals(CRAFTED);
+    }
+
+    public static boolean usesIdentifier(Stat<?> stat) {
+        return stat.getType().equals(INTERACTED) || stat.getType().equals(LOOTED) || stat.getType().equals(CRAFTED);
     }
 }

@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.tracking.trackable;
 
 import com.bawnorton.randoassistant.config.Config;
+import com.bawnorton.randoassistant.util.LootCondition;
 import com.google.common.collect.Sets;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -14,7 +15,7 @@ import java.util.Set;
 public class Trackable<T> implements Comparable<Trackable<T>> {
     private final Stat<T> associatedStat;
     private final Identifier identifier;
-    private final Set<Identifier> output = Sets.newHashSet();
+    private final Set<TrackableEntry> output = Sets.newHashSet();
 
     private final StatHandler statHandler;
 
@@ -26,16 +27,17 @@ public class Trackable<T> implements Comparable<Trackable<T>> {
         statHandler = player.getStatHandler();
     }
 
-    public Set<Identifier> getOutput() {
+    public Set<TrackableEntry> getOutput() {
         return output;
     }
 
-    public void addOutput(Identifier id) {
-        output.add(id);
+    public void addOutput(Identifier id, LootCondition condition) {
+        output.add(new TrackableEntry(id, condition));
     }
 
     public boolean isEnabled() {
-        return statHandler.getStat(getStat()) > 0 || Config.getInstance().enableOverride;
+        if(Config.getInstance().enableOverride) return true;
+        return statHandler.getStat(getStat()) > 0;
     }
 
     public Stat<T> getStat() {

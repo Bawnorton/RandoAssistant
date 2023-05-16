@@ -7,13 +7,13 @@
     "AbstractBlockMixin",
     "AxeItemMixin",
     "BlockMixin",
-    "CraftingResultSlotMixin",
     "FishingBobberEntityMixin",
     "HoneycombItemMixin",
     "LivingEntityMixin",
     "LootableContainerBlockEntityMixin",
     "MinecraftServerMixin",
     "PacketByteBufMixin",
+    "RecipeUnlockerMixin",
     "ServerStatHandlerMixin"
   ],
   "injectors": {

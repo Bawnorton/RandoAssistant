@@ -2,6 +2,7 @@ package com.bawnorton.randoassistant.mixin.client;
 
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.extend.InventoryScreenExtender;
+import com.bawnorton.randoassistant.networking.client.Networking;
 import com.bawnorton.randoassistant.screen.LootBookWidget;
 import com.bawnorton.randoassistant.screen.LootTableResultButton;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
@@ -54,6 +55,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
     private void onInit(CallbackInfo ci) {
         LootBookWidget lootBook = LootBookWidget.getInstance();
         lootBook.initialise((InventoryScreen) (Object) this);
+        Networking.requestStatsPacket();
         lootButton = new TexturedButtonWidget(this.x + 126, this.height / 2 - 22, 20, 18, 0, 0, 19, LOOT_BUTTON_TEXTURE, (button) -> {
             if(!RandoAssistantClient.isInstalledOnServer) return;
             lootBook.toggleOpen();

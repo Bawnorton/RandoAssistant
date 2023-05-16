@@ -3,6 +3,7 @@ package com.bawnorton.randoassistant.screen;
 import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.util.IdentifierType;
 import com.google.common.collect.Sets;
+import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -50,19 +51,8 @@ public class LootTableListWidget {
 
     public void resetResults(boolean resetPage) {
         this.buttons.clear();
-        Set<Identifier> identifiers = Sets.newHashSet();
         String searchText = LootBookWidget.getInstance().getSearchText().toLowerCase().replace("^[a-z]", "");
-        Tracker.getInstance().getEnabledInteracted().forEach(trackable -> identifiers.addAll(trackable.getOutput()));
-        Tracker.getInstance().getEnabledLooted().forEach(trackable -> identifiers.addAll(trackable.getOutput()));
-        Tracker.getInstance().getEnabledCrafted().forEach(trackable -> trackable.getOutput().forEach(identifier -> {
-            if(IdentifierType.fromId(identifier).isItem()) {
-                Item item = Registries.ITEM.get(identifier);
-                if(Tracker.getInstance().hasCrafted(item)) {
-                    identifiers.add(identifier);
-                }
-            }
-        }));
-        identifiers.forEach(identifier -> {
+        Tracker.getInstance().getEnabled().forEach(identifier -> {
             String name = (switch (IdentifierType.fromId(identifier)) {
                 case ITEM -> Registries.ITEM.get(identifier).getName().getString();
                 case BLOCK -> Registries.BLOCK.get(identifier).getName().getString();

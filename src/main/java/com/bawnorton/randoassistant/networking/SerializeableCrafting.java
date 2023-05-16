@@ -1,50 +1,47 @@
 package com.bawnorton.randoassistant.networking;
 
 import com.bawnorton.randoassistant.util.tuples.Pair;
-import com.bawnorton.randoassistant.util.tuples.Triplet;
-import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
-public class SerializeableInteraction implements Serializeable {
+public class SerializeableCrafting implements Serializeable {
     private Pair<String, String> serializedInteraction;
-    private Block input;
-    private Block output;
+    private Recipe<?> input;
+    private Item output;
 
-    private SerializeableInteraction(Block input, Block output) {
+    private SerializeableCrafting(Recipe<?> input, Item output) {
         this.input = input;
         this.output = output;
 
         initSerialized();
     }
 
-    public SerializeableInteraction(byte[] bytes) {
+    public SerializeableCrafting(byte[] bytes) {
         populateData(bytes);
     }
 
     private void initSerialized() {
-        serializedInteraction = new Pair<>(Registries.BLOCK.getId(input).toString(), Registries.BLOCK.getId(output).toString());
+        serializedInteraction = new Pair<>(input.getId().toString(), Registries.ITEM.getId(output).toString());
     }
 
     private void deserialize(Pair<String, String> serialized) {
-        this.input = Registries.BLOCK.get(new Identifier(serialized.a()));
-        this.output = Registries.BLOCK.get(new Identifier(serialized.b()));
+        this.input = Networking.server.getRecipeManager().get(new Identifier(serialized.a())).orElseThrow();
+        this.output = Registries.ITEM.get(new Identifier(serialized.b()));
     }
 
-    public static SerializeableInteraction ofBlockToBlock(Block input, Block output) {
-        return new SerializeableInteraction(input, output);
+    public static SerializeableCrafting of(Recipe<?> input, Item output) {
+        return new SerializeableCrafting(input, output);
     }
 
-    public Block getInput() {
+    public Recipe<?> getInput() {
         return input;
     }
 
-    public Block getOutput() {
+    public Item getOutput() {
         return output;
     }
 
@@ -71,6 +68,6 @@ public class SerializeableInteraction implements Serializeable {
 
     @Override
     public Identifier getTypePacket() {
-        return NetworkingConstants.INTERACTION_PACKET;
+        return NetworkingConstants.CRAFTING_PACKET;
     }
 }

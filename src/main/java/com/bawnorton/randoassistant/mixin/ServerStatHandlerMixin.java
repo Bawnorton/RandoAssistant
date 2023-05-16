@@ -24,7 +24,7 @@ public abstract class ServerStatHandlerMixin {
     @Inject(method = "setStat", at = @At("TAIL"))
     private void onSetStat(PlayerEntity player, Stat<?> stat, int value, CallbackInfo ci) {
         if (player instanceof ServerPlayerEntity serverPlayer) {
-            if(RandoAssistantStats.isOf(stat)) {
+            if(RandoAssistantStats.isCustom(stat)) {
                 sendStats(serverPlayer);
                 Networking.sendClearCachePacket(serverPlayer);
             }
@@ -33,7 +33,7 @@ public abstract class ServerStatHandlerMixin {
 
     @Inject(method = "getStatId", at = @At("RETURN"), cancellable = true)
     private static <T> void onGetStatId(Stat<T> stat, CallbackInfoReturnable<Identifier> cir) {
-        if(stat.getType().equals(RandoAssistantStats.LOOTED) || stat.getType().equals(RandoAssistantStats.INTERACTED)) {
+        if(RandoAssistantStats.usesIdentifier(stat)) {
             cir.setReturnValue((Identifier) stat.getValue());
         }
     }
@@ -45,6 +45,8 @@ public abstract class ServerStatHandlerMixin {
             cir.setReturnValue(Optional.of((Stat<T>) RandoAssistantStats.LOOTED.getOrCreateStat(Identifier.tryParse(id))));
         } else if (type.equals(RandoAssistantStats.INTERACTED)) {
             cir.setReturnValue(Optional.of((Stat<T>) RandoAssistantStats.INTERACTED.getOrCreateStat(Identifier.tryParse(id))));
+        } else if (type.equals(RandoAssistantStats.CRAFTED)) {
+            cir.setReturnValue(Optional.of((Stat<T>) RandoAssistantStats.CRAFTED.getOrCreateStat(Identifier.tryParse(id))));
         }
     }
 }

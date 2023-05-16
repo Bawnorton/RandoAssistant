@@ -1,7 +1,6 @@
 package com.bawnorton.randoassistant.networking;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -17,21 +16,14 @@ public class Networking {
 
     public static void init() {
         ServerPlayNetworking.registerGlobalReceiver(NetworkingConstants.HANDSHAKE_PACKET, (server, player, handler, buf, responseSender) -> sendHandshakePacket(player));
+        ServerPlayNetworking.registerGlobalReceiver(NetworkingConstants.STATS_PACKET, (server, player, handler, buf, responseSender) -> waitForServer(() -> player.getStatHandler().sendStats(player)));
     }
 
-    public static void sendLootTablePacket(ServerPlayerEntity player, SerializeableLootTable lootTable) {
+    public static void sendSerializeablePacket(ServerPlayerEntity player, Serializeable serializeable) {
         waitForServer(() -> {
             PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeBytes(lootTable.toBytes());
-            ServerPlayNetworking.send(player, NetworkingConstants.LOOT_TABLE_PACKET, buf);
-        });
-    }
-
-    public static void sendInteractionPacket(ServerPlayerEntity player, SerializeableInteraction interaction) {
-        waitForServer(() -> {
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeBytes(interaction.toBytes());
-            ServerPlayNetworking.send(player, NetworkingConstants.INTERACTION_PACKET, buf);
+            buf.writeBytes(serializeable.toBytes());
+            ServerPlayNetworking.send(player, serializeable.getTypePacket(), buf);
         });
     }
 
@@ -53,7 +45,10 @@ public class Networking {
     }
 
     public static void sendHandshakePacket(ServerPlayerEntity player) {
-        waitForServer(() -> ServerPlayNetworking.send(player, NetworkingConstants.HANDSHAKE_PACKET, PacketByteBufs.create()));
+        waitForServer(() -> {
+            ServerPlayNetworking.send(player, NetworkingConstants.HANDSHAKE_PACKET, PacketByteBufs.create());
+            player.getStatHandler().sendStats(player);
+        });
     }
 
     private static void waitForServer(Runnable runnable) {

@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.networking;
 
-import com.bawnorton.randoassistant.util.tuples.Triplet;
+import com.bawnorton.randoassistant.util.LootCondition;
+import com.bawnorton.randoassistant.util.tuples.Quadruplet;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -13,14 +14,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class SerializeableLootTable {
-    private Triplet<String, String, List<String>> serializedLootTable;
+public class SerializeableLootTable implements Serializeable {
+    private Quadruplet<String, String, List<String>, String> serializedLootTable;
 
-    private final Identifier lootTableId;
-    private final Identifier sourceId;
-    private final List<Item> items;
+    private Identifier lootTableId;
+    private Identifier sourceId;
+    private List<Item> items;
+    private LootCondition condition;
 
-    private SerializeableLootTable(Identifier lootTableId, Identifier sourceId, Collection<ItemStack> items) {
+    private SerializeableLootTable(Identifier lootTableId, Identifier sourceId, Collection<ItemStack> items, LootCondition condition) {
         if(lootTableId == null) throw new IllegalArgumentException("Identifier cannot be null");
         this.lootTableId = lootTableId;
         this.sourceId = sourceId;
@@ -28,8 +30,13 @@ public class SerializeableLootTable {
         for(ItemStack itemStack : items) {
             this.items.add(itemStack.getItem());
         }
+        this.condition = condition;
 
         initSerialized();
+    }
+
+    public SerializeableLootTable(byte[] bytes) {
+        populateData(bytes);
     }
 
     private void initSerialized() {
@@ -37,29 +44,26 @@ public class SerializeableLootTable {
         for(Item item : items) {
             itemNames.add(Registries.ITEM.getId(item).toString());
         }
-        serializedLootTable = new Triplet<>(lootTableId.toString(), sourceId.toString(), itemNames);
+        serializedLootTable = new Quadruplet<>(lootTableId.toString(), sourceId.toString(), itemNames, condition.name());
     }
 
-    private static SerializeableLootTable deserialize(Triplet<String, String, List<String>> serialized) {
-        String lootTableId = serialized.a();
-        String sourceId = serialized.b();
-        List<ItemStack> items = new ArrayList<>();
-        for(String item : serialized.c()) {
-            items.add(new ItemStack(Registries.ITEM.get(new Identifier(item))));
-        }
-        return new SerializeableLootTable(new Identifier(lootTableId), new Identifier(sourceId), items);
+    private void deserialize(Quadruplet<String, String, List<String>, String> serialized) {
+        this.lootTableId = new Identifier(serialized.a());
+        this.sourceId = new Identifier(serialized.b());
+        this.condition = LootCondition.valueOf(serialized.d());
+        this.items = serialized.c().stream().map(itemName -> Registries.ITEM.get(new Identifier(itemName))).toList();
     }
 
-    public static SerializeableLootTable ofBlock(Block block, Collection<ItemStack> items) {
-        return new SerializeableLootTable(block.getLootTableId(), Registries.BLOCK.getId(block), items);
+    public static SerializeableLootTable ofBlock(Block block, Collection<ItemStack> items, boolean silkTouch) {
+        return new SerializeableLootTable(block.getLootTableId(), Registries.BLOCK.getId(block), items, silkTouch ? LootCondition.SILK_TOUCH : LootCondition.NONE);
     }
 
     public static SerializeableLootTable ofEntity(EntityType<?> entity, Collection<ItemStack> items) {
-        return new SerializeableLootTable(entity.getLootTableId(), Registries.ENTITY_TYPE.getId(entity), items);
+        return new SerializeableLootTable(entity.getLootTableId(), Registries.ENTITY_TYPE.getId(entity), items, LootCondition.NONE);
     }
 
     public static SerializeableLootTable ofOther(Identifier id, Collection<ItemStack> items) {
-        return new SerializeableLootTable(id, id, items);
+        return new SerializeableLootTable(id, id, items, LootCondition.NONE);
     }
 
     public Identifier getLootTableId() {
@@ -74,14 +78,8 @@ public class SerializeableLootTable {
         return items;
     }
 
-    @SuppressWarnings("unchecked")
-    public static SerializeableLootTable fromBytes(byte[] bytes) {
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            return deserialize((Triplet<String, String, List<String>>) ois.readObject());
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public LootCondition getCondition() {
+        return condition;
     }
 
     public byte[] toBytes() {
@@ -95,6 +93,21 @@ public class SerializeableLootTable {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public void populateData(byte[] bytes) {
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            deserialize((Quadruplet<String, String, List<String>, String>) ois.readObject());
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Identifier getTypePacket() {
+        return NetworkingConstants.LOOT_TABLE_PACKET;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("SerializeableLootTable{");
@@ -104,7 +117,8 @@ public class SerializeableLootTable {
             sb.append(item).append(", ");
         }
         sb.delete(sb.length() - 2, sb.length());
-        sb.append("]}");
+        sb.append("], condition=").append(condition);
+        sb.append('}');
         return sb.toString();
     }
 }

@@ -2,16 +2,21 @@ package com.bawnorton.randoassistant.tracking;
 
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.config.Config;
+import com.bawnorton.randoassistant.networking.SerializeableCrafting;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import com.bawnorton.randoassistant.screen.LootBookWidget;
 import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import com.bawnorton.randoassistant.tracking.trackable.Trackable;
+import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
+import com.bawnorton.randoassistant.util.LootCondition;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.registry.Registries;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
@@ -19,7 +24,6 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,15 +31,15 @@ public class Tracker {
     private static Tracker INSTANCE;
 
     private final TrackableMap<Identifier> TRACKABLE_INTERACTED;
-    private final TrackableMap<Identifier> TRACKABLE_CRAFTED;
     private final TrackableMap<Identifier> TRACKABLE_LOOTED;
+    private final Map<Recipe<?>, Item> TRACKABLE_CRAFTED;
 
     private final Map<Identifier, Set<Trackable<Identifier>>> TRACKED;
 
     public Tracker() {
         TRACKABLE_INTERACTED = new TrackableMap<>();
-        TRACKABLE_CRAFTED = new TrackableMap<>();
         TRACKABLE_LOOTED = new TrackableMap<>();
+        TRACKABLE_CRAFTED = Maps.newHashMap();
         TRACKED = Maps.newHashMap();
     }
 
@@ -47,13 +51,10 @@ public class Tracker {
     }
 
     public void track(SerializeableLootTable lootTable) {
-        Identifier lootTableId = lootTable.getLootTableId();
-        Identifier sourceId = lootTable.getSourceId();
-        List<Item> targets = lootTable.getItems();
-        Stat<Identifier> stat = RandoAssistantStats.LOOTED.getOrCreateStat(lootTableId);
-        Trackable<Identifier> trackable = TRACKABLE_LOOTED.getOrCreate(stat, sourceId);
-        for(Item target : targets) {
-            trackable.addOutput(Registries.ITEM.getId(target));
+        Stat<Identifier> stat = RandoAssistantStats.LOOTED.getOrCreateStat(lootTable.getLootTableId());
+        Trackable<Identifier> trackable = TRACKABLE_LOOTED.getOrCreate(stat, lootTable.getSourceId());
+        for(Item target : lootTable.getItems()) {
+            trackable.addOutput(Registries.ITEM.getId(target), lootTable.getCondition());
             Set<Trackable<Identifier>> tracked = TRACKED.getOrDefault(Registries.ITEM.getId(target), Sets.newHashSet());
             tracked.add(trackable);
             TRACKED.put(Registries.ITEM.getId(target), tracked);
@@ -61,26 +62,18 @@ public class Tracker {
     }
     
     public void track(SerializeableInteraction interaction) {
-        List<Item> input = interaction.getInput();
-        List<Item> output = interaction.getOutput();
-        for(Item source : input) {
-            Stat<Identifier> stat = RandoAssistantStats.INTERACTED.getOrCreateStat(Registries.ITEM.getId(source));
-            Trackable<Identifier> trackable = (interaction.isCrafting() ? TRACKABLE_CRAFTED : TRACKABLE_INTERACTED).getOrCreate(stat, Registries.ITEM.getId(source));
-            for(Item target : output) {
-                trackable.addOutput(Registries.ITEM.getId(target));
-                Set<Trackable<Identifier>> tracked = TRACKED.getOrDefault(Registries.ITEM.getId(target), Sets.newHashSet());
-                tracked.add(trackable);
-                TRACKED.put(Registries.ITEM.getId(target), tracked);
-            }
-        }
+        Stat<Identifier> stat = RandoAssistantStats.INTERACTED.getOrCreateStat(Registries.BLOCK.getId(interaction.getInput()));
+        Trackable<Identifier> trackable = TRACKABLE_INTERACTED.getOrCreate(stat, Registries.BLOCK.getId(interaction.getInput()));
+        trackable.addOutput(Registries.BLOCK.getId(interaction.getOutput()), LootCondition.NONE);
+        Set<Trackable<Identifier>> tracked = TRACKED.getOrDefault(Registries.BLOCK.getId(interaction.getOutput()), Sets.newHashSet());
+        tracked.add(trackable);
+        TRACKED.put(Registries.BLOCK.getId(interaction.getOutput()), tracked);
     }
 
-    public boolean hasCrafted(Item item) {
-        if(Config.getInstance().enableOverride) return true;
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if(player == null) throw new IllegalStateException("Player is null");
-        int count = player.getStatHandler().getStat(Stats.CRAFTED.getOrCreateStat(item));
-        return count > 0;
+    public void track(SerializeableCrafting crafting) {
+        Recipe<?> recipe = crafting.getInput();
+        Item outputItem = crafting.getOutput();
+        TRACKABLE_CRAFTED.put(recipe, outputItem);
     }
 
     @Nullable
@@ -88,16 +81,59 @@ public class Tracker {
         return TRACKED.get(id);
     }
 
-    public final Set<Trackable<Identifier>> getEnabledLooted() {
+    public Set<Identifier> getEnabled() {
+        Set<Identifier> identifiers = Sets.newHashSet();
+        getEnabledInteracted().forEach(trackable -> trackable.getOutput().forEach(entry -> identifiers.add(entry.identifier())));
+        getEnabledLooted().forEach(trackable -> trackable.getOutput().forEach(entry -> {
+            Identifier identifier = entry.identifier();
+            if(entry.requiresSilkTouch()) {
+                Block block = Registries.BLOCK.get(trackable.getIdentifier());
+                if(hasSilkTouched(block)) identifiers.add(identifier);
+            } else identifiers.add(identifier);
+        }));
+        identifiers.addAll(getEnabledCrafted());
+        return identifiers;
+    }
+    
+    private Set<Trackable<Identifier>> getEnabledLooted() {
         return TRACKABLE_LOOTED.getEnabled();
     }
 
-    public final Set<Trackable<Identifier>> getEnabledInteracted() {
+    private Set<Trackable<Identifier>> getEnabledInteracted() {
         return TRACKABLE_INTERACTED.getEnabled();
     }
 
-    public final Set<Trackable<Identifier>> getEnabledCrafted() {
-        return TRACKABLE_CRAFTED.getEnabled();
+    private Set<Identifier> getEnabledCrafted() {
+        Set<Identifier> crafted = Sets.newHashSet();
+        TRACKABLE_CRAFTED.forEach((recipe, item) -> {
+            if(hasCrafted(recipe)) crafted.add(Registries.ITEM.getId(item));
+        });
+        return crafted;
+    }
+
+    public boolean hasCrafted(Recipe<?> recipe) {
+        if(Config.getInstance().enableOverride) return true;
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if(player == null) throw new IllegalStateException("Player is null");
+        int count = player.getStatHandler().getStat(RandoAssistantStats.CRAFTED.getOrCreateStat(recipe.getId()));
+        return count > 0;
+    }
+
+    public boolean hasObtained(Item item) {
+        if(Config.getInstance().enableOverride) return true;
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if(player == null) throw new IllegalStateException("Player is null");
+        int count = player.getStatHandler().getStat(Stats.CRAFTED.getOrCreateStat(item));
+        count += player.getStatHandler().getStat(Stats.PICKED_UP.getOrCreateStat(item));
+        return count > 0;
+    }
+
+    private boolean hasSilkTouched(Block block) {
+        if(Config.getInstance().enableOverride) return true;
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if(player == null) throw new IllegalStateException("Player is null");
+        int count = player.getStatHandler().getStat(RandoAssistantStats.SILK_TOUCHED.getOrCreateStat(block));
+        return count > 0;
     }
 
     public void clear() {
@@ -109,6 +145,7 @@ public class Tracker {
     }
 
     public void clearCache() {
+        TrackableCrawler.clearCache();
         LootBookWidget.getInstance().clearCache();
     }
 

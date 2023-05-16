@@ -17,6 +17,7 @@ public class EventManager {
             Networking.sendClearCachePacket(player);
             RandoAssistant.getAllLootTables(player);
             RandoAssistant.getAllInteractions(player);
+            RandoAssistant.getAllRecipes(player);
         });
     }
 }

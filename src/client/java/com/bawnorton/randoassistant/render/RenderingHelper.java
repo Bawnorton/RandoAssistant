@@ -5,6 +5,7 @@ import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.mixin.client.AbstractPlantPartBlockInvoker;
 import com.bawnorton.randoassistant.util.Easing;
 import com.bawnorton.randoassistant.util.IdentifierType;
+import com.bawnorton.randoassistant.util.RecipeType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -37,7 +38,7 @@ public class RenderingHelper {
 
     public static void renderIdentifier(Identifier id, MatrixStack matrices, double scale, int x, int y, boolean preferEntity) {
         IdentifierType type = IdentifierType.fromId(id);
-        if(IdentifierType.isItemAndEntity(id)) {
+        if(type.isItemAndEntity()) {
             type = preferEntity ? IdentifierType.ENTITY : IdentifierType.ITEM;
         }
         switch (type) {
@@ -93,7 +94,14 @@ public class RenderingHelper {
                 } else if (path.contains("fishing")) {
                     client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Items.FISHING_ROD), x, y);
                 } else {
-                    client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Items.CHEST), x, y);
+                    RecipeType recipeType = RecipeType.fromName(id.getPath());
+                    if(recipeType == null) {
+                        client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Items.CHEST), x, y);
+                    } else if (recipeType == RecipeType.CRAFTING) {
+                        client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Items.CRAFTING_TABLE), x, y);
+                    } else if (recipeType == RecipeType.SMELTING) {
+                        client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Items.FURNACE), x, y);
+                    }
                 }
             }
         }

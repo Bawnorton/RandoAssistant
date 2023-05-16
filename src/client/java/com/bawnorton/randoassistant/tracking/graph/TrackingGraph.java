@@ -81,6 +81,12 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
         }
     }
 
+    public void removeOutgoingEdges(Identifier target) {
+        Vertex vertex = getVertex(target);
+        Set<Edge> edges = outgoingEdgesOf(vertex);
+        removeAllEdges(edges);
+    }
+
     public boolean contains(Identifier identifier) {
         return VERTEX_MAP.containsKey(identifier);
     }
