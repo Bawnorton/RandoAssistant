@@ -27,10 +27,6 @@ import java.util.Locale;
 
 import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
 
-/*
-To be implemented:
-- Settings screen
- */
 @SuppressWarnings("DataFlowIssue")
 public class LootBookWidget extends DrawableHelper implements Drawable, Element, Selectable {
     public static final Identifier TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/loot_book.png");
@@ -40,9 +36,12 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
     private InventoryScreen screen;
 
     private ToggleButtonWidget settingsButton;
+    private ToggleButtonWidget statsButton;
     private TextFieldWidget searchField;
     private LootTableListWidget lootTableArea;
+
     private LootBookSettingsWidget settingsWidget;
+    private LootBookStatsWidget statsWidget;
 
     private String searchText = "";
     private int rightOffset;
@@ -50,6 +49,7 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
     private int parentHeight;
     private boolean open;
     private boolean settingsOpen = false;
+    private boolean statsOpen = false;
     private boolean searching;
 
     public static LootBookWidget getInstance() {
@@ -74,7 +74,7 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         int x = (this.parentWidth - 147) / 2 + this.rightOffset;
         int y = (this.parentHeight - 166) / 2;
         String search = this.searchField != null ? this.searchField.getText() : "";
-        this.searchField = new TextFieldWidget(client.textRenderer, x + 26, y + 14, 89, client.textRenderer.fontHeight + 3, Text.of(""));
+        this.searchField = new TextFieldWidget(client.textRenderer, x + 26, y + 14, 69, client.textRenderer.fontHeight + 3, Text.of(""));
         this.searchField.setMaxLength(50);
         this.searchField.setVisible(true);
         this.searchField.setEditableColor(0xFFFFFF);
@@ -85,6 +85,10 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         this.settingsButton = new ToggleButtonWidget(x + 120, y + 12, 16, 16, false);
         this.settingsButton.setTextureUV(152, 41, 0, 18, TEXTURE);
         this.settingsButton.setTooltip(Tooltip.of(Text.of("Settings")));
+        this.statsWidget = new LootBookStatsWidget(client, x, y);
+        this.statsButton = new ToggleButtonWidget(x + 100, y + 12, 16, 16, false);
+        this.statsButton.setTextureUV(152, 77, 0, 18, TEXTURE);
+        this.statsButton.setTooltip(Tooltip.of(Text.of("Stats")));
     }
     public void toggleOpen() {
         this.setOpen(!this.isOpen());
@@ -115,6 +119,10 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         this.settingsOpen = false;
     }
 
+    public void closeStats() {
+        this.statsOpen = false;
+    }
+
     public void tick() {
         if(!this.isOpen()) return;
         this.searchField.tick();
@@ -136,10 +144,14 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         if(settingsOpen) {
             this.settingsWidget.render(matrices, mouseX, mouseY, delta);
             this.lootTableArea.renderLastClickedGraph(matrices, mouseX, mouseY);
+        } else if (statsOpen) {
+            this.statsWidget.render(matrices, mouseX, mouseY, delta);
+            this.lootTableArea.renderLastClickedGraph(matrices, mouseX, mouseY);
         } else {
             this.searchField.render(matrices, mouseX, mouseY, delta);
             this.lootTableArea.render(matrices, mouseX, mouseY, delta);
             this.settingsButton.render(matrices, mouseX, mouseY, delta);
+            this.statsButton.render(matrices, mouseX, mouseY, delta);
         }
         matrices.pop();
     }
@@ -150,7 +162,7 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
 
     public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY) {
         if(!this.isOpen()) return;
-        if(!settingsOpen) {
+        if(!settingsOpen && !statsOpen) {
             this.lootTableArea.renderTooltip(matrices, mouseX, mouseY);
         }
     }
@@ -180,11 +192,18 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         if(this.settingsOpen) {
             return this.settingsWidget.mouseClicked(mouseX, mouseY, button);
         }
+        if(this.statsOpen) {
+            return this.statsWidget.mouseClicked(mouseX, mouseY, button);
+        }
         if (this.searchField.mouseClicked(mouseX, mouseY, button) || this.lootTableArea.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
         if(this.settingsButton.mouseClicked(mouseX, mouseY, button)) {
             this.settingsOpen = true;
+            return true;
+        }
+        if(this.statsButton.mouseClicked(mouseX, mouseY, button)) {
+            this.statsOpen = true;
             return true;
         }
         return false;
@@ -278,6 +297,7 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
     public void moveWidgets(boolean up) {
         this.lootTableArea.movePageButtons(up);
         this.settingsWidget.moveWidgets(up);
+        this.statsWidget.moveWidgets(up);
         if(up) {
             this.searchField.setY(this.searchField.getY() - HEIGHT / 2);
             this.settingsButton.setY(this.settingsButton.getY() - HEIGHT / 2);

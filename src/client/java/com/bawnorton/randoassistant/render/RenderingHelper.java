@@ -112,10 +112,7 @@ public class RenderingHelper {
         DiffuseLighting.disableGuiDepthLighting();
 
         matrices.push();
-        matrices.translate(x + 10, y + 6, 100);
-        if(block instanceof FlowerPotBlock || block instanceof CandleCakeBlock || block instanceof BambooSaplingBlock) {
-            matrices.translate(-2, 0, 0);
-        }
+        matrices.translate(x + 8, y + 6, 100);
         matrices.scale(15, -15, 40);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(30));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(225));
@@ -124,7 +121,7 @@ public class RenderingHelper {
         VertexConsumerProvider.Immediate vertexConsumers = client.getBufferBuilders().getEntityVertexConsumers();
         client.getBlockRenderManager().renderBlockAsEntity(state, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
 
-        RenderSystem.setShaderLights(new Vector3f(-1.5f, -0.5f, 0), new Vector3f(0, -1, 0));
+        RenderSystem.setShaderLights(new Vector3f(1.5f, 0.5f, 0), new Vector3f(0, 1, 0));
         vertexConsumers.draw();
         DiffuseLighting.enableGuiDepthLighting();
 
