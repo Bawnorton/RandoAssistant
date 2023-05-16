@@ -49,7 +49,7 @@ public class RandoAssistant implements ModInitializer {
         LootManager lootManager = Networking.server.getLootManager();
         LootContextType lootContextType = new LootContextType.Builder().allow(LootContextParameters.THIS_ENTITY).allow(LootContextParameters.TOOL).build();
 
-        for(int i = 0; i < 1; i++) {
+        for(int i = 0; i < 50; i++) {
             HashSet<Identifier> seen = new HashSet<>();
             Registries.BLOCK.forEach(block -> {
                 LootContext.Builder builder = new LootContext.Builder(Networking.server.getWorld(World.OVERWORLD));
