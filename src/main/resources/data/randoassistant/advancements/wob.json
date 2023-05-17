@@ -1,0 +1,19 @@
+{
+  "display": {
+    "icon": {
+      "item": "randoassistant:wob"
+    },
+    "title": "That's Not a Bow",
+    "description": "Congrats you forgot how to make a bow, put the wob in a crafting table to get a bow.",
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "parent": "fasguys_toolbox:loot_table_randomizer/main",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

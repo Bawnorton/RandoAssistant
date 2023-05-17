@@ -58,4 +58,10 @@ public class Networking {
     public static void requestStatsPacket() {
         ClientPlayNetworking.send(NetworkingConstants.STATS_PACKET, PacketByteBufs.create());
     }
+
+    public static void requestAdvancementUnlock(int i) {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeInt(i);
+        ClientPlayNetworking.send(NetworkingConstants.ADVANCEMENT_UNLOCK_PACKET, buf);
+    }
 }

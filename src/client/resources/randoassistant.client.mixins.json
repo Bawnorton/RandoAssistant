@@ -21,6 +21,7 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "ClientPlayNetworkHandlerMixin",
     "CraftingScreenMixin"
   ]
 }

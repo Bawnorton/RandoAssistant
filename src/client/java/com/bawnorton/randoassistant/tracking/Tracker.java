@@ -5,6 +5,7 @@ import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.networking.SerializeableCrafting;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
+import com.bawnorton.randoassistant.networking.client.Networking;
 import com.bawnorton.randoassistant.screen.LootBookWidget;
 import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import com.bawnorton.randoassistant.tracking.trackable.Trackable;
@@ -26,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class Tracker {
     private static Tracker INSTANCE;
@@ -157,6 +159,50 @@ public class Tracker {
         }
     }
 
+    public int getDiscoveredBlocksCount() {
+        return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.BLOCK.containsId(trackable.getIdentifier()) && trackable.isEnabled()).size();
+    }
+
+    public int getTotalBlocksCount() {
+        return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.BLOCK.containsId(trackable.getIdentifier())).size() - 6;
+    }
+
+    public int getDiscoveredEntitiesCount() {
+        return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.ENTITY_TYPE.containsId(trackable.getIdentifier()) && trackable.isEnabled()).size();
+    }
+
+    public int getTotalEntitiesCount() {
+        return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.ENTITY_TYPE.containsId(trackable.getIdentifier())).size() - 2;
+    }
+
+    public int getDiscoveredOtherCount() {
+        return TRACKABLE_LOOTED.getFiltered(trackable -> !Registries.BLOCK.containsId(trackable.getIdentifier()) && !Registries.ENTITY_TYPE.containsId(trackable.getIdentifier()) && !Registries.ITEM.containsId(trackable.getIdentifier()) && trackable.isEnabled()).size();
+    }
+
+    public int getTotalOtherCount() {
+        return TRACKABLE_LOOTED.getFiltered(trackable -> !Registries.BLOCK.containsId(trackable.getIdentifier()) && !Registries.ENTITY_TYPE.containsId(trackable.getIdentifier()) && !Registries.ITEM.containsId(trackable.getIdentifier())).size();
+    }
+
+    public int getDiscoveredCount() {
+        return getDiscoveredBlocksCount() + getDiscoveredEntitiesCount() + getDiscoveredOtherCount();
+    }
+
+    public int getTotalCount() {
+        return getTotalBlocksCount() + getTotalEntitiesCount() + getTotalOtherCount();
+    }
+
+    public void testAll() {
+        if(getDiscoveredCount() >= getTotalCount()) {
+            Networking.requestAdvancementUnlock(0);
+        } else if (getDiscoveredBlocksCount() >= getTotalBlocksCount()) {
+            Networking.requestAdvancementUnlock(1);
+        } else if (getDiscoveredEntitiesCount() >= getTotalEntitiesCount()) {
+            Networking.requestAdvancementUnlock(2);
+        } else if (getDiscoveredOtherCount() >= getTotalOtherCount()) {
+            Networking.requestAdvancementUnlock(3);
+        }
+    }
+
     private static class TrackableMap<T> {
         private final HashMap<Stat<T>, Trackable<T>> trackables;
 
@@ -174,18 +220,26 @@ public class Tracker {
             }
         }
 
-        public final Set<Trackable<T>> getEnabled() {
-            Set<Trackable<T>> enabled = Sets.newHashSet();
+        public Set<Trackable<T>> getEnabled() {
+            return getFiltered(Trackable::isEnabled);
+        }
+
+        public Set<Trackable<T>> getFiltered(Predicate<Trackable<T>> filter) {
+            Set<Trackable<T>> filtered = Sets.newHashSet();
             for(Trackable<T> trackable : trackables.values()) {
-                if(trackable.isEnabled()) {
-                    enabled.add(trackable);
+                if(filter.test(trackable)) {
+                    filtered.add(trackable);
                 }
             }
-            return enabled;
+            return filtered;
         }
 
         public void clear() {
             trackables.clear();
+        }
+
+        public int size() {
+            return trackables.size();
         }
 
         @Override

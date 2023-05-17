@@ -13,7 +13,9 @@
     "LootableContainerBlockEntityMixin",
     "MinecraftServerMixin",
     "PacketByteBufMixin",
+    "PlayerAdvancementTrackerMixin",
     "RecipeUnlockerMixin",
+    "ServerPlayerEntityMixin",
     "ServerStatHandlerMixin"
   ],
   "injectors": {

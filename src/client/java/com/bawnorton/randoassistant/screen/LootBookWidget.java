@@ -301,9 +301,11 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         if(up) {
             this.searchField.setY(this.searchField.getY() - HEIGHT / 2);
             this.settingsButton.setY(this.settingsButton.getY() - HEIGHT / 2);
+            this.statsButton.setY(this.statsButton.getY() - HEIGHT / 2);
         } else {
             this.searchField.setY(this.searchField.getY() + HEIGHT / 2);
             this.settingsButton.setY(this.settingsButton.getY() + HEIGHT / 2);
+            this.statsButton.setY(this.statsButton.getY() + HEIGHT / 2);
         }
     }
 
