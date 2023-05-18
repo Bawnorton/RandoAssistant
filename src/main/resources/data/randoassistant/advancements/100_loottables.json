@@ -1,7 +1,7 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:iron"
+      "item": "minecraft:iron_ingot"
     },
     "title": "Loot Collector",
     "description": "You have discovered 100 loot tables.",

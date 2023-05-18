@@ -1,7 +1,7 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:gold"
+      "item": "minecraft:gold_ingot"
     },
     "title": "Loot Baron",
     "description": "You have discovered 200 loot tables.",
