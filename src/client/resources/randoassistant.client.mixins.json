@@ -22,6 +22,7 @@
   },
   "mixins": [
     "ClientPlayNetworkHandlerMixin",
-    "CraftingScreenMixin"
+    "CraftingScreenMixin",
+    "GameRendererMixin"
   ]
 }

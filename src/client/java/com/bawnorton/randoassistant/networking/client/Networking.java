@@ -8,6 +8,7 @@ import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
+import com.bawnorton.randoassistant.util.LootAdvancement;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -59,9 +60,9 @@ public class Networking {
         ClientPlayNetworking.send(NetworkingConstants.STATS_PACKET, PacketByteBufs.create());
     }
 
-    public static void requestAdvancementUnlock(int i) {
+    public static void requestAdvancementUnlock(LootAdvancement advancement) {
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeInt(i);
+        buf.writeInt(advancement.ordinal());
         ClientPlayNetworking.send(NetworkingConstants.ADVANCEMENT_UNLOCK_PACKET, buf);
     }
 }

@@ -10,6 +10,7 @@ import com.bawnorton.randoassistant.screen.LootBookWidget;
 import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import com.bawnorton.randoassistant.tracking.trackable.Trackable;
 import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
+import com.bawnorton.randoassistant.util.LootAdvancement;
 import com.bawnorton.randoassistant.util.LootCondition;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -192,14 +193,24 @@ public class Tracker {
     }
 
     public void testAll() {
-        if(getDiscoveredCount() >= getTotalCount()) {
-            Networking.requestAdvancementUnlock(0);
+        int discoveredCount = getDiscoveredCount();
+        int totalCount = getTotalCount();
+        if(discoveredCount >= 50 && discoveredCount < 100) {
+            Networking.requestAdvancementUnlock(LootAdvancement.FIFTY);
+        } else if (discoveredCount >= 100 && discoveredCount < 200) {
+            Networking.requestAdvancementUnlock(LootAdvancement.HUNDRED);
+        } else if (discoveredCount >= 200 && discoveredCount < 500) {
+            Networking.requestAdvancementUnlock(LootAdvancement.TWO_HUNDRED);
+        } else if (discoveredCount >= 500 && discoveredCount < totalCount) {
+            Networking.requestAdvancementUnlock(LootAdvancement.FIVE_HUNDRED);
+        } else if(discoveredCount >= totalCount) {
+            Networking.requestAdvancementUnlock(LootAdvancement.ALL);
         } else if (getDiscoveredBlocksCount() >= getTotalBlocksCount()) {
-            Networking.requestAdvancementUnlock(1);
+            Networking.requestAdvancementUnlock(LootAdvancement.ALL_BLOCKS);
         } else if (getDiscoveredEntitiesCount() >= getTotalEntitiesCount()) {
-            Networking.requestAdvancementUnlock(2);
+            Networking.requestAdvancementUnlock(LootAdvancement.ALL_ENTITIES);
         } else if (getDiscoveredOtherCount() >= getTotalOtherCount()) {
-            Networking.requestAdvancementUnlock(3);
+            Networking.requestAdvancementUnlock(LootAdvancement.ALL_OTHER);
         }
     }
 
