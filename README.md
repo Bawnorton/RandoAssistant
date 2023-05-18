@@ -48,7 +48,9 @@ The settings menu can be accessed by clicking the settings button in the top rig
 - **Search Depth** (default: `6`)
   - The maximum number of steps to search for a path to the target item
   - Increasing this will increase the size of the graph and time it takes to generate the graph, thus, values over 15 are not recommended
-
+- **Highlight Radius** (default `5`)
+    - The radius for how many blocks (that are unbroken) are highlighted when holding down the highlight key (default `v`)
+    - Values over 10 are not recommended when surrounded by a lot of unbroken blocks as highlighting blocks is somewhat intensive
 
 ## Dependencies
 - [Minecraft Fabric 1.19.4](https://fabricmc.net/)
