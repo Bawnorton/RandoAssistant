@@ -33,7 +33,7 @@ public abstract class TrackableCrawler {
     private static void crawl(Identifier original, Identifier target, TrackingGraph graph, int depth) {
         if(depth >= Config.getInstance().searchDepth) return;
         graph.add(target);
-        Set<Trackable<Identifier>> sources = Tracker.getInstance().getTracked(target);
+        Set<Trackable<Identifier>> sources = Tracker.getInstance().getSources(target);
         if(sources == null) sources = new HashSet<>();
 
         List<Identifier> sourceIds = sources.stream().filter(Trackable::isEnabled).map(Trackable::getIdentifier).toList();

@@ -30,6 +30,10 @@ public class Config {
     @SerializedName("search_depth")
     public Integer searchDepth;
 
+    @Expose
+    @SerializedName("highlight_radius")
+    public Integer highlightRadius;
+
 
     private Config() {
     }

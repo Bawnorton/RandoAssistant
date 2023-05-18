@@ -2,10 +2,14 @@ package com.bawnorton.randoassistant.render.overlay;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -33,7 +37,7 @@ public abstract class RenderManager {
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
-        RenderSystem.lineWidth(2.0f);
+        RenderSystem.lineWidth(20.0f);
 
         buffer.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
 
@@ -59,10 +63,17 @@ public abstract class RenderManager {
     }
 
     private static boolean isValidBlock(BlockPos pos) {
-        BlockEntity blockEntity = null;
+        Block block = null;
         if (client.world != null) {
-            blockEntity = client.world.getBlockEntity(pos);
+            BlockState state = client.world.getBlockState(pos);
+            if(state.getFluidState().isEmpty() && !state.isAir()) {
+                block = state.getBlock();
+            }
         }
-        return blockEntity != null;
+        return block != null;
+    }
+
+    public static void clearRenderers() {
+        renderers.clear();
     }
 }

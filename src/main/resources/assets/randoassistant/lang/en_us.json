@@ -1,4 +1,6 @@
 {
   "randoassistant.homepage": "My Website",
-  "item.randoassistant.wob": "Wob"
+  "item.randoassistant.wob": "Wob",
+  "key.randoassistant.highlight": "Highlight Unbroken Blocks",
+  "key.categories.randoassistant": "Rando Assistant"
 }

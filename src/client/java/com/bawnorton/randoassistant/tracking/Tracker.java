@@ -38,12 +38,14 @@ public class Tracker {
     private final Map<Recipe<?>, Item> TRACKABLE_CRAFTED;
 
     private final Map<Identifier, Set<Trackable<Identifier>>> TRACKED;
+    private final Map<Identifier, Trackable<Identifier>> ID_TO_TRACKABLE;
 
     public Tracker() {
         TRACKABLE_INTERACTED = new TrackableMap<>();
         TRACKABLE_LOOTED = new TrackableMap<>();
         TRACKABLE_CRAFTED = Maps.newHashMap();
         TRACKED = Maps.newHashMap();
+        ID_TO_TRACKABLE = Maps.newHashMap();
     }
 
     public static Tracker getInstance() {
@@ -56,6 +58,7 @@ public class Tracker {
     public void track(SerializeableLootTable lootTable) {
         Stat<Identifier> stat = RandoAssistantStats.LOOTED.getOrCreateStat(lootTable.getLootTableId());
         Trackable<Identifier> trackable = TRACKABLE_LOOTED.getOrCreate(stat, lootTable.getSourceId());
+        ID_TO_TRACKABLE.put(lootTable.getSourceId(), trackable);
         for(Item target : lootTable.getItems()) {
             trackable.addOutput(Registries.ITEM.getId(target), lootTable.getCondition());
             Set<Trackable<Identifier>> tracked = TRACKED.getOrDefault(Registries.ITEM.getId(target), Sets.newHashSet());
@@ -80,7 +83,7 @@ public class Tracker {
     }
 
     @Nullable
-    public Set<Trackable<Identifier>> getTracked(Identifier id) {
+    public Set<Trackable<Identifier>> getSources(Identifier id) {
         return TRACKED.get(id);
     }
 
@@ -212,6 +215,10 @@ public class Tracker {
         } else if (getDiscoveredOtherCount() >= getTotalOtherCount()) {
             Networking.requestAdvancementUnlock(LootAdvancement.ALL_OTHER);
         }
+    }
+
+    public boolean isEnabled(Identifier id) {
+        return ID_TO_TRACKABLE.containsKey(id) && ID_TO_TRACKABLE.get(id).isEnabled();
     }
 
     private static class TrackableMap<T> {

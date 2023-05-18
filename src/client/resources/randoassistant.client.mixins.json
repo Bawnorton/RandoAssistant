@@ -8,6 +8,9 @@
     "BiomeColorBlenderMixin",
     "BiomeMixin",
     "BlockColorsMixin",
+    "ClientPlayNetworkHandlerMixin",
+    "CraftingScreenMixin",
+    "GameRendererMixin",
     "HandledScreenMixin",
     "HoveredTooltipPositionerMixin",
     "InventoryScreenMixin",
@@ -21,8 +24,5 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "ClientPlayNetworkHandlerMixin",
-    "CraftingScreenMixin",
-    "GameRendererMixin"
   ]
 }

@@ -23,6 +23,7 @@ public class ConfigManager {
         if (config.enableOverride == null) config.enableOverride = false;
         if (config.randomizeColours == null) config.randomizeColours = false;
         if (config.searchDepth == null) config.searchDepth = 6;
+        if (config.highlightRadius == null) config.highlightRadius = 5;
 
         Config.update(config);
         save();
