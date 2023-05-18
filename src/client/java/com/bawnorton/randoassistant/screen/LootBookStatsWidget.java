@@ -15,10 +15,23 @@ public class LootBookStatsWidget {
     private int y;
 
     private final ToggleButtonWidget backButton;
-    private final String blockCount;
-    private final String entityCount;
-    private final String otherCount;
-    private final String totalCount;
+
+
+    private final int totalBlocks = Tracker.getInstance().getTotalBlocksCount();
+    private final int totalEntities = Tracker.getInstance().getTotalEntitiesCount();
+    private final int totalOther = Tracker.getInstance().getTotalOtherCount();
+    private final int totalTotal = Tracker.getInstance().getTotalCount();
+
+    private final int discoveredBlocks = Math.min(Tracker.getInstance().getDiscoveredBlocksCount(), totalBlocks);
+    private final int discoveredEntities = Math.min(Tracker.getInstance().getDiscoveredEntitiesCount(), totalEntities);
+    private final int discoveredOther = Math.min(Tracker.getInstance().getDiscoveredOtherCount(), totalOther);
+    private final int discoveredTotal = Math.min(Tracker.getInstance().getDiscoveredCount(), totalTotal);
+
+    private final String blockCount = discoveredBlocks + "/" + totalBlocks;
+    private final String entityCount = discoveredEntities + "/" + totalEntities;
+    private final String otherCount = discoveredOther + "/" + totalOther;
+    private final String totalCount = discoveredTotal + "/" + totalTotal;
+
 
     public LootBookStatsWidget(MinecraftClient client, int x, int y) {
         this.client = client;
@@ -28,11 +41,6 @@ public class LootBookStatsWidget {
         backButton = new ToggleButtonWidget(x + 10, y + 10, 16, 16, false);
         backButton.setTextureUV(206, 41, 0, 18, LootBookWidget.TEXTURE);
         backButton.setTooltip(Tooltip.of(Text.of("Exit")));
-
-        blockCount = Tracker.getInstance().getDiscoveredBlocksCount() + "/" + Tracker.getInstance().getTotalBlocksCount();
-        entityCount = Tracker.getInstance().getDiscoveredEntitiesCount() + "/" + Tracker.getInstance().getTotalEntitiesCount();
-        otherCount = Tracker.getInstance().getDiscoveredOtherCount() + "/" + Tracker.getInstance().getTotalOtherCount();
-        totalCount = Tracker.getInstance().getDiscoveredCount() + "/" + Tracker.getInstance().getTotalCount();
     }
 
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -47,6 +55,19 @@ public class LootBookStatsWidget {
         client.textRenderer.draw(matrices, Text.of(otherCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(otherCount), y + 85, 0xFFFFFF);
         client.textRenderer.draw(matrices, Text.of("Total:"), x + 20, y + 100, 0xDDDDDD);
         client.textRenderer.draw(matrices, Text.of(totalCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(totalCount), y + 100, 0xFFFFFF);
+        Text tooltip = null;
+        if (mouseX >= x + 20 && mouseY >= y + 55 && mouseX <= x + 135 && mouseY <= y + 55 + 9) {
+            tooltip = Text.of(String.format("Blocks: %.1f", (float) discoveredBlocks / totalBlocks * 100) + "%");
+        } else if (mouseX >= x + 20 && mouseY >= y + 70 && mouseX <= x + 135 && mouseY <= y + 70 + 9) {
+            tooltip = Text.of(String.format("Entities: %.1f", (float) discoveredEntities / totalEntities * 100) + "%");
+        } else if (mouseX >= x + 20 && mouseY >= y + 85 && mouseX <= x + 135 && mouseY <= y + 85 + 9) {
+            tooltip = Text.of(String.format("Other: %.1f", (float) discoveredOther / totalOther * 100) + "%");
+        } else if (mouseX >= x + 20 && mouseY >= y + 100 && mouseX <= x + 135 && mouseY <= y + 100 + 9) {
+            tooltip = Text.of(String.format("Total: %.1f", (float) discoveredTotal / totalTotal * 100) + "%");
+        }
+        if (tooltip != null && client.currentScreen != null) {
+            client.currentScreen.renderTooltip(matrices, tooltip, mouseX, mouseY);
+        }
     }
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {

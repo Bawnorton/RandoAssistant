@@ -121,7 +121,7 @@ public class RenderingHelper {
         VertexConsumerProvider.Immediate vertexConsumers = client.getBufferBuilders().getEntityVertexConsumers();
         client.getBlockRenderManager().renderBlockAsEntity(state, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
 
-        RenderSystem.setShaderLights(new Vector3f(1.5f, 0.5f, 0), new Vector3f(0, 1, 0));
+        RenderSystem.setShaderLights(new Vector3f(1, -0.5f, 0), new Vector3f(0, -1, 0));
         vertexConsumers.draw();
         DiffuseLighting.enableGuiDepthLighting();
 
