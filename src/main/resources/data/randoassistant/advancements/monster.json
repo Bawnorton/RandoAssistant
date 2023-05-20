@@ -1,11 +1,11 @@
 {
   "display": {
     "icon": {
-      "item": "randoassistant:wob"
+      "item": "minecraft:skeleton_skull"
     },
-    "title": "That's Not a Bow",
-    "description": "Congrats you forgot how to make a bow, put the wob in a crafting table to get a bow.",
-    "frame": "challenge",
+    "title": "How Could You!?",
+    "description": "It was so innocent. Was it even worth it?",
+    "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": true
@@ -17,4 +17,3 @@
     }
   }
 }
-

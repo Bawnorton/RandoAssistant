@@ -1,6 +1,10 @@
 package com.bawnorton.randoassistant.util;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementProgress;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
 public enum LootAdvancement {
@@ -14,7 +18,10 @@ public enum LootAdvancement {
     ALL_OTHER(new Identifier(RandoAssistant.MOD_ID, "all_other_loottables")),
     CAT_MORNING_GIFT(new Identifier(RandoAssistant.MOD_ID, "cat_morning_gift")),
     SHAME(new Identifier(RandoAssistant.MOD_ID, "shame")),
-    WOB(new Identifier(RandoAssistant.MOD_ID, "wob"));
+    MONSTER(new Identifier(RandoAssistant.MOD_ID, "monster")),
+    ORPHANED_POLAR_BEAR(new Identifier(RandoAssistant.MOD_ID, "orphaned_polar_bear")),
+    WOB(new Identifier(RandoAssistant.MOD_ID, "wob")),
+    CANDLES(new Identifier(RandoAssistant.MOD_ID, "candles"));
 
     private final Identifier id;
 
@@ -28,5 +35,20 @@ public enum LootAdvancement {
 
     public static LootAdvancement fromOrdinal(int ordinal) {
         return LootAdvancement.values()[ordinal];
+    }
+
+    public void grant(ServerPlayerEntity serverPlayer) {
+        MinecraftServer server = serverPlayer.getServer();
+        if(server == null) return;
+
+        Advancement advancement = server.getAdvancementLoader().get(id());
+        if(advancement == null) return;
+
+        AdvancementProgress progress = serverPlayer.getAdvancementTracker().getProgress(advancement);
+        if(progress.isDone()) return;
+
+        for(String criterion : progress.getUnobtainedCriteria()) {
+            serverPlayer.getAdvancementTracker().grantCriterion(advancement, criterion);
+        }
     }
 }

@@ -3,3 +3,7 @@ accessible field net/minecraft/item/AxeItem STRIPPED_BLOCKS Ljava/util/Map;
 accessible field net/minecraft/client/gui/screen/ingame/HandledScreen y I
 accessible field net/minecraft/client/gui/screen/ingame/HandledScreen x I
 accessible class net/minecraft/entity/passive/CatEntity$SleepWithOwnerGoal
+accessible field net/minecraft/text/TranslatableTextContent key Ljava/lang/String;
+accessible field net/minecraft/text/TranslatableTextContent fallback Ljava/lang/String;
+mutable field net/minecraft/text/TranslatableTextContent key Ljava/lang/String;
+mutable field net/minecraft/text/TranslatableTextContent fallback Ljava/lang/String;

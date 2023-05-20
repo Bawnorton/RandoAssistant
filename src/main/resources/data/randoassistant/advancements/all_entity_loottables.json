@@ -10,7 +10,7 @@
     "announce_to_chat": true,
     "hidden": false
   },
-  "parent": "fasguys_toolbox:loot_table_randomizer/main",
+  "parent": "randoassistant:monster",
   "criteria": {
     "requirement": {
       "trigger": "minecraft:impossible"

@@ -1,10 +1,7 @@
 package com.bawnorton.randoassistant.mixin;
 
 import com.bawnorton.randoassistant.RandoAssistant;
-import com.bawnorton.randoassistant.networking.Networking;
 import com.bawnorton.randoassistant.util.LootAdvancement;
-import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -24,13 +21,7 @@ public abstract class ServerPlayerEntityMixin {
     @Inject(method = "onSlotUpdate(Lnet/minecraft/screen/ScreenHandler;ILnet/minecraft/item/ItemStack;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancement/criterion/InventoryChangedCriterion;trigger(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/item/ItemStack;)V"))
     private void onTrigger(ScreenHandler handler, int slotId, ItemStack stack, CallbackInfo ci) {
         if(stack.getItem().equals(RandoAssistant.WOB)) {
-            Advancement advancement = Networking.server.getAdvancementLoader().get(LootAdvancement.WOB.id());
-            if(advancement == null) return;
-            AdvancementProgress progress = field_29183.getAdvancementTracker().getProgress(advancement);
-            if(progress.isDone()) return;
-            for(String criterion : progress.getUnobtainedCriteria()) {
-                field_29183.getAdvancementTracker().grantCriterion(advancement, criterion);
-            }
+            LootAdvancement.WOB.grant(field_29183);
         }
     }
 }

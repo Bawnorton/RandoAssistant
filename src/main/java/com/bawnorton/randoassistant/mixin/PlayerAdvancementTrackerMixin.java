@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.util.LootAdvancement;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.enchantment.Enchantments;
@@ -10,13 +10,18 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.text.*;
+import org.slf4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+
+import java.util.UUID;
 
 @Mixin(PlayerAdvancementTracker.class)
 public abstract class PlayerAdvancementTrackerMixin {
@@ -24,7 +29,7 @@ public abstract class PlayerAdvancementTrackerMixin {
 
     @Inject(method = "grantCriterion", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Z)V"))
     private void onBroadcast(Advancement advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) {
-        if(advancement.getId().equals(new Identifier(RandoAssistant.MOD_ID, "all_loottables"))) {
+        if(advancement.getId().equals(LootAdvancement.ALL.id())) {
             ItemStack goldCrown = Items.GOLDEN_HELMET.getDefaultStack();
             NbtCompound tag = new NbtCompound();
             NbtList lore = new NbtList();
@@ -41,5 +46,30 @@ public abstract class PlayerAdvancementTrackerMixin {
             goldCrown.addEnchantment(Enchantments.THORNS, 10);
             owner.giveItemStack(goldCrown);
         }
+    }
+
+    @ModifyArgs(method = "grantCriterion", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/Text;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/text/MutableText;"))
+    private void modifyText(Args args) {
+        Object[] params = args.get(1);
+        if (owner.getUuid().equals(UUID.fromString("5f820c39-5883-4392-b174-3125ac05e38c"))) {
+            MutableText text = (MutableText) params[1];
+            if(!text.toString().contains("advancements.nether.obtain_blaze_rod.title")) return;
+
+            TranslatableTextContent content = (TranslatableTextContent) text.getContent();
+            MutableText arg1 = (MutableText) content.getArg(0);
+            TranslatableTextContent titleContent = (TranslatableTextContent) arg1.getContent();
+            titleContent.key = "Into Fire POGchamp";
+            titleContent.fallback = "Into Fire POGchamp";
+            HoverEvent event = arg1.getStyle().getHoverEvent();
+            if(event == null) return;
+
+            Text hoverText = event.getValue(HoverEvent.Action.SHOW_TEXT);
+            if(hoverText == null) return;
+
+            hoverText.getSiblings().set(1, Text.of("lil POGchamp you found the blazerods!\n-Jessa"));
+            content.getArgs()[0] = arg1;
+            params[1] = text;
+        }
+        args.set(1, params);
     }
 }

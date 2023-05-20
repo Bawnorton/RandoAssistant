@@ -15,6 +15,7 @@ import com.bawnorton.randoassistant.util.LootCondition;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
+import net.minecraft.block.CandleBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
@@ -169,6 +170,14 @@ public class Tracker {
 
     public int getTotalBlocksCount() {
         return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.BLOCK.containsId(trackable.getIdentifier())).size() - 6;
+    }
+
+    public int getDiscoveredCandlesCount() {
+        return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.BLOCK.containsId(trackable.getIdentifier()) && trackable.isEnabled() && Registries.BLOCK.get(trackable.getIdentifier()) instanceof CandleBlock).size();
+    }
+
+    public int getTotalCandlesCount() {
+        return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.BLOCK.containsId(trackable.getIdentifier()) && Registries.BLOCK.get(trackable.getIdentifier()) instanceof CandleBlock).size();
     }
 
     public int getDiscoveredEntitiesCount() {

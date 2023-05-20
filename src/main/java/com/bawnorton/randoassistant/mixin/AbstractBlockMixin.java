@@ -1,8 +1,10 @@
 package com.bawnorton.randoassistant.mixin;
 
+import com.bawnorton.randoassistant.networking.Networking;
 import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.CandleBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContext;
@@ -22,11 +24,15 @@ import static net.minecraft.loot.context.LootContextParameters.THIS_ENTITY;
 public abstract class AbstractBlockMixin {
     @Shadow public abstract Identifier getLootTableId();
 
+    @SuppressWarnings("ConstantValue")
     @Inject(method = "getDroppedStacks", at = @At("HEAD"))
     private void getDroppedStacks(BlockState state, LootContext.Builder builder, CallbackInfoReturnable<List<ItemStack>> cir) {
         Entity source = builder.getNullable(THIS_ENTITY);
         if(source instanceof ServerPlayerEntity serverPlayer) {
             serverPlayer.incrementStat(RandoAssistantStats.LOOTED.getOrCreateStat(getLootTableId()));
+            if(((Object) this) instanceof CandleBlock) {
+                Networking.sendCandleLootPacket(serverPlayer);
+            }
         }
     }
 }
