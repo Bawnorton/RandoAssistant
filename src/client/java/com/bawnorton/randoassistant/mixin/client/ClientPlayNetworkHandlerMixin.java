@@ -17,7 +17,7 @@ import java.util.Map;
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin {
     @Inject(method = "onStatistics", at = @At(value = "INVOKE", target = "Lnet/minecraft/stat/StatHandler;setStat(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/stat/Stat;I)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onStatistics(StatisticsS2CPacket packet, CallbackInfo ci, Iterator var2, Map.Entry<Stat<?>, Integer> entry, Stat<?> stat, int i) {
+    private void onStatistics(StatisticsS2CPacket packet, CallbackInfo ci, Iterator<?> var2, Map.Entry<Stat<?>, Integer> entry, Stat<?> stat, int i) {
         if(RandoAssistantStats.isCustom(stat) && i > 0) {
             Tracker.getInstance().testAll();
         }

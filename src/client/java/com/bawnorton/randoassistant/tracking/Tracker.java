@@ -256,10 +256,6 @@ public class Tracker {
             trackables.clear();
         }
 
-        public int size() {
-            return trackables.size();
-        }
-
         @Override
         public String toString() {
             return "TrackableMap{" +

@@ -68,8 +68,8 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
     }
 
     public void connect(Identifier source, Identifier destination) {
-        if(!contains(source)) add(source);
-        if(!contains(destination)) add(destination);
+        if(contains(source)) add(source);
+        if(contains(destination)) add(destination);
         Vertex sourceVertex = getVertex(source);
         Vertex destinationVertex = getVertex(destination);
         try {
@@ -81,19 +81,13 @@ public class TrackingGraph extends SimpleDirectedGraph<TrackingGraph.Vertex, Tra
         }
     }
 
-    public void removeOutgoingEdges(Identifier target) {
-        Vertex vertex = getVertex(target);
-        Set<Edge> edges = outgoingEdgesOf(vertex);
-        removeAllEdges(edges);
-    }
-
     public boolean contains(Identifier identifier) {
-        return VERTEX_MAP.containsKey(identifier);
+        return !VERTEX_MAP.containsKey(identifier);
     }
 
     @NotNull
     public Vertex getVertex(Identifier identifier) {
-        if(!contains(identifier)) throw new IllegalArgumentException("Identifier " + identifier + " not found");
+        if(contains(identifier)) throw new IllegalArgumentException("Identifier " + identifier + " not found");
         return VERTEX_MAP.get(identifier);
     }
 

@@ -57,7 +57,7 @@ public class SerializeableCrafting implements Serializeable {
     }
 
     @SuppressWarnings("unchecked")
-    public void populateData(byte[] bytes) {
+    private void populateData(byte[] bytes) {
         try(ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             ObjectInputStream ois = new ObjectInputStream(bais);
             deserialize((Pair<String, String>) ois.readObject());

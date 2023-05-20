@@ -159,7 +159,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
     private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         LootBookWidget lootBook = LootBookWidget.getInstance();
         if (lootBook.mouseClicked(mouseX, mouseY, button)) {
-            ((InventoryScreen) (Object) this).setFocused(lootBook);
+            setFocused(lootBook);
 
             if(LootTableResultButton.isGraphOpen() && y == (this.height - this.backgroundHeight) / 2) {
                 y += HEIGHT / 2;
@@ -179,6 +179,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
         }
     }
 
+    @SuppressWarnings("unused")
     @Override
     protected void onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> cir) {
         LootBookWidget.getInstance().mouseDragged(mouseX, mouseY, button, deltaX, deltaY);

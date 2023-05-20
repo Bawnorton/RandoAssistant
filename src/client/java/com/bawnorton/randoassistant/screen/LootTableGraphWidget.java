@@ -35,8 +35,8 @@ public class LootTableGraphWidget {
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
     private static final int ABSOLUTE_SCALE = 2;
 
-    public static int WIDTH = 324;
-    public static int HEIGHT = 167;
+    public static final int WIDTH = 324;
+    public static final int HEIGHT = 167;
 
     private TrackingGraph graph;
     private Drawing<TrackingGraph.Vertex, TrackingGraph.Edge> drawing;
@@ -276,9 +276,11 @@ public class LootTableGraphWidget {
                         selected.addAll(graph.getChildren(identifier).stream().map(TrackingGraph.Vertex::getIdentifier).collect(Collectors.toSet()));
                     }
                 });
+                return true;
             }
         } else if(mouseX >= x - 30 && mouseX <= x - 4 && mouseY >= y + 30 && mouseY <= y + 56) {
             centreOnTarget();
+            return true;
         } else if(mouseX >= x + WIDTH && mouseX <= x + WIDTH + 26 && mouseY >= y && mouseY <= y + 26) {
             LootTableResultButton.getLastClicked().closeGraph();
             LootBookWidget lootBook = LootBookWidget.getInstance();
@@ -288,6 +290,7 @@ public class LootTableGraphWidget {
             TexturedButtonWidget recipeButton = ((InventoryScreenExtender) lootBook.getScreen()).getRecipeBookButton();
             lootButton.setY(lootButton.getY() - HEIGHT / 2);
             recipeButton.setY(recipeButton.getY() - HEIGHT / 2);
+            return true;
         }
         return false;
     }

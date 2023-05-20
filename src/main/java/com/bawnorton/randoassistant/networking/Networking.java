@@ -1,22 +1,17 @@
 package com.bawnorton.randoassistant.networking;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.util.LootAdvancement;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementPositioner;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerAdvancementLoader;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
 
 public class Networking {
     public static final Object SERVER_LOCK = new Object();

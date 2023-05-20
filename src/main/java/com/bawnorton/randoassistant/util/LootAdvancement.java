@@ -11,7 +11,10 @@ public enum LootAdvancement {
     ALL(new Identifier(RandoAssistant.MOD_ID, "all_loottables")),
     ALL_BLOCKS(new Identifier(RandoAssistant.MOD_ID, "all_block_loottables")),
     ALL_ENTITIES(new Identifier(RandoAssistant.MOD_ID, "all_entity_loottables")),
-    ALL_OTHER(new Identifier(RandoAssistant.MOD_ID, "all_other_loottables"));
+    ALL_OTHER(new Identifier(RandoAssistant.MOD_ID, "all_other_loottables")),
+    CAT_MORNING_GIFT(new Identifier(RandoAssistant.MOD_ID, "cat_morning_gift")),
+    SHAME(new Identifier(RandoAssistant.MOD_ID, "shame")),
+    WOB(new Identifier(RandoAssistant.MOD_ID, "wob"));
 
     private final Identifier id;
 

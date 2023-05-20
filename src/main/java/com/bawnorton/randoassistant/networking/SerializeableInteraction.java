@@ -1,15 +1,11 @@
 package com.bawnorton.randoassistant.networking;
 
 import com.bawnorton.randoassistant.util.tuples.Pair;
-import com.bawnorton.randoassistant.util.tuples.Triplet;
 import net.minecraft.block.Block;
-import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SerializeableInteraction implements Serializeable {
     private Pair<String, String> serializedInteraction;
@@ -60,7 +56,7 @@ public class SerializeableInteraction implements Serializeable {
     }
 
     @SuppressWarnings("unchecked")
-    public void populateData(byte[] bytes) {
+    private void populateData(byte[] bytes) {
         try(ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             ObjectInputStream ois = new ObjectInputStream(bais);
             deserialize((Pair<String, String>) ois.readObject());

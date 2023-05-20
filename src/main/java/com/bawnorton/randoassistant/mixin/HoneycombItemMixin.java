@@ -1,8 +1,5 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.RandoAssistant;
-import com.bawnorton.randoassistant.networking.Networking;
-import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.stat.RandoAssistantStats;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.HoneycombItem;

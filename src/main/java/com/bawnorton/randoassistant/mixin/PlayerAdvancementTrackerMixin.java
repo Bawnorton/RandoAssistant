@@ -3,7 +3,6 @@ package com.bawnorton.randoassistant.mixin;
 import com.bawnorton.randoassistant.RandoAssistant;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.PlayerAdvancementTracker;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;

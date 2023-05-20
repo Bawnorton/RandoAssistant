@@ -13,8 +13,6 @@ import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-import java.util.function.Consumer;
-
 import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
 
 public class LootBookSettingsWidget {

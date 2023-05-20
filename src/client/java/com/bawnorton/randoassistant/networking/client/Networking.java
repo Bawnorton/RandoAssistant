@@ -7,9 +7,7 @@ import com.bawnorton.randoassistant.networking.SerializeableCrafting;
 import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import com.bawnorton.randoassistant.tracking.Tracker;
-import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
 import com.bawnorton.randoassistant.util.LootAdvancement;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemStack;
@@ -34,9 +32,7 @@ public class Networking {
             client.execute(() -> Tracker.getInstance().track(crafting));
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.CLEAR_CACHE_PACKET, (client, handler, buf, responseSender) -> {
-            client.execute(() -> Tracker.getInstance().clearCache());
-        });
+        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.CLEAR_CACHE_PACKET, (client, handler, buf, responseSender) -> client.execute(() -> Tracker.getInstance().clearCache()));
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.DEBUG_PACKET, (client, handler, buf, responseSender) -> {
             ItemStack stack = buf.readItemStack();
@@ -47,9 +43,7 @@ public class Networking {
             });
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.HANDSHAKE_PACKET, (client, handler, buf, responseSender) -> {
-            client.execute(() -> RandoAssistantClient.isInstalledOnServer = true);
-        });
+        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.HANDSHAKE_PACKET, (client, handler, buf, responseSender) -> client.execute(() -> RandoAssistantClient.isInstalledOnServer = true));
     }
 
     public static void requestHandshakePacket() {

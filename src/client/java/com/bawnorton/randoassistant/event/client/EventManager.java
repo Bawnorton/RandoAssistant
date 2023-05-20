@@ -21,7 +21,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class EventManager {
 
-    public static KeyBinding highlight = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+    public static final KeyBinding highlight = KeyBindingHelper.registerKeyBinding(new KeyBinding(
             "key.randoassistant.highlight",
             GLFW.GLFW_KEY_V,
             "key.categories.randoassistant"

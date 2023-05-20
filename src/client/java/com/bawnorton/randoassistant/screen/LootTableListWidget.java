@@ -2,19 +2,14 @@ package com.bawnorton.randoassistant.screen;
 
 import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.util.IdentifierType;
-import com.google.common.collect.Sets;
-import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
 

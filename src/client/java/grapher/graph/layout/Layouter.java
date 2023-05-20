@@ -45,6 +45,7 @@ public class Layouter<V extends Vertex, E extends Edge<V>> {
     /**
      * Constructs the layouter without populating list ofItems edges and vertices
      */
+    @SuppressWarnings("unused")
     public Layouter() {
         layouterFactory = new LayouterFactory<>();
     }

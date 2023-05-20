@@ -6,9 +6,9 @@ import net.minecraft.util.math.Vec3d;
 
 public class Line extends Renderer {
 
-    public Vec3d start;
-    public Vec3d end;
-    public Colour colour;
+    public final Vec3d start;
+    public final Vec3d end;
+    public final Colour colour;
 
     public Line(Vec3d start, Vec3d end, Colour colour) {
         this.start = start;

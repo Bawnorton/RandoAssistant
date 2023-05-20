@@ -1,7 +1,5 @@
 package com.bawnorton.randoassistant.util;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
@@ -81,24 +79,5 @@ public enum IdentifierType {
                 yield path;
             }
         };
-    }
-
-    public boolean isItem() {
-        return this == ITEM;
-    }
-
-    public boolean isBlock() {
-        if(this == BLOCK) return true;
-        if(this == ITEM) return Block.getBlockFromItem(Registries.ITEM.get(id)) != Blocks.AIR;
-        return false;
-    }
-
-    public boolean isEntity() {
-        if(this == ENTITY) return true;
-        return isItemAndEntity();
-    }
-
-    public boolean isOther() {
-        return this == OTHER;
     }
 }

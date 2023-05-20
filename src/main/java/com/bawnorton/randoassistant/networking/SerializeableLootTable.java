@@ -1,7 +1,7 @@
 package com.bawnorton.randoassistant.networking;
 
 import com.bawnorton.randoassistant.util.LootCondition;
-import com.bawnorton.randoassistant.util.tuples.Quadruplet;
+import com.bawnorton.randoassistant.util.tuples.Quartet;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class SerializeableLootTable implements Serializeable {
-    private Quadruplet<String, String, List<String>, String> serializedLootTable;
+    private Quartet<String, String, List<String>, String> serializedLootTable;
 
     private Identifier lootTableId;
     private Identifier sourceId;
@@ -44,10 +44,10 @@ public class SerializeableLootTable implements Serializeable {
         for(Item item : items) {
             itemNames.add(Registries.ITEM.getId(item).toString());
         }
-        serializedLootTable = new Quadruplet<>(lootTableId.toString(), sourceId.toString(), itemNames, condition.name());
+        serializedLootTable = Quartet.of(lootTableId.toString(), sourceId.toString(), itemNames, condition.name());
     }
 
-    private void deserialize(Quadruplet<String, String, List<String>, String> serialized) {
+    private void deserialize(Quartet<String, String, List<String>, String> serialized) {
         this.lootTableId = new Identifier(serialized.a());
         this.sourceId = new Identifier(serialized.b());
         this.condition = LootCondition.valueOf(serialized.d());
@@ -94,10 +94,10 @@ public class SerializeableLootTable implements Serializeable {
     }
 
     @SuppressWarnings("unchecked")
-    public void populateData(byte[] bytes) {
+    private void populateData(byte[] bytes) {
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             ObjectInputStream ois = new ObjectInputStream(bais);
-            deserialize((Quadruplet<String, String, List<String>, String>) ois.readObject());
+            deserialize((Quartet<String, String, List<String>, String>) ois.readObject());
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

@@ -12,6 +12,7 @@
     "HoneycombItemMixin",
     "LivingEntityMixin",
     "LootableContainerBlockEntityMixin",
+    "MerchantEntityMixin",
     "MinecraftServerMixin",
     "PacketByteBufMixin",
     "PiglinBrainMixin",

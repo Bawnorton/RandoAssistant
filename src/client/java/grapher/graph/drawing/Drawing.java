@@ -1,6 +1,5 @@
 package grapher.graph.drawing;
 
-import com.bawnorton.randoassistant.RandoAssistant;
 import grapher.graph.elements.Edge;
 import grapher.graph.elements.Vertex;
 
