@@ -19,7 +19,6 @@
     "ScreenMixin",
     "StatMixin"
   ],
-  "plugin": "com.bawnorton.randoassistant.RandoAssistantMixinPlugin",
   "injectors": {
     "defaultRequire": 1
   },

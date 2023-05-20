@@ -5,7 +5,6 @@ import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.networking.client.Networking;
 import com.bawnorton.randoassistant.render.overlay.Colour;
 import com.bawnorton.randoassistant.render.overlay.Cube;
-import com.bawnorton.randoassistant.render.overlay.Cuboid;
 import com.bawnorton.randoassistant.render.overlay.RenderManager;
 import com.bawnorton.randoassistant.tracking.Tracker;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -18,8 +17,6 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.shape.VoxelShape;
 import org.lwjgl.glfw.GLFW;
 
 public class EventManager {

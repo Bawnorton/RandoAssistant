@@ -74,10 +74,9 @@ public enum IdentifierType {
                     name = Arrays.stream(name.split(" ")).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase()).collect(Collectors.joining(" "));
                     yield "Fishing " + name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
                 } else if (path.contains("piglin")) {
-                    String[] parts = path.split("/");
-                    String name = parts[parts.length - 1].replaceAll("_", " ");
-                    name = Arrays.stream(name.split(" ")).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase()).collect(Collectors.joining(" "));
-                    yield name;
+                    yield "Piglin Bartering";
+                } else if (path.contains("cat")) {
+                    yield "Cat Morning Gift";
                 }
                 yield path;
             }
