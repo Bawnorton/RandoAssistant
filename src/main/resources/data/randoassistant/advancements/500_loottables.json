@@ -4,7 +4,7 @@
       "item": "minecraft:diamond"
     },
     "title": "Loot Duke",
-    "description": "You have discovered 200 loot tables.",
+    "description": "You have discovered 500 loot tables.",
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,

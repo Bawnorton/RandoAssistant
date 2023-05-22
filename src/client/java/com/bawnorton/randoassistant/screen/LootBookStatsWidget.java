@@ -17,20 +17,26 @@ public class LootBookStatsWidget {
     private final ToggleButtonWidget backButton;
 
 
-    private final int totalBlocks = Tracker.getInstance().getTotalBlocksCount();
-    private final int totalEntities = Tracker.getInstance().getTotalEntitiesCount();
-    private final int totalOther = Tracker.getInstance().getTotalOtherCount();
-    private final int totalTotal = Tracker.getInstance().getTotalCount();
+    private int totalBlocks;
+    private int totalEntities;
+    private int totalChests;
+    private int totalVillagerGifts;
+    private int totalOther;
+    private int totalTotal;
 
-    private final int discoveredBlocks = Math.min(Tracker.getInstance().getDiscoveredBlocksCount(), totalBlocks);
-    private final int discoveredEntities = Math.min(Tracker.getInstance().getDiscoveredEntitiesCount(), totalEntities);
-    private final int discoveredOther = Math.min(Tracker.getInstance().getDiscoveredOtherCount(), totalOther);
-    private final int discoveredTotal = Math.min(Tracker.getInstance().getDiscoveredCount(), totalTotal);
+    private int discoveredBlocks;
+    private int discoveredEntities;
+    private int discoveredChests;
+    private int discoveredVillagerGifts;
+    private int discoveredOther;
+    private int discoveredTotal;
 
-    private final String blockCount = discoveredBlocks + "/" + totalBlocks;
-    private final String entityCount = discoveredEntities + "/" + totalEntities;
-    private final String otherCount = discoveredOther + "/" + totalOther;
-    private final String totalCount = discoveredTotal + "/" + totalTotal;
+    private String blockCount;
+    private String entityCount;
+    private String chestCount;
+    private String villagerGiftCount;
+    private String otherCount;
+    private String totalCount;
 
 
     public LootBookStatsWidget(MinecraftClient client, int x, int y) {
@@ -41,6 +47,31 @@ public class LootBookStatsWidget {
         backButton = new ToggleButtonWidget(x + 10, y + 10, 16, 16, false);
         backButton.setTextureUV(206, 41, 0, 18, LootBookWidget.TEXTURE);
         backButton.setTooltip(Tooltip.of(Text.of("Exit")));
+
+        refresh();
+    }
+
+    public void refresh() {
+        totalBlocks = Tracker.getInstance().getTotalBlocksCount();
+        totalEntities = Tracker.getInstance().getTotalEntitiesCount();
+        totalChests = Tracker.getInstance().getTotalChestsCount();
+        totalVillagerGifts = Tracker.getInstance().getTotalVillagerGiftsCount();
+        totalOther = Tracker.getInstance().getTotalOtherCount();
+        totalTotal = Tracker.getInstance().getTotalCount();
+
+        discoveredBlocks = Math.min(Tracker.getInstance().getDiscoveredBlocksCount(), totalBlocks);
+        discoveredEntities = Math.min(Tracker.getInstance().getDiscoveredEntitiesCount(), totalEntities);
+        discoveredChests = Math.min(Tracker.getInstance().getDiscoveredChestsCount(), totalChests);
+        discoveredVillagerGifts = Math.min(Tracker.getInstance().getDiscoveredVillagerGiftsCount(), totalVillagerGifts);
+        discoveredOther = Math.min(Tracker.getInstance().getDiscoveredOtherCount(), totalOther);
+        discoveredTotal = Math.min(Tracker.getInstance().getDiscoveredCount(), totalTotal);
+
+        blockCount = discoveredBlocks + "/" + totalBlocks;
+        entityCount = discoveredEntities + "/" + totalEntities;
+        chestCount = discoveredChests + "/" + totalChests;
+        villagerGiftCount = discoveredVillagerGifts + "/" + totalVillagerGifts;
+        otherCount = discoveredOther + "/" + totalOther;
+        totalCount = discoveredTotal + "/" + totalTotal;
     }
 
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -51,18 +82,26 @@ public class LootBookStatsWidget {
         client.textRenderer.draw(matrices, Text.of(blockCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(blockCount), y + 55, 0xFFFFFF);
         client.textRenderer.draw(matrices, Text.of("Entities:"), x + 20, y + 70, 0xDDDDDD);
         client.textRenderer.draw(matrices, Text.of(entityCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(entityCount), y + 70, 0xFFFFFF);
-        client.textRenderer.draw(matrices, Text.of("Other:"), x + 20, y + 85, 0xDDDDDD);
-        client.textRenderer.draw(matrices, Text.of(otherCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(otherCount), y + 85, 0xFFFFFF);
-        client.textRenderer.draw(matrices, Text.of("Total:"), x + 20, y + 100, 0xDDDDDD);
-        client.textRenderer.draw(matrices, Text.of(totalCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(totalCount), y + 100, 0xFFFFFF);
+        client.textRenderer.draw(matrices, Text.of("Chests:"), x + 20, y + 85, 0xDDDDDD);
+        client.textRenderer.draw(matrices, Text.of(chestCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(chestCount), y + 85, 0xFFFFFF);
+        client.textRenderer.draw(matrices, Text.of("Villager Gifts:"), x + 20, y + 100, 0xDDDDDD);
+        client.textRenderer.draw(matrices, Text.of(villagerGiftCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(villagerGiftCount), y + 100, 0xFFFFFF);
+        client.textRenderer.draw(matrices, Text.of("Other:"), x + 20, y + 115, 0xDDDDDD);
+        client.textRenderer.draw(matrices, Text.of(otherCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(otherCount), y + 115, 0xFFFFFF);
+        client.textRenderer.draw(matrices, Text.of("Total:"), x + 20, y + 130, 0xDDDDDD);
+        client.textRenderer.draw(matrices, Text.of(totalCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(totalCount), y + 130, 0xFFFFFF);
         Text tooltip = null;
         if (mouseX >= x + 20 && mouseY >= y + 55 && mouseX <= x + 135 && mouseY <= y + 55 + 9) {
             tooltip = Text.of(String.format("Blocks: %.1f", (float) discoveredBlocks / totalBlocks * 100) + "%");
         } else if (mouseX >= x + 20 && mouseY >= y + 70 && mouseX <= x + 135 && mouseY <= y + 70 + 9) {
             tooltip = Text.of(String.format("Entities: %.1f", (float) discoveredEntities / totalEntities * 100) + "%");
         } else if (mouseX >= x + 20 && mouseY >= y + 85 && mouseX <= x + 135 && mouseY <= y + 85 + 9) {
-            tooltip = Text.of(String.format("Other: %.1f", (float) discoveredOther / totalOther * 100) + "%");
+            tooltip = Text.of(String.format("Chests: %.1f", (float) discoveredChests / totalChests * 100) + "%");
         } else if (mouseX >= x + 20 && mouseY >= y + 100 && mouseX <= x + 135 && mouseY <= y + 100 + 9) {
+            tooltip = Text.of(String.format("Villager Gifts: %.1f", (float) discoveredVillagerGifts / totalVillagerGifts * 100) + "%");
+        } else if (mouseX >= x + 20 && mouseY >= y + 115 && mouseX <= x + 135 && mouseY <= y + 115 + 9) {
+            tooltip = Text.of(String.format("Other: %.1f", (float) discoveredOther / totalOther * 100) + "%");
+        } else if (mouseX >= x + 20 && mouseY >= y + 130 && mouseX <= x + 135 && mouseY <= y + 130 + 9) {
             tooltip = Text.of(String.format("Total: %.1f", (float) discoveredTotal / totalTotal * 100) + "%");
         }
         if (tooltip != null && client.currentScreen != null) {

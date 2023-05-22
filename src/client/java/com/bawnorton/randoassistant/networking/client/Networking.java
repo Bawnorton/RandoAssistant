@@ -34,15 +34,6 @@ public class Networking {
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.CLEAR_CACHE_PACKET, (client, handler, buf, responseSender) -> client.execute(() -> Tracker.getInstance().clearCache()));
 
-        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.CANDLE_LOOT_PACKET, (client, handler, buf, responseSender) -> {
-            client.execute(() -> {
-                int candleCount = Tracker.getInstance().getDiscoveredCandlesCount();
-                int totalCandleCount = Tracker.getInstance().getTotalCandlesCount();
-                PacketByteBuf packet = PacketByteBufs.create();
-                packet.writeBoolean(candleCount >= totalCandleCount);
-                responseSender.sendPacket(NetworkingConstants.CANDLE_LOOT_PACKET, packet);
-            });
-        });
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.DEBUG_PACKET, (client, handler, buf, responseSender) -> {
             ItemStack stack = buf.readItemStack();

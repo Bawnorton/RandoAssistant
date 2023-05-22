@@ -1,10 +1,10 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:candle"
+      "item": "minecraft:chest"
     },
-    "title": "I Didn't Wax For This",
-    "description": "Broke every candle in the game.",
+    "title": "Loot Goblin",
+    "description": "You have looted every chest in the game.",
     "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,

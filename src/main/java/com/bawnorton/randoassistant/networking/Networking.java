@@ -22,9 +22,6 @@ public class Networking {
         ServerPlayNetworking.registerGlobalReceiver(NetworkingConstants.HANDSHAKE_PACKET, (server, player, handler, buf, responseSender) -> sendHandshakePacket(player));
         ServerPlayNetworking.registerGlobalReceiver(NetworkingConstants.STATS_PACKET, (server, player, handler, buf, responseSender) -> waitForServer(() -> player.getStatHandler().sendStats(player)));
         ServerPlayNetworking.registerGlobalReceiver(NetworkingConstants.ADVANCEMENT_UNLOCK_PACKET, (server, player, handler, buf, responseSender) -> waitForServer(() -> LootAdvancement.fromOrdinal(buf.readInt()).grant(player)));
-        ServerPlayNetworking.registerGlobalReceiver(NetworkingConstants.CANDLE_LOOT_PACKET, (server, player, handler, buf, responseSender) -> waitForServer(() -> {
-            if(buf.readBoolean()) LootAdvancement.CANDLES.grant(player);
-        }));
     }
 
     public static void sendSerializeablePacket(ServerPlayerEntity player, Serializeable serializeable) {
@@ -39,13 +36,6 @@ public class Networking {
         waitForServer(() -> {
             PacketByteBuf buf = PacketByteBufs.create();
             ServerPlayNetworking.send(serverPlayer, NetworkingConstants.CLEAR_CACHE_PACKET, buf);
-        });
-    }
-
-    public static void sendCandleLootPacket(ServerPlayerEntity serverPlayer) {
-        waitForServer(() -> {
-            PacketByteBuf buf = PacketByteBufs.create();
-            ServerPlayNetworking.send(serverPlayer, NetworkingConstants.CANDLE_LOOT_PACKET, buf);
         });
     }
 

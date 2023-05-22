@@ -204,6 +204,7 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         }
         if(this.statsButton.mouseClicked(mouseX, mouseY, button)) {
             this.statsOpen = true;
+            statsWidget.refresh();
             return true;
         }
         return false;

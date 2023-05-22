@@ -27,6 +27,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -165,7 +166,7 @@ public class Tracker {
     }
 
     public int getDiscoveredBlocksCount() {
-        return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.BLOCK.containsId(trackable.getIdentifier()) && trackable.isEnabled()).size();
+        return TRACKABLE_LOOTED.getEnabled(trackable -> Registries.BLOCK.containsId(trackable.getIdentifier())).size();
     }
 
     public int getTotalBlocksCount() {
@@ -173,35 +174,61 @@ public class Tracker {
     }
 
     public int getDiscoveredCandlesCount() {
-        return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.BLOCK.containsId(trackable.getIdentifier()) && trackable.isEnabled() && Registries.BLOCK.get(trackable.getIdentifier()) instanceof CandleBlock).size();
+        return TRACKABLE_LOOTED.getEnabled(trackable -> Registries.BLOCK.containsId(trackable.getIdentifier()), trackable -> Registries.BLOCK.get(trackable.getIdentifier()) instanceof CandleBlock).size();
     }
 
     public int getTotalCandlesCount() {
-        return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.BLOCK.containsId(trackable.getIdentifier()) && Registries.BLOCK.get(trackable.getIdentifier()) instanceof CandleBlock).size();
+        return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.BLOCK.containsId(trackable.getIdentifier()), trackable -> Registries.BLOCK.get(trackable.getIdentifier()) instanceof CandleBlock).size();
     }
 
     public int getDiscoveredEntitiesCount() {
-        return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.ENTITY_TYPE.containsId(trackable.getIdentifier()) && trackable.isEnabled()).size();
+        return TRACKABLE_LOOTED.getEnabled(trackable -> Registries.ENTITY_TYPE.containsId(trackable.getIdentifier())).size();
     }
 
     public int getTotalEntitiesCount() {
         return TRACKABLE_LOOTED.getFiltered(trackable -> Registries.ENTITY_TYPE.containsId(trackable.getIdentifier())).size() - 2;
     }
 
+    public int getDiscoveredChestsCount() {
+        return TRACKABLE_LOOTED.getEnabled(trackable -> trackable.getIdentifier().getPath().contains("chests"), trackable -> !trackable.getIdentifier().getPath().contains("spawn_bonus_chest")).size();
+    }
+
+    public int getTotalChestsCount() {
+        return TRACKABLE_LOOTED.getFiltered(trackable -> trackable.getIdentifier().getPath().contains("chests"), trackable -> !trackable.getIdentifier().getPath().contains("spawn_bonus_chest")).size();
+    }
+
+    public int getDiscoveredVillagerGiftsCount() {
+        return TRACKABLE_LOOTED.getEnabled(trackable -> trackable.getIdentifier().getPath().contains("hero_of_the_village")).size();
+    }
+
+    public int getTotalVillagerGiftsCount() {
+        return TRACKABLE_LOOTED.getFiltered(trackable -> trackable.getIdentifier().getPath().contains("hero_of_the_village")).size();
+    }
+
     public int getDiscoveredOtherCount() {
-        return TRACKABLE_LOOTED.getFiltered(trackable -> !Registries.BLOCK.containsId(trackable.getIdentifier()) && !Registries.ENTITY_TYPE.containsId(trackable.getIdentifier()) && !Registries.ITEM.containsId(trackable.getIdentifier()) && trackable.isEnabled()).size();
+        return TRACKABLE_LOOTED.getEnabled(trackable -> {
+            Identifier identifier = trackable.getIdentifier();
+            if(identifier.getPath().contains("chests")) return false;
+            if(identifier.getPath().contains("hero_of_the_village")) return false;
+            return !Registries.BLOCK.containsId(identifier) && !Registries.ENTITY_TYPE.containsId(identifier) && !Registries.ITEM.containsId(identifier);
+        }).size();
     }
 
     public int getTotalOtherCount() {
-        return TRACKABLE_LOOTED.getFiltered(trackable -> !Registries.BLOCK.containsId(trackable.getIdentifier()) && !Registries.ENTITY_TYPE.containsId(trackable.getIdentifier()) && !Registries.ITEM.containsId(trackable.getIdentifier())).size();
+        return TRACKABLE_LOOTED.getFiltered(trackable -> {
+            Identifier identifier = trackable.getIdentifier();
+            if(identifier.getPath().contains("chests")) return false;
+            if(identifier.getPath().contains("hero_of_the_village")) return false;
+            return !Registries.BLOCK.containsId(identifier) && !Registries.ENTITY_TYPE.containsId(identifier) && !Registries.ITEM.containsId(identifier);
+        }).size();
     }
 
     public int getDiscoveredCount() {
-        return getDiscoveredBlocksCount() + getDiscoveredEntitiesCount() + getDiscoveredOtherCount();
+        return TRACKABLE_LOOTED.getEnabled().size();
     }
 
     public int getTotalCount() {
-        return getTotalBlocksCount() + getTotalEntitiesCount() + getTotalOtherCount();
+        return TRACKABLE_LOOTED.getFiltered().size() - 8;
     }
 
     public void testAll() {
@@ -217,11 +244,23 @@ public class Tracker {
             Networking.requestAdvancementUnlock(LootAdvancement.FIVE_HUNDRED);
         } else if(discoveredCount >= totalCount) {
             Networking.requestAdvancementUnlock(LootAdvancement.ALL);
-        } else if (getDiscoveredBlocksCount() >= getTotalBlocksCount()) {
+        }
+        if (getDiscoveredChestsCount() >= getTotalChestsCount()) {
+            Networking.requestAdvancementUnlock(LootAdvancement.ALL_CHESTS);
+        }
+        if (getDiscoveredVillagerGiftsCount() >= getTotalVillagerGiftsCount()) {
+            Networking.requestAdvancementUnlock(LootAdvancement.ALL_VILLAGER_GIFTS);
+        }
+        if (getDiscoveredCandlesCount() >= getTotalCandlesCount()) {
+            Networking.requestAdvancementUnlock(LootAdvancement.ALL_CANDLES);
+        }
+        if (getDiscoveredBlocksCount() >= getTotalBlocksCount()) {
             Networking.requestAdvancementUnlock(LootAdvancement.ALL_BLOCKS);
-        } else if (getDiscoveredEntitiesCount() >= getTotalEntitiesCount()) {
+        }
+        if (getDiscoveredEntitiesCount() >= getTotalEntitiesCount()) {
             Networking.requestAdvancementUnlock(LootAdvancement.ALL_ENTITIES);
-        } else if (getDiscoveredOtherCount() >= getTotalOtherCount()) {
+        }
+        if (getDiscoveredOtherCount() >= getTotalOtherCount()) {
             Networking.requestAdvancementUnlock(LootAdvancement.ALL_OTHER);
         }
     }
@@ -251,10 +290,41 @@ public class Tracker {
             return getFiltered(Trackable::isEnabled);
         }
 
-        public Set<Trackable<T>> getFiltered(Predicate<Trackable<T>> filter) {
+        @SafeVarargs
+        public final Set<Trackable<T>> getEnabled(Predicate<Trackable<T>>... filter) {
             Set<Trackable<T>> filtered = Sets.newHashSet();
             for(Trackable<T> trackable : trackables.values()) {
-                if(filter.test(trackable)) {
+                if(trackable.isEnabled()) {
+                    boolean passes = true;
+                    for(Predicate<Trackable<T>> predicate : filter) {
+                        if(!predicate.test(trackable)) {
+                            passes = false;
+                            break;
+                        }
+                    }
+                    if(passes) {
+                        filtered.add(trackable);
+                    }
+                }
+            }
+            return filtered;
+        }
+
+        @SafeVarargs
+        public final Set<Trackable<T>> getFiltered(Predicate<Trackable<T>>... filter) {
+            if(filter.length == 0) {
+                return new HashSet<>(trackables.values());
+            }
+            Set<Trackable<T>> filtered = Sets.newHashSet();
+            for(Trackable<T> trackable : trackables.values()) {
+                boolean passes = true;
+                for(Predicate<Trackable<T>> predicate : filter) {
+                    if(!predicate.test(trackable)) {
+                        passes = false;
+                        break;
+                    }
+                }
+                if(passes) {
                     filtered.add(trackable);
                 }
             }

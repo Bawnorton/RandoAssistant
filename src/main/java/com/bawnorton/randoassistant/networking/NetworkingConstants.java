@@ -12,5 +12,4 @@ public class NetworkingConstants {
     public static final Identifier HANDSHAKE_PACKET = new Identifier(RandoAssistant.MOD_ID, "handshake");
     public static final Identifier STATS_PACKET = new Identifier(RandoAssistant.MOD_ID, "stats");
     public static final Identifier ADVANCEMENT_UNLOCK_PACKET = new Identifier(RandoAssistant.MOD_ID, "advancement_unlock");
-    public static final Identifier CANDLE_LOOT_PACKET = new Identifier(RandoAssistant.MOD_ID, "candle_loot");
 }

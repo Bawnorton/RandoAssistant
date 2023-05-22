@@ -1,14 +1,14 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:compass"
+      "item": "minecraft:candle"
     },
-    "title": "Wandering Looter",
-    "description": "You have looted every chest, gotten every villager gift, fished and bartered.",
+    "title": "I Didn't Wax For This",
+    "description": "Broke every colour of candle in the game.",
     "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,
-    "hidden": false
+    "hidden": true
   },
   "parent": "fasguys_toolbox:loot_table_randomizer/main",
   "criteria": {
@@ -17,3 +17,4 @@
     }
   }
 }
+

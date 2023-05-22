@@ -1,14 +1,14 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:compass"
+      "item": "minecraft:emerald_block"
     },
-    "title": "Wandering Looter",
-    "description": "You have looted every chest, gotten every villager gift, fished and bartered.",
+    "title": "True Hero",
+    "description": "You have recieved a gift from every profession of villager. Bet they were all useless.",
     "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,
-    "hidden": false
+    "hidden": true
   },
   "parent": "fasguys_toolbox:loot_table_randomizer/main",
   "criteria": {
@@ -17,3 +17,4 @@
     }
   }
 }
+

@@ -12,6 +12,9 @@ public enum LootAdvancement {
     HUNDRED(new Identifier(RandoAssistant.MOD_ID, "100_loottables")),
     TWO_HUNDRED(new Identifier(RandoAssistant.MOD_ID, "200_loottables")),
     FIVE_HUNDRED(new Identifier(RandoAssistant.MOD_ID, "500_loottables")),
+    ALL_CANDLES(new Identifier(RandoAssistant.MOD_ID, "all_candles")),
+    ALL_CHESTS(new Identifier(RandoAssistant.MOD_ID, "all_chests")),
+    ALL_VILLAGER_GIFTS(new Identifier(RandoAssistant.MOD_ID, "all_villager_gifts")),
     ALL(new Identifier(RandoAssistant.MOD_ID, "all_loottables")),
     ALL_BLOCKS(new Identifier(RandoAssistant.MOD_ID, "all_block_loottables")),
     ALL_ENTITIES(new Identifier(RandoAssistant.MOD_ID, "all_entity_loottables")),
@@ -20,8 +23,7 @@ public enum LootAdvancement {
     SHAME(new Identifier(RandoAssistant.MOD_ID, "shame")),
     MONSTER(new Identifier(RandoAssistant.MOD_ID, "monster")),
     ORPHANED_POLAR_BEAR(new Identifier(RandoAssistant.MOD_ID, "orphaned_polar_bear")),
-    WOB(new Identifier(RandoAssistant.MOD_ID, "wob")),
-    CANDLES(new Identifier(RandoAssistant.MOD_ID, "candles"));
+    WOB(new Identifier(RandoAssistant.MOD_ID, "wob"));
 
     private final Identifier id;
 
