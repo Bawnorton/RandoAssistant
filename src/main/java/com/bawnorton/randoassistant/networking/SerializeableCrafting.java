@@ -3,8 +3,10 @@ package com.bawnorton.randoassistant.networking;
 import com.bawnorton.randoassistant.util.tuples.Pair;
 import net.minecraft.item.Item;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 
@@ -29,7 +31,7 @@ public class SerializeableCrafting implements Serializeable {
     }
 
     private void deserialize(Pair<String, String> serialized) {
-        this.input = Networking.server.getRecipeManager().get(new Identifier(serialized.a())).orElseThrow();
+        this.input = Networking.getServer().getRecipeManager().get(new Identifier(serialized.a())).orElse(null);
         this.output = Registries.ITEM.get(new Identifier(serialized.b()));
     }
 

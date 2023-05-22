@@ -10,8 +10,10 @@ import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.util.LootAdvancement;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
@@ -33,7 +35,6 @@ public class Networking {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.CLEAR_CACHE_PACKET, (client, handler, buf, responseSender) -> client.execute(() -> Tracker.getInstance().clearCache()));
-
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.DEBUG_PACKET, (client, handler, buf, responseSender) -> {
             ItemStack stack = buf.readItemStack();

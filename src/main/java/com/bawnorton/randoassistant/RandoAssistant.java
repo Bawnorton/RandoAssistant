@@ -24,8 +24,10 @@ import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +40,15 @@ public class RandoAssistant implements ModInitializer {
 
     public static final Item WOB = Registry.register(Registries.ITEM, new Identifier(MOD_ID, "wob"), new Wob(new FabricItemSettings()));
 
-    public static void getAllLootTables(ServerPlayerEntity player) {
+    public static void getAllLootTables(ServerPlayerEntity player, MinecraftServer server) {
         player.getStatHandler().sendStats(player);
-        LootManager lootManager = Networking.server.getLootManager();
+        LootManager lootManager = server.getLootManager();
         LootContextType lootContextType = new LootContextType.Builder().allow(LootContextParameters.THIS_ENTITY).allow(LootContextParameters.TOOL).build();
 
         for(int i = 0; i < 50; i++) {
             HashSet<Identifier> seen = new HashSet<>();
             Registries.BLOCK.forEach(block -> {
-                LootContext.Builder builder = new LootContext.Builder(Networking.server.getWorld(World.OVERWORLD));
+                LootContext.Builder builder = new LootContext.Builder(server.getWorld(World.OVERWORLD));
                 builder.luck(100f);
                 builder.optionalParameter(LootContextParameters.THIS_ENTITY, player);
 
@@ -63,12 +65,12 @@ public class RandoAssistant implements ModInitializer {
             });
 
             Registries.ENTITY_TYPE.forEach(entityType -> {
-                LootContext.Builder builder = new LootContext.Builder(Networking.server.getWorld(World.OVERWORLD));
+                LootContext.Builder builder = new LootContext.Builder(server.getWorld(World.OVERWORLD));
                 builder.luck(100f);
                 builder.optionalParameter(LootContextParameters.THIS_ENTITY, player);
 
                 seen.add(entityType.getLootTableId());
-                Entity entity = entityType.create(Networking.server.getWorld(World.OVERWORLD));
+                Entity entity = entityType.create(server.getWorld(World.OVERWORLD));
                 if (!(entity instanceof LivingEntity)) return;
                 LootTable table = lootManager.getTable(entityType.getLootTableId());
                 Set<ItemStack> stacks = new HashSet<>(table.generateLoot(builder.build(lootContextType)));
@@ -77,7 +79,7 @@ public class RandoAssistant implements ModInitializer {
 
             lootManager.getTableIds().forEach(id -> {
                 if (seen.contains(id)) return;
-                LootContext.Builder builder = new LootContext.Builder(Networking.server.getWorld(World.OVERWORLD));
+                LootContext.Builder builder = new LootContext.Builder(server.getWorld(World.OVERWORLD));
                 builder.luck(100f);
                 builder.optionalParameter(LootContextParameters.THIS_ENTITY, player);
 
@@ -95,8 +97,8 @@ public class RandoAssistant implements ModInitializer {
         AxeItem.STRIPPED_BLOCKS.forEach((input, output) -> Networking.sendSerializeablePacket(player, SerializeableInteraction.ofBlockToBlock(input, output)));
     }
 
-    public static void getAllRecipes(ServerPlayerEntity player) {
-        RecipeManager recipeManager = Networking.server.getRecipeManager();
+    public static void getAllRecipes(ServerPlayerEntity player, MinecraftServer server) {
+        RecipeManager recipeManager = server.getRecipeManager();
         recipeManager.values().forEach(recipe -> {
             Item output = recipe.getOutput(DynamicRegistryManager.of(Registries.REGISTRIES)).getItem();
             Networking.sendSerializeablePacket(player, SerializeableCrafting.of(recipe, output));

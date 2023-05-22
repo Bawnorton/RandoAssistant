@@ -20,6 +20,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
@@ -232,17 +233,22 @@ public class Tracker {
     }
 
     public void testAll() {
-        int discoveredCount = getDiscoveredCount();
         int totalCount = getTotalCount();
+        if(totalCount < 1000) return; // Shouldn't test if TRACKABLE_LOOTED is not fully loaded
+        int discoveredCount = getDiscoveredCount();
         if(discoveredCount >= 50 && discoveredCount < 100) {
             Networking.requestAdvancementUnlock(LootAdvancement.FIFTY);
-        } else if (discoveredCount >= 100 && discoveredCount < 200) {
+        }
+        if (discoveredCount >= 100 && discoveredCount < 200) {
             Networking.requestAdvancementUnlock(LootAdvancement.HUNDRED);
-        } else if (discoveredCount >= 200 && discoveredCount < 500) {
+        }
+        if (discoveredCount >= 200 && discoveredCount < 500) {
             Networking.requestAdvancementUnlock(LootAdvancement.TWO_HUNDRED);
-        } else if (discoveredCount >= 500 && discoveredCount < totalCount) {
+        }
+        if (discoveredCount >= 500 && discoveredCount < totalCount) {
             Networking.requestAdvancementUnlock(LootAdvancement.FIVE_HUNDRED);
-        } else if(discoveredCount >= totalCount) {
+        }
+        if(discoveredCount >= totalCount) {
             Networking.requestAdvancementUnlock(LootAdvancement.ALL);
         }
         if (getDiscoveredChestsCount() >= getTotalChestsCount()) {
