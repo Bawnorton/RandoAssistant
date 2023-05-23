@@ -1,57 +1,52 @@
 package com.bawnorton.randoassistant.networking;
 
 import com.bawnorton.randoassistant.util.LootCondition;
-import com.bawnorton.randoassistant.util.tuples.Quartet;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class SerializeableLootTable implements Serializeable {
-    private Quartet<String, String, List<String>, String> serializedLootTable;
+    private final Identifier lootTableId;
+    private final Identifier sourceId;
+    private final List<Item> items;
+    private final LootCondition condition;
 
-    private Identifier lootTableId;
-    private Identifier sourceId;
-    private List<Item> items;
-    private LootCondition condition;
-
-    private SerializeableLootTable(Identifier lootTableId, Identifier sourceId, Collection<ItemStack> items, LootCondition condition) {
+    private SerializeableLootTable(Identifier lootTableId, Identifier sourceId, List<Item> items, LootCondition condition) {
         if(lootTableId == null) throw new IllegalArgumentException("Identifier cannot be null");
         this.lootTableId = lootTableId;
         this.sourceId = sourceId;
-        this.items = new ArrayList<>();
-        for(ItemStack itemStack : items) {
-            this.items.add(itemStack.getItem());
-        }
+        this.items = new ArrayList<>(items);
         this.condition = condition;
-
-        initSerialized();
     }
 
-    public SerializeableLootTable(byte[] bytes) {
-        populateData(bytes);
+    private SerializeableLootTable(Identifier lootTableId, Identifier sourceId, Collection<ItemStack> stacks, LootCondition condition) {
+        this(lootTableId, sourceId, stacks.stream().map(ItemStack::getItem).toList(), condition);
     }
 
-    private void initSerialized() {
-        List<String> itemNames = new ArrayList<>();
-        for(Item item : items) {
-            itemNames.add(Registries.ITEM.getId(item).toString());
-        }
-        serializedLootTable = Quartet.of(lootTableId.toString(), sourceId.toString(), itemNames, condition.name());
+    public static SerializeableLootTable deserialize(PacketByteBuf buf) {
+        Identifier lootTableId = buf.readIdentifier();
+        Identifier sourceId = buf.readIdentifier();
+        LootCondition condition = LootCondition.valueOf(buf.readString());
+        List<Item> items = buf.readCollection(ArrayList::new, (byteBuf) -> Registries.ITEM.get(byteBuf.readIdentifier()));
+        return new SerializeableLootTable(lootTableId, sourceId, items, condition);
     }
 
-    private void deserialize(Quartet<String, String, List<String>, String> serialized) {
-        this.lootTableId = new Identifier(serialized.a());
-        this.sourceId = new Identifier(serialized.b());
-        this.condition = LootCondition.valueOf(serialized.d());
-        this.items = serialized.c().stream().map(itemName -> Registries.ITEM.get(new Identifier(itemName))).toList();
+    public PacketByteBuf serialize() {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeIdentifier(lootTableId);
+        buf.writeIdentifier(sourceId);
+        buf.writeString(condition.name());
+        buf.writeCollection(items, (byteBuf, item) -> byteBuf.writeIdentifier(Registries.ITEM.getId(item)));
+        return buf;
     }
 
     public static SerializeableLootTable ofBlock(Block block, Collection<ItemStack> items, boolean silkTouch) {
@@ -80,27 +75,6 @@ public class SerializeableLootTable implements Serializeable {
 
     public LootCondition getCondition() {
         return condition;
-    }
-
-    public byte[] toBytes() {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(serializedLootTable);
-            oos.flush();
-            return baos.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void populateData(byte[] bytes) {
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            deserialize((Quartet<String, String, List<String>, String>) ois.readObject());
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override

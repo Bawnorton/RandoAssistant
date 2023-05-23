@@ -1,4 +1,4 @@
-package com.bawnorton.randoassistant.mixin.client;
+package com.bawnorton.randoassistant.mixin;
 
 import net.minecraft.registry.Registry;
 import net.minecraft.stat.Stat;

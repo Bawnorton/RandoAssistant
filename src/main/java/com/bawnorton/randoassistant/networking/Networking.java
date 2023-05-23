@@ -10,23 +10,21 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Networking {
-    private static MinecraftServer server;
+    private static final AtomicReference<MinecraftServer> server = new AtomicReference<>();
 
     public static void init() {
-        ServerPlayNetworking.registerGlobalReceiver(NetworkingConstants.HANDSHAKE_PACKET, (server, player, handler, buf, responseSender) -> {
-            Networking.server = server;
-            sendHandshakePacket(player);
-        });
+        ServerPlayNetworking.registerGlobalReceiver(NetworkingConstants.HANDSHAKE_PACKET, (server, player, handler, buf, responseSender) -> sendHandshakePacket(player));
         ServerPlayNetworking.registerGlobalReceiver(NetworkingConstants.STATS_PACKET, (server, player, handler, buf, responseSender) -> player.getStatHandler().sendStats(player));
         ServerPlayNetworking.registerGlobalReceiver(NetworkingConstants.ADVANCEMENT_UNLOCK_PACKET, (server, player, handler, buf, responseSender) -> LootAdvancement.fromOrdinal(buf.readInt()).grant(player));
     }
 
     public static void sendSerializeablePacket(ServerPlayerEntity player, Serializeable serializeable) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeBytes(serializeable.toBytes());
-        ServerPlayNetworking.send(player, serializeable.getTypePacket(), buf);
+        ServerPlayNetworking.send(player, serializeable.getTypePacket(), serializeable.serialize());
     }
 
     public static void sendClearCachePacket(ServerPlayerEntity serverPlayer) {
@@ -45,14 +43,18 @@ public class Networking {
     public static void sendHandshakePacket(ServerPlayerEntity player) {
         ServerPlayNetworking.send(player, NetworkingConstants.HANDSHAKE_PACKET, PacketByteBufs.create());
         player.getStatHandler().sendStats(player);
-        Networking.sendClearCachePacket(player);
-        RandoAssistant.getAllLootTables(player, server);
-        RandoAssistant.getAllRecipes(player, server);
-        RandoAssistant.getAllInteractions(player);
     }
 
     public static MinecraftServer getServer() {
-        if(server == null) throw new NullPointerException("Server has not been initialized yet!");
-        return server;
+        if(server.get() == null) throw new NullPointerException("Server has not been initialized yet!");
+        return server.get();
+    }
+
+    public static void sendData(@NotNull MinecraftServer server, ServerPlayerEntity player) {
+        Networking.server.set(server);
+        RandoAssistant.getAllLootTables(player, server);
+        RandoAssistant.getAllRecipes(player, server);
+        RandoAssistant.getAllInteractions(player);
+        sendClearCachePacket(player);
     }
 }

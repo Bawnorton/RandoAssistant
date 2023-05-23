@@ -20,17 +20,17 @@ import net.minecraft.util.Identifier;
 public class Networking {
     public static void init() {
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.LOOT_TABLE_PACKET, (client, handler, buf, responseSender) -> {
-            SerializeableLootTable lootTable = new SerializeableLootTable(buf.getWrittenBytes());
+            SerializeableLootTable lootTable = SerializeableLootTable.deserialize(buf);
             client.execute(() -> Tracker.getInstance().track(lootTable));
         });
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.INTERACTION_PACKET, (client, handler, buf, responseSender) -> {
-            SerializeableInteraction interaction = new SerializeableInteraction(buf.getWrittenBytes());
+            SerializeableInteraction interaction = SerializeableInteraction.deserialize(buf);
             client.execute(() -> Tracker.getInstance().track(interaction));
         });
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.CRAFTING_PACKET, (client, handler, buf, responseSender) -> {
-            SerializeableCrafting crafting = new SerializeableCrafting(buf.getWrittenBytes());
+            SerializeableCrafting crafting = SerializeableCrafting.deserialize(buf);
             client.execute(() -> Tracker.getInstance().track(crafting));
         });
 

@@ -27,7 +27,6 @@ import net.minecraft.registry.Registry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,10 +90,10 @@ public class RandoAssistant implements ModInitializer {
     }
 
     public static void getAllInteractions(ServerPlayerEntity player) {
-        HoneycombItem.UNWAXED_TO_WAXED_BLOCKS.get().forEach((input, output) -> Networking.sendSerializeablePacket(player, SerializeableInteraction.ofBlockToBlock(input, output)));
-        HoneycombItem.WAXED_TO_UNWAXED_BLOCKS.get().forEach((input, output) -> Networking.sendSerializeablePacket(player, SerializeableInteraction.ofBlockToBlock(input, output)));
-        OxidizableBlock.OXIDATION_LEVEL_DECREASES.get().forEach((input, output) -> Networking.sendSerializeablePacket(player, SerializeableInteraction.ofBlockToBlock(input, output)));
-        AxeItem.STRIPPED_BLOCKS.forEach((input, output) -> Networking.sendSerializeablePacket(player, SerializeableInteraction.ofBlockToBlock(input, output)));
+        HoneycombItem.UNWAXED_TO_WAXED_BLOCKS.get().forEach((input, output) -> Networking.sendSerializeablePacket(player, SerializeableInteraction.of(input, output)));
+        HoneycombItem.WAXED_TO_UNWAXED_BLOCKS.get().forEach((input, output) -> Networking.sendSerializeablePacket(player, SerializeableInteraction.of(input, output)));
+        OxidizableBlock.OXIDATION_LEVEL_DECREASES.get().forEach((input, output) -> Networking.sendSerializeablePacket(player, SerializeableInteraction.of(input, output)));
+        AxeItem.STRIPPED_BLOCKS.forEach((input, output) -> Networking.sendSerializeablePacket(player, SerializeableInteraction.of(input, output)));
     }
 
     public static void getAllRecipes(ServerPlayerEntity player, MinecraftServer server) {

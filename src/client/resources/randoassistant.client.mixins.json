@@ -16,8 +16,7 @@
     "InventoryScreenMixin",
     "LinearColorBlenderMixin",
     "LivingEntityRendererMixin",
-    "ScreenMixin",
-    "StatMixin"
+    "ScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -18,7 +18,8 @@
     "PlayerAdvancementTrackerMixin",
     "RecipeUnlockerMixin",
     "ServerPlayerEntityMixin",
-    "ServerStatHandlerMixin"
+    "ServerStatHandlerMixin",
+    "StatMixin"
   ],
   "injectors": {
     "defaultRequire": 1
