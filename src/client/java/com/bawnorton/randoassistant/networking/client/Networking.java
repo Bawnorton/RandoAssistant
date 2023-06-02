@@ -10,10 +10,9 @@ import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.util.LootAdvancement;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.client.world.ClientWorld;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
@@ -46,6 +45,8 @@ public class Networking {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.HANDSHAKE_PACKET, (client, handler, buf, responseSender) -> client.execute(() -> RandoAssistantClient.isInstalledOnServer = true));
+
+        ClientPlayNetworking.registerGlobalReceiver(NetworkingConstants.TAKE_PANORAMA_PACKET, (client, handler, buf, responseSender) -> client.execute(() -> client.takePanorama(FabricLoader.getInstance().getGameDir().toFile(), 1024, 1024)));
     }
 
     public static void requestHandshakePacket() {

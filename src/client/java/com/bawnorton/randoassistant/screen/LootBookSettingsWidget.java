@@ -7,6 +7,7 @@ import com.bawnorton.randoassistant.event.client.EventManager;
 import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
@@ -90,21 +91,21 @@ public class LootBookSettingsWidget {
         return button;
     }
 
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        client.textRenderer.draw(matrices, Text.of("Settings"), x + 52, y + 13, 0xFFFFFF);
-        this.backButton.render(matrices, mouseX, mouseY, delta);
-        this.starIcons.render(matrices, mouseX, mouseY, delta);
-        client.textRenderer.draw(matrices, Text.of("Unbroken Stars"), starIcons.getX() - 110, starIcons.getY() + 4, 0xFFFFFF);
-        this.silkTouchStarIcons.render(matrices, mouseX, mouseY, delta);
-        client.textRenderer.draw(matrices, Text.of("Silk-Touch Stars"), silkTouchStarIcons.getX() - 110, silkTouchStarIcons.getY() + 4, 0xFFFFFF);
-        this.enableOverride.render(matrices, mouseX, mouseY, delta);
-        client.textRenderer.draw(matrices, Text.of("Enable Override"), enableOverride.getX() - 110, enableOverride.getY() + 4, 0xFFFFFF);
-        this.randomizeColours.render(matrices, mouseX, mouseY, delta);
-        client.textRenderer.draw(matrices, Text.of("Randomize Colours"), randomizeColours.getX() - 110, randomizeColours.getY() + 4, 0xFFFFFF);
-        this.searchDepth.render(matrices, mouseX, mouseY, delta);
-        client.textRenderer.draw(matrices, Text.of("Search Depth"), searchDepth.getX() - 105, searchDepth.getY() + 4, 0xFFFFFF);
-        this.highlightRadius.render(matrices, mouseX, mouseY, delta);
-        client.textRenderer.draw(matrices, Text.of("Highlight Radius"), highlightRadius.getX() - 105, highlightRadius.getY() + 4, 0xFFFFFF);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        context.drawText(client.textRenderer, Text.of("Settings"), x + 52, y + 13, 0xFFFFFF, false);
+        this.backButton.render(context, mouseX, mouseY, delta);
+        this.starIcons.render(context, mouseX, mouseY, delta);
+        context.drawText(client.textRenderer, Text.of("Unbroken Stars"), starIcons.getX() - 110, starIcons.getY() + 4, 0xFFFFFF, false);
+        this.silkTouchStarIcons.render(context, mouseX, mouseY, delta);
+        context.drawText(client.textRenderer, Text.of("Silk-Touch Stars"), silkTouchStarIcons.getX() - 110, silkTouchStarIcons.getY() + 4, 0xFFFFFF, false);
+        this.enableOverride.render(context, mouseX, mouseY, delta);
+        context.drawText(client.textRenderer, Text.of("Enable Override"), enableOverride.getX() - 110, enableOverride.getY() + 4, 0xFFFFFF, false);
+        this.randomizeColours.render(context, mouseX, mouseY, delta);
+        context.drawText(client.textRenderer, Text.of("Randomize Colours"), randomizeColours.getX() - 110, randomizeColours.getY() + 4, 0xFFFFFF, false);
+        this.searchDepth.render(context, mouseX, mouseY, delta);
+        context.drawText(client.textRenderer, Text.of("Search Depth"), searchDepth.getX() - 105, searchDepth.getY() + 4, 0xFFFFFF, false);
+        this.highlightRadius.render(context, mouseX, mouseY, delta);
+        context.drawText(client.textRenderer, Text.of("Highlight Radius"), highlightRadius.getX() - 105, highlightRadius.getY() + 4, 0xFFFFFF, false);
     }
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {

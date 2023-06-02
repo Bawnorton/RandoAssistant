@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.stat.RandoAssistantStats;
+import com.bawnorton.randoassistant.stat.StatsManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.HoneycombItem;
 import net.minecraft.item.ItemUsageContext;
@@ -29,7 +29,7 @@ public abstract class HoneycombItemMixin {
     private void onUseOnBlock(ItemUsageContext context, CallbackInfoReturnable<ActionResult> cir, World world, BlockPos blockPos, BlockState blockState) {
         getWaxedState(blockState).ifPresent(waxedState -> {
             if(context.getPlayer() instanceof ServerPlayerEntity serverPlayer) {
-                serverPlayer.incrementStat(RandoAssistantStats.INTERACTED.getOrCreateStat(Registries.BLOCK.getId(blockState.getBlock())));
+                serverPlayer.incrementStat(StatsManager.INTERACTED.getOrCreateStat(Registries.BLOCK.getId(blockState.getBlock())));
             }
         });
     }

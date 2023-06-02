@@ -1,9 +1,7 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.stat.RandoAssistantStats;
+import com.bawnorton.randoassistant.stat.StatsManager;
 import com.bawnorton.randoassistant.util.LootAdvancement;
-import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.passive.AllayEntity;
@@ -28,12 +26,12 @@ public abstract class LivingEntityMixin {
     @Inject(method = "dropLoot", at = @At("HEAD"))
     private void dropLoot(DamageSource source, boolean causedByPlayer, CallbackInfo ci) {
         if(source.getAttacker() instanceof ServerPlayerEntity serverPlayer) {
-            serverPlayer.incrementStat(RandoAssistantStats.LOOTED.getOrCreateStat(getLootTable()));
+            serverPlayer.incrementStat(StatsManager.LOOTED.getOrCreateStat(getLootTable()));
             Object thiz = this;
             if(thiz instanceof TurtleEntity || thiz instanceof DolphinEntity || thiz instanceof AllayEntity) {
                 LootAdvancement.MONSTER.grant(serverPlayer);
             } else if (thiz instanceof PolarBearEntity polarBear) {
-                List<PolarBearEntity> list = polarBear.world.getNonSpectatingEntities(PolarBearEntity.class, polarBear.getBoundingBox().expand(8.0, 4.0, 8.0));
+                List<PolarBearEntity> list = polarBear.getWorld().getNonSpectatingEntities(PolarBearEntity.class, polarBear.getBoundingBox().expand(8.0, 4.0, 8.0));
                 for (PolarBearEntity polarBearEntity : list) {
                     if (polarBearEntity.isBaby()) {
                         LootAdvancement.ORPHANED_POLAR_BEAR.grant(serverPlayer);

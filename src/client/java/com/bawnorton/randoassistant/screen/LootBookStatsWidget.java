@@ -2,9 +2,9 @@ package com.bawnorton.randoassistant.screen;
 
 import com.bawnorton.randoassistant.tracking.Tracker;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
@@ -74,22 +74,22 @@ public class LootBookStatsWidget {
         totalCount = discoveredTotal + "/" + totalTotal;
     }
 
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        client.textRenderer.draw(matrices, Text.of("Stats"), x + 60, y + 13, 0xFFFFFF);
-        this.backButton.render(matrices, mouseX, mouseY, delta);
-        client.textRenderer.draw(matrices, Text.of("Loot Tables Discovered:"), x + 12, y + 40, 0xFFFFFF);
-        client.textRenderer.draw(matrices, Text.of("Blocks:"), x + 20, y + 55, 0xDDDDDD);
-        client.textRenderer.draw(matrices, Text.of(blockCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(blockCount), y + 55, 0xFFFFFF);
-        client.textRenderer.draw(matrices, Text.of("Entities:"), x + 20, y + 70, 0xDDDDDD);
-        client.textRenderer.draw(matrices, Text.of(entityCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(entityCount), y + 70, 0xFFFFFF);
-        client.textRenderer.draw(matrices, Text.of("Chests:"), x + 20, y + 85, 0xDDDDDD);
-        client.textRenderer.draw(matrices, Text.of(chestCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(chestCount), y + 85, 0xFFFFFF);
-        client.textRenderer.draw(matrices, Text.of("Villager Gifts:"), x + 20, y + 100, 0xDDDDDD);
-        client.textRenderer.draw(matrices, Text.of(villagerGiftCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(villagerGiftCount), y + 100, 0xFFFFFF);
-        client.textRenderer.draw(matrices, Text.of("Other:"), x + 20, y + 115, 0xDDDDDD);
-        client.textRenderer.draw(matrices, Text.of(otherCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(otherCount), y + 115, 0xFFFFFF);
-        client.textRenderer.draw(matrices, Text.of("Total:"), x + 20, y + 130, 0xDDDDDD);
-        client.textRenderer.draw(matrices, Text.of(totalCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(totalCount), y + 130, 0xFFFFFF);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        context.drawText(client.textRenderer, Text.of("Stats"), x + 60, y + 13, 0xFFFFFF, false);
+        this.backButton.render(context, mouseX, mouseY, delta);
+        context.drawText(client.textRenderer, Text.of("Loot Tables Discovered:"), x + 12, y + 40, 0xFFFFFF, false);
+        context.drawText(client.textRenderer, Text.of("Blocks:"), x + 20, y + 55, 0xDDDDDD, false);
+        context.drawText(client.textRenderer, Text.of(blockCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(blockCount), y + 55, 0xFFFFFF, false);
+        context.drawText(client.textRenderer, Text.of("Entities:"), x + 20, y + 70, 0xDDDDDD, false);
+        context.drawText(client.textRenderer, Text.of(entityCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(entityCount), y + 70, 0xFFFFFF, false);
+        context.drawText(client.textRenderer, Text.of("Chests:"), x + 20, y + 85, 0xDDDDDD, false);
+        context.drawText(client.textRenderer, Text.of(chestCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(chestCount), y + 85, 0xFFFFFF, false);
+        context.drawText(client.textRenderer, Text.of("Villager Gifts:"), x + 20, y + 100, 0xDDDDDD, false);
+        context.drawText(client.textRenderer, Text.of(villagerGiftCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(villagerGiftCount), y + 100, 0xFFFFFF, false);
+        context.drawText(client.textRenderer, Text.of("Other:"), x + 20, y + 115, 0xDDDDDD, false);
+        context.drawText(client.textRenderer, Text.of(otherCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(otherCount), y + 115, 0xFFFFFF, false);
+        context.drawText(client.textRenderer, Text.of("Total:"), x + 20, y + 130, 0xDDDDDD, false);
+        context.drawText(client.textRenderer, Text.of(totalCount), x + 135 - MinecraftClient.getInstance().textRenderer.getWidth(totalCount), y + 130, 0xFFFFFF, false);
         Text tooltip = null;
         if (mouseX >= x + 20 && mouseY >= y + 55 && mouseX <= x + 135 && mouseY <= y + 55 + 9) {
             tooltip = Text.of(String.format("Blocks: %.1f", (float) discoveredBlocks / totalBlocks * 100) + "%");
@@ -104,8 +104,8 @@ public class LootBookStatsWidget {
         } else if (mouseX >= x + 20 && mouseY >= y + 130 && mouseX <= x + 135 && mouseY <= y + 130 + 9) {
             tooltip = Text.of(String.format("Total: %.1f", (float) discoveredTotal / totalTotal * 100) + "%");
         }
-        if (tooltip != null && client.currentScreen != null) {
-            client.currentScreen.renderTooltip(matrices, tooltip, mouseX, mouseY);
+        if (tooltip != null) {
+            context.drawTooltip(client.textRenderer, tooltip, mouseX, mouseY);
         }
     }
 

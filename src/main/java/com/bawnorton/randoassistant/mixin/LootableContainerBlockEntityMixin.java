@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.stat.RandoAssistantStats;
+import com.bawnorton.randoassistant.stat.StatsManager;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -21,7 +21,7 @@ public abstract class LootableContainerBlockEntityMixin {
     @Inject(method = "checkLootInteraction", at = @At("HEAD"))
     private void onCheckLootInteractionHead(PlayerEntity player, CallbackInfo ci) {
         if (lootTableId != null && player instanceof ServerPlayerEntity serverPlayer) {
-            serverPlayer.incrementStat(RandoAssistantStats.LOOTED.getOrCreateStat(lootTableId));
+            serverPlayer.incrementStat(StatsManager.LOOTED.getOrCreateStat(lootTableId));
         }
     }
 }

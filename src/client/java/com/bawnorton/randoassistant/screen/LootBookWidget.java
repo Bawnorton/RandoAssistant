@@ -3,10 +3,9 @@ package com.bawnorton.randoassistant.screen;
 import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
@@ -28,7 +27,7 @@ import java.util.Locale;
 import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
 
 @SuppressWarnings("DataFlowIssue")
-public class LootBookWidget extends DrawableHelper implements Drawable, Element, Selectable {
+public class LootBookWidget implements Drawable, Element, Selectable {
     public static final Identifier TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/loot_book.png");
     private static LootBookWidget INSTANCE;
 
@@ -129,29 +128,31 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         if(!open) return;
+        MatrixStack matrices = context.getMatrices();
         matrices.push();
         matrices.translate(0, 0, 100);
-        RenderSystem.setShaderTexture(0, TEXTURE);
         if(!RandoAssistantClient.isInstalledOnServer) {
             if(isOpen()) this.toggleOpen();
         }
         int x = (this.parentWidth - 147) / 2 + this.rightOffset;
         int y = (this.parentHeight - 166) / 2;
-        if(LootTableResultButton.isGraphOpen()) y += HEIGHT / 2;
-        drawTexture(matrices, x, y, 1, 1, 147, 166);
+        if(LootTableResultButton.isGraphOpen()) {
+            y += HEIGHT / 2;
+        }
+        context.drawTexture(TEXTURE, x, y, 1, 1, 147, 166);
         if(settingsOpen) {
-            this.settingsWidget.render(matrices, mouseX, mouseY, delta);
-            this.lootTableArea.renderLastClickedGraph(matrices, mouseX, mouseY);
+            this.settingsWidget.render(context, mouseX, mouseY, delta);
+            this.lootTableArea.renderLastClickedGraph(context, mouseX, mouseY);
         } else if (statsOpen) {
-            this.statsWidget.render(matrices, mouseX, mouseY, delta);
-            this.lootTableArea.renderLastClickedGraph(matrices, mouseX, mouseY);
+            this.statsWidget.render(context, mouseX, mouseY, delta);
+            this.lootTableArea.renderLastClickedGraph(context, mouseX, mouseY);
         } else {
-            this.searchField.render(matrices, mouseX, mouseY, delta);
-            this.lootTableArea.render(matrices, mouseX, mouseY, delta);
-            this.settingsButton.render(matrices, mouseX, mouseY, delta);
-            this.statsButton.render(matrices, mouseX, mouseY, delta);
+            this.searchField.render(context, mouseX, mouseY, delta);
+            this.lootTableArea.render(context, mouseX, mouseY, delta);
+            this.settingsButton.render(context, mouseX, mouseY, delta);
+            this.statsButton.render(context, mouseX, mouseY, delta);
         }
         matrices.pop();
     }
@@ -160,10 +161,10 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         return this.isOpen() ? (parentWidth - backgroundWidth - 200) / 2 + 23: (parentWidth - backgroundWidth) / 2;
     }
 
-    public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY) {
+    public void drawTooltip(DrawContext context, int mouseX, int mouseY) {
         if(!this.isOpen()) return;
         if(!settingsOpen && !statsOpen) {
-            this.lootTableArea.renderTooltip(matrices, mouseX, mouseY);
+            this.lootTableArea.renderTooltip(context, mouseX, mouseY);
         }
     }
 
@@ -219,7 +220,7 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
             return true;
         }
         if(this.searchField.keyPressed(keyCode, scanCode, modifiers)) {
-            this.refreshSearchResults();
+            this.refreshSearchResults(true);
             return true;
         }
         if(this.searchField.isFocused() && this.searchField.isVisible() && keyCode != GLFW.GLFW_KEY_ESCAPE) {
@@ -249,7 +250,7 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         }
         if(!this.isOpen() || client.player.isSpectator()) return false;
         if(this.searchField.charTyped(chr, modifiers)) {
-            this.refreshSearchResults();
+            this.refreshSearchResults(true);
             return true;
         }
         if(this.settingsOpen) {
@@ -267,11 +268,11 @@ public class LootBookWidget extends DrawableHelper implements Drawable, Element,
         return false;
     }
 
-    private void refreshSearchResults() {
+    public void refreshSearchResults(boolean resetPage) {
         String text = this.searchField.getText().toLowerCase(Locale.ROOT);
         if(!text.equals(this.searchText)) {
             this.searchText = text;
-            lootTableArea.resetResults(true);
+            lootTableArea.resetResults(resetPage);
         }
     }
 

@@ -6,6 +6,7 @@ import com.bawnorton.randoassistant.networking.client.Networking;
 import com.bawnorton.randoassistant.screen.LootBookWidget;
 import com.bawnorton.randoassistant.screen.LootTableResultButton;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
@@ -37,11 +38,11 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
     private RecipeBookWidget recipeBook;
     @Shadow
     private boolean narrow;
+
+    @Shadow protected abstract void drawBackground(DrawContext context, float delta, int mouseX, int mouseY);
+
     private TexturedButtonWidget lootButton;
     private TexturedButtonWidget recipeButton;
-
-    @Shadow
-    protected abstract void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY);
 
     @Inject(method = "handledScreenTick", at = @At("TAIL"))
     private void onHandledScreenTick(CallbackInfo ci) {
@@ -76,9 +77,9 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
             }
         }) {
             @Override
-            public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
                 if(!RandoAssistantClient.isInstalledOnServer) RenderSystem.setShaderColor(0.5f, 0.5f, 0.5f, 1);
-                super.renderButton(matrices, mouseX, mouseY, delta);
+                super.renderButton(context, mouseX, mouseY, delta);
                 if(!RandoAssistantClient.isInstalledOnServer) RenderSystem.setShaderColor(1, 1, 1, 1);
             }
 
@@ -136,18 +137,18 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
         };
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/InventoryScreen;renderBackground(Lnet/minecraft/client/util/math/MatrixStack;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/InventoryScreen;renderBackground(Lnet/minecraft/client/gui/DrawContext;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         LootBookWidget lootBook = LootBookWidget.getInstance();
         if (lootBook.isOpen()) {
-            drawBackground(matrices, delta, mouseX, mouseY);
-            lootBook.render(matrices, mouseX, mouseY, delta);
+            drawBackground(context, delta, mouseX, mouseY);
+            lootBook.render(context, mouseX, mouseY, delta);
         }
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/recipebook/RecipeBookWidget;drawTooltip(Lnet/minecraft/client/util/math/MatrixStack;IIII)V", shift = At.Shift.AFTER))
-    private void onTooltipRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        LootBookWidget.getInstance().drawTooltip(matrices, mouseX, mouseY);
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/InventoryScreen;drawMouseoverTooltip(Lnet/minecraft/client/gui/DrawContext;II)V", shift = At.Shift.AFTER))
+    private void onTooltipRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        LootBookWidget.getInstance().drawTooltip(context, mouseX, mouseY);
     }
 
     @Redirect(method = "isPointWithinBounds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/recipebook/RecipeBookWidget;isOpen()Z"))

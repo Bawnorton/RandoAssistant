@@ -9,9 +9,9 @@ import com.bawnorton.randoassistant.util.IdentifierType;
 import com.bawnorton.randoassistant.util.tuples.Pair;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
@@ -104,39 +104,38 @@ public class LootTableResultButton extends ClickableWidget {
     }
 
     @Override
-    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
         RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
         int u = 29;
         int v = 206;
         if(this.isHovered()) {
             v += height;
         }
-        drawTexture(matrices, getX(), getY(), u, v, width, height);
-        RenderingHelper.renderIdentifier(Objects.requireNonNullElse(source, Registries.ITEM.getId(Items.STRUCTURE_VOID)), matrices, 1, getX() + 4, getY() + 4, true);
-        renderArrow(matrices, getX() + 24, getY() + 3);
-        renderTarget(matrices, getX() + 104, getY() + 4);
+        context.drawTexture(BACKGROUND_TEXTURE, getX(), getY(), u, v, width, height);
+        RenderingHelper.renderIdentifier(Objects.requireNonNullElse(source, Registries.ITEM.getId(Items.STRUCTURE_VOID)), context, 1, getX() + 4, getY() + 4, true);
+        renderArrow(context, getX() + 24, getY() + 3);
+        renderTarget(context, getX() + 104, getY() + 4);
     }
 
-    private void renderTarget(MatrixStack matrices, int x, int y) {
+    private void renderTarget(DrawContext context, int x, int y) {
         ItemStack icon = new ItemStack(Registries.ITEM.get(target));
-        client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
+        context.drawItem(icon, x, y);
     }
 
-    private void renderArrow(MatrixStack matices, int x, int y) {
-        RenderSystem.setShaderTexture(0, ARROW_TEXTURE);
-        drawTexture(matices, x + 1, y, 0, 0, 76, 17, 76, 17);
+    private void renderArrow(DrawContext context, int x, int y) {
+        drawTexture(context, ARROW_TEXTURE, x + 1, y, 0, 0, 0, 76, 17, 76, 17);
         Text text = Text.of(String.valueOf(distance));
         int textWidth = client.textRenderer.getWidth(text);
         int textHeight = client.textRenderer.fontHeight;
         int textX = x + 39 - textWidth / 2;
         int textY = y + 9 - textHeight / 2;
-        client.textRenderer.draw(matices, text, textX, textY, 0x000000);
+        context.drawText(client.textRenderer, text, textX, textY, 0x000000, false);
     }
 
-    public boolean renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
+    public boolean renderTooltip(DrawContext context, int mouseX, int mouseY) {
         if (isHovered() && client.currentScreen != null) {
             Text text = Text.of((source == null ? "Loading..." : IdentifierType.getName(source, true)) + " -> " + IdentifierType.getName(target, false));
-            client.currentScreen.renderTooltip(matrices, text, mouseX, mouseY);
+            context.drawText(client.textRenderer, text, mouseX, mouseY, 0x000000, false);
             return true;
         }
         return false;

@@ -1,11 +1,12 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.stat.RandoAssistantStats;
+import com.bawnorton.randoassistant.stat.StatsManager;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContext;
+import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,12 +23,11 @@ import static net.minecraft.loot.context.LootContextParameters.THIS_ENTITY;
 public abstract class AbstractBlockMixin {
     @Shadow public abstract Identifier getLootTableId();
 
-    @SuppressWarnings("ConstantValue")
     @Inject(method = "getDroppedStacks", at = @At("HEAD"))
-    private void getDroppedStacks(BlockState state, LootContext.Builder builder, CallbackInfoReturnable<List<ItemStack>> cir) {
-        Entity source = builder.getNullable(THIS_ENTITY);
+    private void getDroppedStacks(BlockState state, LootContextParameterSet.Builder builder, CallbackInfoReturnable<List<ItemStack>> cir) {
+        Entity source = builder.getOptional(THIS_ENTITY);
         if(source instanceof ServerPlayerEntity serverPlayer) {
-            serverPlayer.incrementStat(RandoAssistantStats.LOOTED.getOrCreateStat(getLootTableId()));
+            serverPlayer.incrementStat(StatsManager.LOOTED.getOrCreateStat(getLootTableId()));
         }
     }
 }

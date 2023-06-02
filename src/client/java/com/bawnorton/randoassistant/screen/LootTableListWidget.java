@@ -3,6 +3,7 @@ package com.bawnorton.randoassistant.screen;
 import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.util.IdentifierType;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.registry.Registries;
@@ -77,26 +78,26 @@ public class LootTableListWidget {
         this.previousPageButton.visible = this.pageCount > 1 && this.currentPage > 0;
     }
 
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         int y = this.y + (LootTableResultButton.isGraphOpen() ? HEIGHT / 2 : 0);
         if(this.pageCount > 1) {
             String pageText = String.format("%d/%d", this.currentPage + 1, this.pageCount);
             int pageTextWidth = this.client.textRenderer.getWidth(pageText);
-            this.client.textRenderer.draw(matrices, pageText, this.x - pageTextWidth / 2f + 66, y + 109f, -1);
+            context.drawText(client.textRenderer, pageText, (int) (this.x - pageTextWidth / 2f + 66), (int) (y + 109f), -1, false);
         }
 
         for(int i = 0; i < 4; i++) {
             if (i + 4 * currentPage >= buttons.size()) break;
             LootTableResultButton button = buttons.get(i + 4 * currentPage);
             button.setY(y + i * 25);
-            button.render(matrices, mouseX, mouseY, delta);
+            button.render(context, mouseX, mouseY, delta);
         }
-        this.nextPageButton.render(matrices, mouseX, mouseY, delta);
-        this.previousPageButton.render(matrices, mouseX, mouseY, delta);
-        this.renderLastClickedGraph(matrices, mouseX, mouseY);
+        this.nextPageButton.render(context, mouseX, mouseY, delta);
+        this.previousPageButton.render(context, mouseX, mouseY, delta);
+        this.renderLastClickedGraph(context, mouseX, mouseY);
     }
 
-    public void renderLastClickedGraph(MatrixStack matrices, int mouseX, int mouseY) {
+    public void renderLastClickedGraph(DrawContext context, int mouseX, int mouseY) {
         LootTableResultButton lastClicked = LootTableResultButton.getLastClicked();
         if(lastClicked != null && lastClicked.graphOpen) {
             if(lastClicked.isDirty()) {
@@ -104,18 +105,19 @@ public class LootTableListWidget {
             }
             int invX = LootBookWidget.getInstance().getInvX();
             int invY = LootBookWidget.getInstance().getInvY() - HEIGHT - 2;
+            MatrixStack matrices = context.getMatrices();
             matrices.push();
             matrices.translate(0, 0, 600);
-            lastClicked.graphWidget.render(matrices, invX, invY, mouseX, mouseY);
+            lastClicked.graphWidget.render(context, invX, invY, mouseX, mouseY);
             matrices.pop();
         }
     }
 
-    public void renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
+    public void renderTooltip(DrawContext context, int mouseX, int mouseY) {
         for(int i = 0; i < 4; i++) {
             if (i + 4 * currentPage >= buttons.size()) break;
             LootTableResultButton button = buttons.get(i + 4 * currentPage);
-            if(button.renderTooltip(matrices, mouseX, mouseY)) {
+            if(button.renderTooltip(context, mouseX, mouseY)) {
                 return;
             }
         }

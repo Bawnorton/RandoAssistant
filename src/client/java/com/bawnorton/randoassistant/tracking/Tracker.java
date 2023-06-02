@@ -7,7 +7,7 @@ import com.bawnorton.randoassistant.networking.SerializeableInteraction;
 import com.bawnorton.randoassistant.networking.SerializeableLootTable;
 import com.bawnorton.randoassistant.networking.client.Networking;
 import com.bawnorton.randoassistant.screen.LootBookWidget;
-import com.bawnorton.randoassistant.stat.RandoAssistantStats;
+import com.bawnorton.randoassistant.stat.StatsManager;
 import com.bawnorton.randoassistant.tracking.trackable.Trackable;
 import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
 import com.bawnorton.randoassistant.util.LootAdvancement;
@@ -20,7 +20,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
@@ -59,7 +58,7 @@ public class Tracker {
     }
 
     public void track(SerializeableLootTable lootTable) {
-        Stat<Identifier> stat = RandoAssistantStats.LOOTED.getOrCreateStat(lootTable.getLootTableId());
+        Stat<Identifier> stat = StatsManager.LOOTED.getOrCreateStat(lootTable.getLootTableId());
         Trackable<Identifier> trackable = TRACKABLE_LOOTED.getOrCreate(stat, lootTable.getSourceId());
         ID_TO_TRACKABLE.put(lootTable.getSourceId(), trackable);
         for(Item target : lootTable.getItems()) {
@@ -71,7 +70,7 @@ public class Tracker {
     }
     
     public void track(SerializeableInteraction interaction) {
-        Stat<Identifier> stat = RandoAssistantStats.INTERACTED.getOrCreateStat(Registries.BLOCK.getId(interaction.getInput()));
+        Stat<Identifier> stat = StatsManager.INTERACTED.getOrCreateStat(Registries.BLOCK.getId(interaction.getInput()));
         Trackable<Identifier> trackable = TRACKABLE_INTERACTED.getOrCreate(stat, Registries.BLOCK.getId(interaction.getInput()));
         trackable.addOutput(Registries.BLOCK.getId(interaction.getOutput()), LootCondition.NONE);
         Set<Trackable<Identifier>> tracked = TRACKED.getOrDefault(Registries.BLOCK.getId(interaction.getOutput()), Sets.newHashSet());
@@ -124,7 +123,7 @@ public class Tracker {
         if(Config.getInstance().enableOverride) return true;
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if(player == null) throw new IllegalStateException("Player is null");
-        int count = player.getStatHandler().getStat(RandoAssistantStats.CRAFTED.getOrCreateStat(recipe.getId()));
+        int count = player.getStatHandler().getStat(StatsManager.CRAFTED.getOrCreateStat(recipe.getId()));
         return count > 0;
     }
 
@@ -141,7 +140,7 @@ public class Tracker {
         if(Config.getInstance().enableOverride) return true;
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if(player == null) throw new IllegalStateException("Player is null");
-        int count = player.getStatHandler().getStat(RandoAssistantStats.SILK_TOUCHED.getOrCreateStat(block));
+        int count = player.getStatHandler().getStat(StatsManager.SILK_TOUCHED.getOrCreateStat(block));
         return count > 0;
     }
 

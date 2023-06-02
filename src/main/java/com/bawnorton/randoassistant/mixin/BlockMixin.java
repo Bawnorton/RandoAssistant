@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.stat.RandoAssistantStats;
+import com.bawnorton.randoassistant.stat.StatsManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -22,7 +22,7 @@ public abstract class BlockMixin {
         if(player instanceof ServerPlayerEntity serverPlayer) {
             ItemStack handStack = player.getMainHandStack();
             if(EnchantmentHelper.hasSilkTouch(handStack)) {
-                serverPlayer.incrementStat(RandoAssistantStats.SILK_TOUCHED.getOrCreateStat(state.getBlock()));
+                serverPlayer.incrementStat(StatsManager.SILK_TOUCHED.getOrCreateStat(state.getBlock()));
             }
         }
     }

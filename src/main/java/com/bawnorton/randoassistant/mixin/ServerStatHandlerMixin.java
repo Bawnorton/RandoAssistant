@@ -1,7 +1,7 @@
 package com.bawnorton.randoassistant.mixin;
 
 import com.bawnorton.randoassistant.networking.Networking;
-import com.bawnorton.randoassistant.stat.RandoAssistantStats;
+import com.bawnorton.randoassistant.stat.StatsManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.ServerStatHandler;
@@ -24,7 +24,7 @@ public abstract class ServerStatHandlerMixin {
     @Inject(method = "setStat", at = @At("TAIL"))
     private void onSetStat(PlayerEntity player, Stat<?> stat, int value, CallbackInfo ci) {
         if (player instanceof ServerPlayerEntity serverPlayer) {
-            if(RandoAssistantStats.isCustom(stat)) {
+            if(StatsManager.isCustom(stat)) {
                 sendStats(serverPlayer);
                 Networking.sendClearCachePacket(serverPlayer);
             }
@@ -33,7 +33,7 @@ public abstract class ServerStatHandlerMixin {
 
     @Inject(method = "getStatId", at = @At("RETURN"), cancellable = true)
     private static <T> void onGetStatId(Stat<T> stat, CallbackInfoReturnable<Identifier> cir) {
-        if(RandoAssistantStats.usesIdentifier(stat)) {
+        if(StatsManager.usesIdentifier(stat)) {
             cir.setReturnValue((Identifier) stat.getValue());
         }
     }
@@ -41,12 +41,12 @@ public abstract class ServerStatHandlerMixin {
     @SuppressWarnings("unchecked")
     @Inject(method = "createStat", at = @At("RETURN"), cancellable = true)
     private <T> void onCreateStat(StatType<T> type, String id, CallbackInfoReturnable<Optional<Stat<T>>> cir) {
-        if(type.equals(RandoAssistantStats.LOOTED)) {
-            cir.setReturnValue(Optional.of((Stat<T>) RandoAssistantStats.LOOTED.getOrCreateStat(Identifier.tryParse(id))));
-        } else if (type.equals(RandoAssistantStats.INTERACTED)) {
-            cir.setReturnValue(Optional.of((Stat<T>) RandoAssistantStats.INTERACTED.getOrCreateStat(Identifier.tryParse(id))));
-        } else if (type.equals(RandoAssistantStats.CRAFTED)) {
-            cir.setReturnValue(Optional.of((Stat<T>) RandoAssistantStats.CRAFTED.getOrCreateStat(Identifier.tryParse(id))));
+        if(type.equals(StatsManager.LOOTED)) {
+            cir.setReturnValue(Optional.of((Stat<T>) StatsManager.LOOTED.getOrCreateStat(Identifier.tryParse(id))));
+        } else if (type.equals(StatsManager.INTERACTED)) {
+            cir.setReturnValue(Optional.of((Stat<T>) StatsManager.INTERACTED.getOrCreateStat(Identifier.tryParse(id))));
+        } else if (type.equals(StatsManager.CRAFTED)) {
+            cir.setReturnValue(Optional.of((Stat<T>) StatsManager.CRAFTED.getOrCreateStat(Identifier.tryParse(id))));
         }
     }
 }

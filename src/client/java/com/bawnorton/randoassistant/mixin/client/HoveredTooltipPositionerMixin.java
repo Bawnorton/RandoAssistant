@@ -14,7 +14,7 @@ public abstract class HoveredTooltipPositionerMixin implements HoveredTooltipPos
     private boolean ignorePreventOverflow = false;
 
     @Inject(method = "preventOverflow", at = @At(value = "HEAD"), cancellable = true)
-    private void ignorePreventOverflow(Screen screen, Vector2i pos, int width, int height, CallbackInfo ci) {
+    private void ignorePreventOverflow(int screenWidth, int screenHeight, Vector2i pos, int width, int height, CallbackInfo ci) {
         if(ignorePreventOverflow) ci.cancel();
     }
 

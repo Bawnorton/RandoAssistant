@@ -9,7 +9,7 @@ import com.bawnorton.randoassistant.util.RecipeType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
@@ -36,7 +36,7 @@ public class RenderingHelper {
     private static final Identifier STAR = new Identifier(RandoAssistant.MOD_ID, "textures/gui/item_stars.png");
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
-    public static void renderIdentifier(Identifier id, MatrixStack matrices, double scale, int x, int y, boolean preferEntity) {
+    public static void renderIdentifier(Identifier id, DrawContext context, double scale, int x, int y, boolean preferEntity) {
         IdentifierType type = IdentifierType.fromId(id);
         if(type.isItemAndEntity()) {
             type = preferEntity ? IdentifierType.ENTITY : IdentifierType.ITEM;
@@ -49,9 +49,9 @@ public class RenderingHelper {
                     return;
                 }
                 try {
-                    client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Registries.ITEM.get(id)), x, y);
+                    context.drawItem(new ItemStack(Registries.ITEM.get(id)), x, y);
                 } catch (IllegalStateException e) {
-                    client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Items.BARRIER), x, y);
+                    context.drawItem(new ItemStack(Items.BARRIER), x, y);
                 }
             }
             case BLOCK -> {
@@ -62,25 +62,25 @@ public class RenderingHelper {
                         block instanceof FrostedIceBlock ||
                         block instanceof AbstractFireBlock ||
                         block instanceof BambooSaplingBlock) {
-                    drawBlock(matrices, block, x, y);
+                    drawBlock(context, block, x, y);
                     return;
                 }
                 if (block instanceof AbstractPlantPartBlock abstractPlantBlock) {
                     AbstractPlantStemBlock stemBlock = ((AbstractPlantPartBlockInvoker) abstractPlantBlock).getStem();
                     ItemStack icon = new ItemStack(stemBlock.getDefaultState().getBlock().asItem());
-                    client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
+                    context.drawItem(icon, x, y);
                     return;
                 }
                 if (block instanceof TallSeagrassBlock) {
                     ItemStack icon = new ItemStack(Items.SEAGRASS);
-                    client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
+                    context.drawItem(icon, x, y);
                     return;
                 }
                 ItemStack icon = new ItemStack(block.asItem());
                 if (icon.getItem() == Items.AIR) icon = new ItemStack(Items.BARRIER);
-                client.getItemRenderer().renderGuiItemIcon(matrices, icon, x, y);
+                context.drawItem(icon, x, y);
             }
-            case ITEM -> client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Registries.ITEM.get(id)), x, y);
+            case ITEM -> context.drawItem(new ItemStack(Registries.ITEM.get(id)), x, y);
             case OTHER -> {
                 String path = id.getPath();
                 if (path.contains("sheep")) {
@@ -92,25 +92,26 @@ public class RenderingHelper {
                         drawEntity(scale, x + 11, y + 12, sheep);
                     }
                 } else if (path.contains("fishing")) {
-                    client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Items.FISHING_ROD), x, y);
+                    context.drawItem(new ItemStack(Items.FISHING_ROD), x, y);
                 } else {
                     RecipeType recipeType = RecipeType.fromName(id.getPath());
                     if(recipeType == null) {
-                        client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Items.CHEST), x, y);
+                        context.drawItem(new ItemStack(Items.CHEST), x, y);
                     } else if (recipeType == RecipeType.CRAFTING) {
-                        client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Items.CRAFTING_TABLE), x, y);
+                        context.drawItem(new ItemStack(Items.CRAFTING_TABLE), x, y);
                     } else if (recipeType == RecipeType.SMELTING) {
-                        client.getItemRenderer().renderGuiItemIcon(matrices, new ItemStack(Items.FURNACE), x, y);
+                        context.drawItem(new ItemStack(Items.FURNACE), x, y);
                     }
                 }
             }
         }
     }
 
-    private static void drawBlock(MatrixStack matrices, Block block, int x, int y) {
+    private static void drawBlock(DrawContext context, Block block, int x, int y) {
         BlockState state = block.getDefaultState();
         DiffuseLighting.disableGuiDepthLighting();
 
+        MatrixStack matrices = context.getMatrices();
         matrices.push();
         matrices.translate(x + 8, y + 6, 100);
         matrices.scale(15, -15, 40);
@@ -204,13 +205,13 @@ public class RenderingHelper {
         DiffuseLighting.enableGuiDepthLighting();
     }
 
-    public static void renderStar(MatrixStack matrices, int x, int y, boolean silkTouch) {
+    public static void renderStar(DrawContext context, int x, int y, boolean silkTouch) {
         if(!RandoAssistantClient.isInstalledOnServer) return;
         float timeOffset = Math.abs(((System.currentTimeMillis() % 2000) / 1000.0f) - 1.0f);
+        MatrixStack matrices = context.getMatrices();
         matrices.push();
         matrices.translate(0, -Easing.ease(0, 1, timeOffset), 300);
-        RenderSystem.setShaderTexture(0, STAR);
-        DrawableHelper.drawTexture(matrices, x, y, silkTouch ? 8 : 0, 0, 8, 8, 16, 16);
+        context.drawTexture(STAR, x, y, silkTouch ? 8 : 0, 0, 8, 8, 16, 16);
         matrices.pop();
     }
 

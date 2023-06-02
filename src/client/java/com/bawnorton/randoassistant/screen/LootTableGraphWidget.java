@@ -9,12 +9,11 @@ import com.bawnorton.randoassistant.util.IdentifierType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import grapher.graph.drawing.Drawing;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
@@ -26,8 +25,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-
-import static net.minecraft.client.gui.DrawableHelper.drawTexture;
 
 public class LootTableGraphWidget {
     private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
@@ -108,57 +105,53 @@ public class LootTableGraphWidget {
         });
     }
 
-    public void render(MatrixStack matrices, int x, int y, double mouseX, double mouseY) {
+    public void render(DrawContext context, int x, int y, double mouseX, double mouseY) {
         this.x = x;
         this.y = y;
-        Set<Tooltip> sideBarTooltips = renderSideBars(matrices, x - 30, y, mouseX, mouseY);
-        renderBackground(matrices, x, y);
+        Set<Tooltip> sideBarTooltips = renderSideBars(context, x - 30, y, mouseX, mouseY);
+        renderBackground(context, x, y);
         if(drawing == null) {
-            renderPlaceholder(matrices, x + WIDTH / 2, y + HEIGHT / 2);
+            renderPlaceholder(context, x + WIDTH / 2, y + HEIGHT / 2);
             return;
         }
+        MatrixStack matrices = context.getMatrices();
         matrices.push();
         matrices.scale((float) scale, (float) scale, 1);
-        DrawableHelper.enableScissor(x + 8, y + 8, x + WIDTH - 8, y + HEIGHT - 8);
+        context.enableScissor(x + 8, y + 8, x + WIDTH - 8, y + HEIGHT - 8);
         renderArrows(matrices, x + xOffset, y + yOffset);
-        Set<Tooltip> nodeTooltips = renderNodes(matrices, x + xOffset, y + yOffset, mouseX / scale, mouseY / scale);
-        DrawableHelper.disableScissor();
-        renderTooltips(nodeTooltips, matrices, mouseX / scale, mouseY / scale);
+        Set<Tooltip> nodeTooltips = renderNodes(context, x + xOffset, y + yOffset, mouseX / scale, mouseY / scale);
+        context.disableScissor();
+        renderTooltips(nodeTooltips, context, mouseX / scale, mouseY / scale);
         matrices.pop();
-        renderTooltips(sideBarTooltips, matrices, mouseX, mouseY);
+        renderTooltips(sideBarTooltips, context, mouseX, mouseY);
     }
 
-    private void renderTooltips(Iterable<Tooltip> tooltips, MatrixStack matrices, double mouseX, double mouseY) {
+    private void renderTooltips(Iterable<Tooltip> tooltips, DrawContext context, double mouseX, double mouseY) {
         tooltips.forEach(tooltip -> {
             Screen screen = MinecraftClient.getInstance().currentScreen;
             assert screen != null;
+            MatrixStack matrices = context.getMatrices();
             matrices.push();
             matrices.translate(0, 0, -200);
             ((HoveredTooltipPositionerExtender) HoveredTooltipPositioner.INSTANCE).setIgnorePreventOverflow(true);
-            screen.renderOrderedTooltip(matrices, tooltip.getLines(MinecraftClient.getInstance()), (int) mouseX, (int) mouseY);
+            context.drawTooltip(MinecraftClient.getInstance().textRenderer, tooltip.getLines(MinecraftClient.getInstance()), HoveredTooltipPositioner.INSTANCE, (int) mouseX, (int) mouseY);
             ((HoveredTooltipPositionerExtender) HoveredTooltipPositioner.INSTANCE).setIgnorePreventOverflow(false);
             matrices.pop();
         });
     }
 
-    private Set<Tooltip> renderSideBars(MatrixStack matrices, int x, int y, double mouseX, double mouseY) {
+    private Set<Tooltip> renderSideBars(DrawContext context, int x, int y, double mouseX, double mouseY) {
         boolean hoverTarget = mouseX >= x && mouseX <= x + 26 && mouseY >= y && mouseY <= y + 26;
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
-        drawTexture(matrices, x, y, 52, 154, 26, 26);
-        RenderingHelper.renderIdentifier(target, matrices, 1, x + 5, y + 5, false);
+        context.drawTexture(WIDGETS_TEXTURE, x, y, 52, 154, 26, 26);
+        RenderingHelper.renderIdentifier(target, context, 1, x + 5, y + 5, false);
         y += 30;
         boolean hoverCompass = mouseX >= x && mouseX <= x + 26 && mouseY >= y && mouseY <= y + 26;
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
-        drawTexture(matrices, x, y, 52, 154 - (hoverCompass ? 26 : 0), 26, 26);
-        RenderingHelper.renderIdentifier(Registries.ITEM.getId(Items.COMPASS), matrices, 1, x + 5, y + 5, false);
+        context.drawTexture(WIDGETS_TEXTURE, x, y, 52, 154 - (hoverCompass ? 26 : 0), 26, 26);
+        RenderingHelper.renderIdentifier(Registries.ITEM.getId(Items.COMPASS), context, 1, x + 5, y + 5, false);
         x += WIDTH + 34;
         y -= 26;
         boolean hoverClose = mouseX >= x && mouseX <= x + 18 && mouseY >= y && mouseY <= y + 18;
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderTexture(0, LootBookWidget.TEXTURE);
-        drawTexture(matrices, x, y, 170, 41 - (hoverClose ? - 18 : 0), 18, 18);
+        context.drawTexture(LootBookWidget.TEXTURE, x, y, 170, 41 - (hoverClose ? - 18 : 0), 18, 18);
 
         Set<Tooltip> tooltips = new HashSet<>();
         if(hoverTarget) {
@@ -176,21 +169,20 @@ public class LootTableGraphWidget {
         return tooltips;
     }
 
-    private void renderBackground(MatrixStack matrices, int x, int y) {
-        RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
-        drawTexture(matrices, x, y, 1, 1, WIDTH, HEIGHT, 512, 512);
+    private void renderBackground(DrawContext context, int x, int y) {
+        context.drawTexture(BACKGROUND_TEXTURE, x, y, 1, 1, WIDTH, HEIGHT, 512, 512);
     }
 
-    private void renderPlaceholder(MatrixStack matrices, int x, int y) {
+    private void renderPlaceholder(DrawContext context, int x, int y) {
         Text text = Text.of("Loading...");
         int textWidth = MinecraftClient.getInstance().textRenderer.getWidth(text);
         int textHeight = MinecraftClient.getInstance().textRenderer.fontHeight;
         int textX = x - textWidth / 2;
         int textY = y - textHeight / 2;
-        MinecraftClient.getInstance().textRenderer.draw(matrices, text, textX, textY, 0xFFFFFFFF);
+        context.drawText(MinecraftClient.getInstance().textRenderer, text, textX, textY, 0xFFFFFFFF, false);
     }
 
-    private Set<Tooltip> renderNodes(MatrixStack matrices, double x, double y, double mouseX, double mouseY) {
+    private Set<Tooltip> renderNodes(DrawContext context, double x, double y, double mouseX, double mouseY) {
         Set<Tooltip> tooltips = new HashSet<>();
         vertexLocations.forEach((identifier, location) -> {
             int posX = (int) (location.getX() / ABSOLUTE_SCALE + x) - 5;
@@ -200,8 +192,6 @@ public class LootTableGraphWidget {
             if(hovered && doesRender) {
                 tooltips.add(Tooltip.of(Text.of(IdentifierType.getName(identifier, !identifier.equals(target)))));
             }
-            RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-            RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
             int u = 0;
             int v = 154;
             if (identifier.equals(target)) {
@@ -210,9 +200,9 @@ public class LootTableGraphWidget {
             } else if (selected != null && selected.contains(identifier)) {
                 RenderSystem.setShaderColor(1, 0.1f, 0.1f, 1);
             }
-            drawTexture(matrices, posX, posY, u, v, 26, 26);
+            context.drawTexture(WIDGETS_TEXTURE, posX, posY, u, v, 26, 26);
             RenderSystem.setShaderColor(1, 1, 1, 1);
-            RenderingHelper.renderIdentifier(identifier, matrices, scale, posX + 5, posY + 5, !identifier.equals(target));
+            RenderingHelper.renderIdentifier(identifier, context, scale, posX + 5, posY + 5, !identifier.equals(target));
         });
         return tooltips;
     }

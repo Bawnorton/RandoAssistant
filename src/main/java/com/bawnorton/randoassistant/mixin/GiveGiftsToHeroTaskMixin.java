@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.stat.RandoAssistantStats;
+import com.bawnorton.randoassistant.stat.StatsManager;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.brain.task.GiveGiftsToHeroTask;
 import net.minecraft.entity.passive.VillagerEntity;
@@ -25,7 +25,7 @@ public abstract class GiveGiftsToHeroTaskMixin {
         Identifier id = GIFTS.get(villager.getVillagerData().getProfession());
         if(id == null) return;
         if(recipient instanceof PlayerEntity player) {
-            player.incrementStat(RandoAssistantStats.LOOTED.getOrCreateStat(id));
+            player.incrementStat(StatsManager.LOOTED.getOrCreateStat(id));
         }
     }
 }

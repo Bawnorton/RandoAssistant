@@ -1,6 +1,6 @@
 package com.bawnorton.randoassistant.mixin;
 
-import com.bawnorton.randoassistant.stat.RandoAssistantStats;
+import com.bawnorton.randoassistant.stat.StatsManager;
 import com.bawnorton.randoassistant.util.LootAdvancement;
 import net.minecraft.entity.passive.CatEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -20,7 +20,7 @@ public abstract class CatEntitySleepWithOwnerGoalMixin {
     @Inject(method = "dropMorningGifts", at = @At("HEAD"))
     private void onDropMorningGifts(CallbackInfo ci) {
         if(owner != null) {
-            owner.incrementStat(RandoAssistantStats.LOOTED.getOrCreateStat(LootTables.CAT_MORNING_GIFT_GAMEPLAY));
+            owner.incrementStat(StatsManager.LOOTED.getOrCreateStat(LootTables.CAT_MORNING_GIFT_GAMEPLAY));
             if(owner instanceof ServerPlayerEntity serverPlayer) {
                 LootAdvancement.CAT_MORNING_GIFT.grant(serverPlayer);
             }
