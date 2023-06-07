@@ -51,4 +51,9 @@ public abstract class HandledScreenMixin extends ScreenMixin {
     protected void onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> cir) {
         // dummy method to override
     }
+
+    @Inject(method = "close", at = @At("HEAD"))
+    protected void onClose(CallbackInfo ci) {
+        // dummy method to override
+    }
 }

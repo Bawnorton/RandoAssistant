@@ -109,20 +109,9 @@ public class LootBookSettingsWidget {
     }
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        searchDepth.setFocused(false);
+        highlightRadius.setFocused(false);
         if (backButton.mouseClicked(mouseX, mouseY, button)) {
-            Config.getInstance().unbrokenBlockIcon = starIcons.isToggled();
-            Config.getInstance().silktouchUnbrokenBlockIcon = silkTouchStarIcons.isToggled();
-            Config.getInstance().enableOverride = enableOverride.isToggled();
-            if(randomizeColours.isToggled() != Config.getInstance().randomizeColours) {
-                client.worldRenderer.reload();
-                RandoAssistantClient.seed++;
-            }
-            Config.getInstance().randomizeColours = randomizeColours.isToggled();
-            Config.getInstance().searchDepth = Integer.parseInt(searchDepth.getText());
-            Config.getInstance().highlightRadius = Integer.parseInt(highlightRadius.getText());
-            TrackableCrawler.clearCache();
-            Tracker.getInstance().clearCache();
-            ConfigManager.saveConfig();
             LootBookWidget.getInstance().closeSettings();
             return true;
         }
@@ -149,9 +138,14 @@ public class LootBookSettingsWidget {
             return true;
         }
         if(searchDepth.mouseClicked(mouseX, mouseY, button)) {
+            searchDepth.setFocused(true);
             return true;
         }
-        return highlightRadius.mouseClicked(mouseX, mouseY, button);
+        if(highlightRadius.mouseClicked(mouseX, mouseY, button)) {
+            highlightRadius.setFocused(true);
+            return true;
+        }
+        return false;
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
@@ -166,6 +160,22 @@ public class LootBookSettingsWidget {
             return true;
         }
         return highlightRadius.charTyped(chr, modifiers);
+    }
+
+    public void onClose() {
+        Config.getInstance().unbrokenBlockIcon = starIcons.isToggled();
+        Config.getInstance().silktouchUnbrokenBlockIcon = silkTouchStarIcons.isToggled();
+        Config.getInstance().enableOverride = enableOverride.isToggled();
+        if(randomizeColours.isToggled() != Config.getInstance().randomizeColours) {
+            client.worldRenderer.reload();
+            RandoAssistantClient.seed++;
+        }
+        Config.getInstance().randomizeColours = randomizeColours.isToggled();
+        Config.getInstance().searchDepth = Integer.parseInt(searchDepth.getText());
+        Config.getInstance().highlightRadius = Integer.parseInt(highlightRadius.getText());
+        TrackableCrawler.clearCache();
+        Tracker.getInstance().clearCache();
+        ConfigManager.saveConfig();
     }
 
     public void moveWidgets(boolean up) {

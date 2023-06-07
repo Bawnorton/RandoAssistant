@@ -187,6 +187,12 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
     }
 
     @Override
+    protected void onClose(CallbackInfo ci) {
+        LootBookWidget.getInstance().closeSettings();
+        LootBookWidget.getInstance().closeStats();
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         return LootBookWidget.getInstance().mouseScrolled(mouseX, mouseY, amount);
     }

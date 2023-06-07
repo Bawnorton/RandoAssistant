@@ -116,6 +116,7 @@ public class LootBookWidget implements Drawable, Element, Selectable {
 
     public void closeSettings() {
         this.settingsOpen = false;
+        settingsWidget.onClose();
     }
 
     public void closeStats() {
@@ -130,9 +131,6 @@ public class LootBookWidget implements Drawable, Element, Selectable {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         if(!open) return;
-        MatrixStack matrices = context.getMatrices();
-        matrices.push();
-        matrices.translate(0, 0, 100);
         if(!RandoAssistantClient.isInstalledOnServer) {
             if(isOpen()) this.toggleOpen();
         }
@@ -154,7 +152,6 @@ public class LootBookWidget implements Drawable, Element, Selectable {
             this.settingsButton.render(context, mouseX, mouseY, delta);
             this.statsButton.render(context, mouseX, mouseY, delta);
         }
-        matrices.pop();
     }
 
     public int findLeftEdge(int parentWidth, int backgroundWidth) {
@@ -190,13 +187,18 @@ public class LootBookWidget implements Drawable, Element, Selectable {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if(!RandoAssistantClient.isInstalledOnServer) return false;
         if(!this.isOpen() || client.player.isSpectator()) return false;
+        searchField.setFocused(false);
         if(this.settingsOpen) {
             return this.settingsWidget.mouseClicked(mouseX, mouseY, button);
         }
         if(this.statsOpen) {
             return this.statsWidget.mouseClicked(mouseX, mouseY, button);
         }
-        if (this.searchField.mouseClicked(mouseX, mouseY, button) || this.lootTableArea.mouseClicked(mouseX, mouseY, button)) {
+        if (this.searchField.mouseClicked(mouseX, mouseY, button)) {
+            searchField.setFocused(true);
+            return true;
+        }
+        if(this.lootTableArea.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
         if(this.settingsButton.mouseClicked(mouseX, mouseY, button)) {
