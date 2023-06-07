@@ -16,7 +16,6 @@ public class LootBookStatsWidget {
 
     private final ToggleButtonWidget backButton;
 
-
     private int totalBlocks;
     private int totalEntities;
     private int totalChests;

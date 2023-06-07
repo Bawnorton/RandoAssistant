@@ -7,6 +7,7 @@
     "AxeItemMixin",
     "BlockMixin",
     "CatEntitySleepWithOwnerGoalMixin",
+    "CraftingScreenHandlerMixin",
     "FishingBobberEntityMixin",
     "GiveGiftsToHeroTaskMixin",
     "HoneycombItemMixin",
@@ -17,7 +18,6 @@
     "PiglinBrainMixin",
     "PlayerAdvancementTrackerMixin",
     "RecipeUnlockerMixin",
-    "ServerPlayerEntityMixin",
     "ServerStatHandlerMixin",
     "StatMixin"
   ],

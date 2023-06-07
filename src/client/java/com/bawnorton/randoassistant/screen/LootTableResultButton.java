@@ -135,7 +135,7 @@ public class LootTableResultButton extends ClickableWidget {
     public boolean renderTooltip(DrawContext context, int mouseX, int mouseY) {
         if (isHovered() && client.currentScreen != null) {
             Text text = Text.of((source == null ? "Loading..." : IdentifierType.getName(source, true)) + " -> " + IdentifierType.getName(target, false));
-            context.drawText(client.textRenderer, text, mouseX, mouseY, 0x000000, false);
+            context.drawTooltip(client.textRenderer, text, mouseX, mouseY);
             return true;
         }
         return false;

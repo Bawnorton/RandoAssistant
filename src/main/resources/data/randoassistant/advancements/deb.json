@@ -1,10 +1,10 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:bow"
+      "item": "minecraft:red_bed"
     },
-    "title": "That's Not a Bow",
-    "description": "Congrats you forgot how to make a bow.",
+    "title": "That's Not a Bed",
+    "description": "Congrats you forgot how to make a bed.",
     "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,

@@ -23,7 +23,8 @@ public enum LootAdvancement {
     SHAME(new Identifier(RandoAssistant.MOD_ID, "shame")),
     MONSTER(new Identifier(RandoAssistant.MOD_ID, "monster")),
     ORPHANED_POLAR_BEAR(new Identifier(RandoAssistant.MOD_ID, "orphaned_polar_bear")),
-    WOB(new Identifier(RandoAssistant.MOD_ID, "wob"));
+    WOB(new Identifier(RandoAssistant.MOD_ID, "wob")),
+    DEB(new Identifier(RandoAssistant.MOD_ID, "deb"));
 
     private final Identifier id;
 
