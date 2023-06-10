@@ -116,7 +116,9 @@ public class LootBookWidget implements Drawable, Element, Selectable {
 
     public void closeSettings() {
         this.settingsOpen = false;
-        settingsWidget.onClose();
+        if(settingsWidget != null) {
+            settingsWidget.onClose();
+        }
     }
 
     public void closeStats() {
