@@ -232,6 +232,7 @@ public class Tracker {
     }
 
     public void testAll() {
+        if(Config.getInstance().enableOverride) return; // Don't test if override is enabled
         int totalCount = getTotalCount();
         if(totalCount < 1000) return; // Shouldn't test if TRACKABLE_LOOTED is not fully loaded
         int discoveredCount = getDiscoveredCount();
