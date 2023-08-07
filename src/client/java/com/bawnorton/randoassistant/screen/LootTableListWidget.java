@@ -9,6 +9,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.registry.Registries;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
 
 // list of loot table buttons
 public class LootTableListWidget {
-    private final List<LootTableResultButton> buttons = new ArrayList<>();
+    private final List<LootTableResultButton> buttons = Collections.synchronizedList(new ArrayList<>());
     private int pageCount;
     private int currentPage;
 
@@ -55,13 +56,20 @@ public class LootTableListWidget {
                 case ENTITY -> Registries.ENTITY_TYPE.get(identifier).getName().getString();
                 case OTHER -> identifier.toString();
             }).toLowerCase().replace("^[a-z]", "");
-            if (name.contains(searchText) || identifier.getPath().contains(searchText)) {
-                LootTableResultButton button = new LootTableResultButton(identifier);
+            if(name.contains(searchText) || identifier.getPath().contains(searchText)) {
+                LootTableResultButton button = new LootTableResultButton(identifier, (resultButton, throwable) -> {
+                    if(resultButton.hasNoConnections()) {
+                        buttons.remove(resultButton);
+                        updatePageCount(false);
+                    }
+                });
                 button.setX(this.x);
                 buttons.add(button);
             }
         });
-        buttons.sort(Comparator.comparing(LootTableResultButton::getTarget));
+        try {
+            buttons.sort(Comparator.comparing(LootTableResultButton::getTarget));
+        } catch (NullPointerException ignored) {}
         updatePageCount(resetPage);
     }
 
@@ -80,13 +88,13 @@ public class LootTableListWidget {
 
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         int y = this.y + (LootTableResultButton.isGraphOpen() ? HEIGHT / 2 : 0);
-        if (this.pageCount > 1) {
+        if(this.pageCount > 1) {
             String pageText = String.format("%d/%d", this.currentPage + 1, this.pageCount);
             int pageTextWidth = this.client.textRenderer.getWidth(pageText);
             context.drawText(client.textRenderer, pageText, (int) (this.x - pageTextWidth / 2f + 66), (int) (y + 109f), -1, false);
         }
 
-        for (int i = 0; i < 4; i++) {
+        for(int i = 0; i < 4; i++) {
             if (i + 4 * currentPage >= buttons.size()) break;
             LootTableResultButton button = buttons.get(i + 4 * currentPage);
             button.setY(y + i * 25);
@@ -99,8 +107,8 @@ public class LootTableListWidget {
 
     public void renderLastClickedGraph(DrawContext context, int mouseX, int mouseY) {
         LootTableResultButton lastClicked = LootTableResultButton.getLastClicked();
-        if (lastClicked != null && lastClicked.graphOpen) {
-            if (lastClicked.isDirty()) {
+        if(lastClicked != null && lastClicked.graphOpen) {
+            if(lastClicked.isDirty()) {
                 lastClicked.refresh();
             }
             int invX = LootBookWidget.getInstance().getInvX();
@@ -114,37 +122,37 @@ public class LootTableListWidget {
     }
 
     public void renderTooltip(DrawContext context, int mouseX, int mouseY) {
-        for (int i = 0; i < 4; i++) {
+        for(int i = 0; i < 4; i++) {
             if (i + 4 * currentPage >= buttons.size()) break;
             LootTableResultButton button = buttons.get(i + 4 * currentPage);
-            if (button.renderTooltip(context, mouseX, mouseY)) {
+            if(button.renderTooltip(context, mouseX, mouseY)) {
                 return;
             }
         }
     }
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.nextPageButton.mouseClicked(mouseX, mouseY, button)) {
+        if(this.nextPageButton.mouseClicked(mouseX, mouseY, button)) {
             this.currentPage++;
             hideShowPageButtons();
             return true;
         }
-        if (this.previousPageButton.mouseClicked(mouseX, mouseY, button)) {
+        if(this.previousPageButton.mouseClicked(mouseX, mouseY, button)) {
             this.currentPage--;
             hideShowPageButtons();
             return true;
         }
-        for (int i = 0; i < 4; i++) {
+        for(int i = 0; i < 4; i++) {
             if (i + 4 * currentPage >= buttons.size()) break;
             LootTableResultButton lootTableResultButton = buttons.get(i + 4 * currentPage);
-            if (lootTableResultButton.mouseClicked(mouseX, mouseY, button)) {
+            if(lootTableResultButton.mouseClicked(mouseX, mouseY, button)) {
                 return true;
             }
         }
         LootTableResultButton lastClicked = LootTableResultButton.getLastClicked();
-        if (lastClicked != null) {
+        if(lastClicked != null) {
             LootTableGraphWidget graphWidget = lastClicked.graphWidget;
-            if (graphWidget != null) {
+            if(graphWidget != null) {
                 return graphWidget.mouseClicked(mouseX, mouseY, button);
             }
         }
@@ -152,7 +160,7 @@ public class LootTableListWidget {
     }
 
     public void movePageButtons(boolean up) {
-        if (up) {
+        if(up) {
             this.nextPageButton.setY(this.nextPageButton.getY() - HEIGHT / 2);
             this.previousPageButton.setY(this.previousPageButton.getY() - HEIGHT / 2);
         } else {

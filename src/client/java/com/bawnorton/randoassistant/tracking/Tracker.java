@@ -39,14 +39,16 @@ public class Tracker {
     private final TrackableMap<Identifier> TRACKABLE_LOOTED;
     private final Map<Recipe<?>, Item> TRACKABLE_CRAFTED;
 
-    private final Map<Identifier, Set<Trackable<Identifier>>> TRACKED;
+    private final Map<Identifier, Set<Trackable<Identifier>>> TRACKED_SOURCES;
+    private final Map<Identifier, Set<Trackable<Identifier>>> TRACKED_TARGETS;
     private final Map<Identifier, Trackable<Identifier>> ID_TO_TRACKABLE;
 
     public Tracker() {
         TRACKABLE_INTERACTED = new TrackableMap<>();
         TRACKABLE_LOOTED = new TrackableMap<>();
         TRACKABLE_CRAFTED = Maps.newHashMap();
-        TRACKED = Maps.newHashMap();
+        TRACKED_SOURCES = Maps.newHashMap();
+        TRACKED_TARGETS = Maps.newHashMap();
         ID_TO_TRACKABLE = Maps.newHashMap();
     }
 
@@ -61,21 +63,27 @@ public class Tracker {
         Stat<Identifier> stat = StatsManager.LOOTED.getOrCreateStat(lootTable.getLootTableId());
         Trackable<Identifier> trackable = TRACKABLE_LOOTED.getOrCreate(stat, lootTable.getSourceId());
         ID_TO_TRACKABLE.put(lootTable.getSourceId(), trackable);
+        Set<Trackable<Identifier>> targets = TRACKED_TARGETS.getOrDefault(lootTable.getSourceId(), Sets.newHashSet());
         for(Item target : lootTable.getItems()) {
             trackable.addOutput(Registries.ITEM.getId(target), lootTable.getCondition());
-            Set<Trackable<Identifier>> tracked = TRACKED.getOrDefault(Registries.ITEM.getId(target), Sets.newHashSet());
-            tracked.add(trackable);
-            TRACKED.put(Registries.ITEM.getId(target), tracked);
+            Set<Trackable<Identifier>> sources = TRACKED_SOURCES.getOrDefault(Registries.ITEM.getId(target), Sets.newHashSet());
+            sources.add(trackable);
+            TRACKED_SOURCES.put(Registries.ITEM.getId(target), sources);
+            targets.add(trackable);
         }
+        TRACKED_TARGETS.put(lootTable.getSourceId(), targets);
     }
     
     public void track(SerializeableInteraction interaction) {
         Stat<Identifier> stat = StatsManager.INTERACTED.getOrCreateStat(Registries.BLOCK.getId(interaction.getInput()));
         Trackable<Identifier> trackable = TRACKABLE_INTERACTED.getOrCreate(stat, Registries.BLOCK.getId(interaction.getInput()));
         trackable.addOutput(Registries.BLOCK.getId(interaction.getOutput()), LootCondition.NONE);
-        Set<Trackable<Identifier>> tracked = TRACKED.getOrDefault(Registries.BLOCK.getId(interaction.getOutput()), Sets.newHashSet());
-        tracked.add(trackable);
-        TRACKED.put(Registries.BLOCK.getId(interaction.getOutput()), tracked);
+        Set<Trackable<Identifier>> sources = TRACKED_SOURCES.getOrDefault(Registries.BLOCK.getId(interaction.getOutput()), Sets.newHashSet());
+        Set<Trackable<Identifier>> targets = TRACKED_TARGETS.getOrDefault(Registries.BLOCK.getId(interaction.getInput()), Sets.newHashSet());
+        sources.add(trackable);
+        targets.add(trackable);
+        TRACKED_SOURCES.put(Registries.BLOCK.getId(interaction.getOutput()), sources);
+        TRACKED_TARGETS.put(Registries.BLOCK.getId(interaction.getInput()), targets);
     }
 
     public void track(SerializeableCrafting crafting) {
@@ -85,8 +93,13 @@ public class Tracker {
     }
 
     @Nullable
-    public Set<Trackable<Identifier>> getSources(Identifier id) {
-        return TRACKED.get(id);
+    public Set<Trackable<Identifier>> getSourgoces(Identifier id) {
+        return TRACKED_SOURCES.get(id);
+    }
+
+    @Nullable
+    public Set<Trackable<Identifier>> getTargets(Identifier id) {
+        return TRACKED_TARGETS.get(id);
     }
 
     public Set<Identifier> getEnabled() {
@@ -148,7 +161,8 @@ public class Tracker {
         TRACKABLE_INTERACTED.clear();
         TRACKABLE_CRAFTED.clear();
         TRACKABLE_LOOTED.clear();
-        TRACKED.clear();
+        TRACKED_SOURCES.clear();
+        TRACKED_TARGETS.clear();
         clearCache();
     }
 
@@ -158,9 +172,14 @@ public class Tracker {
     }
 
     public void debug(Item item) {
-        Set<Trackable<Identifier>> tracked = TRACKED.getOrDefault(Registries.ITEM.getId(item), Sets.newHashSet());
-        RandoAssistant.LOGGER.info("Tracking " + Registries.ITEM.getId(item));
-        for(Trackable<Identifier> trackable : tracked) {
+        Set<Trackable<Identifier>> sources = TRACKED_SOURCES.getOrDefault(Registries.ITEM.getId(item), Sets.newHashSet());
+        RandoAssistant.LOGGER.info("Sources of " + Registries.ITEM.getId(item));
+        for(Trackable<Identifier> trackable : sources) {
+            RandoAssistant.LOGGER.info(trackable.getIdentifier() + " -> " + trackable.getOutput() + " (enabled: " + trackable.isEnabled() + ")");
+        }
+        Set<Trackable<Identifier>> targets = TRACKED_TARGETS.getOrDefault(Registries.ITEM.getId(item), Sets.newHashSet());
+        RandoAssistant.LOGGER.info("Targets of " + Registries.ITEM.getId(item));
+        for(Trackable<Identifier> trackable : targets) {
             RandoAssistant.LOGGER.info(trackable.getIdentifier() + " -> " + trackable.getOutput() + " (enabled: " + trackable.isEnabled() + ")");
         }
     }

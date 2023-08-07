@@ -272,16 +272,20 @@ public class LootTableGraphWidget {
             centreOnTarget();
             return true;
         } else if(mouseX >= x + WIDTH && mouseX <= x + WIDTH + 26 && mouseY >= y && mouseY <= y + 26) {
-            LootTableResultButton.getLastClicked().closeGraph();
-            LootBookWidget lootBook = LootBookWidget.getInstance();
-            lootBook.moveWidgets(true);
-            lootBook.getScreen().y -= HEIGHT / 2;
-            TexturedButtonWidget lootButton = ((InventoryScreenExtender) lootBook.getScreen()).getLootBookButton();
-            TexturedButtonWidget recipeButton = ((InventoryScreenExtender) lootBook.getScreen()).getRecipeBookButton();
-            lootButton.setY(lootButton.getY() - HEIGHT / 2);
-            recipeButton.setY(recipeButton.getY() - HEIGHT / 2);
+            close();
             return true;
         }
         return false;
+    }
+
+    public void close() {
+        LootTableResultButton.getLastClicked().closeGraph();
+        LootBookWidget lootBook = LootBookWidget.getInstance();
+        lootBook.moveWidgets(true);
+        lootBook.getScreen().y -= HEIGHT / 2;
+        TexturedButtonWidget lootButton = ((InventoryScreenExtender) lootBook.getScreen()).getLootBookButton();
+        TexturedButtonWidget recipeButton = ((InventoryScreenExtender) lootBook.getScreen()).getRecipeBookButton();
+        lootButton.setY(lootButton.getY() - HEIGHT / 2);
+        recipeButton.setY(recipeButton.getY() - HEIGHT / 2);
     }
 }

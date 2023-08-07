@@ -25,6 +25,9 @@ public class ConfigManager {
         if (config.randomizeColours == null) config.randomizeColours = false;
         if (config.searchDepth == null) config.searchDepth = 6;
         if (config.highlightRadius == null) config.highlightRadius = 5;
+        if (config.invertSearch == null) config.invertSearch = false;
+        if (config.enableCrafting == null) config.enableCrafting = true;
+        if (config.enableInteractions == null) config.enableInteractions = true;
 
         Config.update(config);
         save();

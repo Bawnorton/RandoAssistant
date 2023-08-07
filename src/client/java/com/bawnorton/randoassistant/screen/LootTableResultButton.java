@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.screen;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.render.RenderingHelper;
 import com.bawnorton.randoassistant.tracking.graph.GraphHelper;
 import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
@@ -20,10 +21,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.function.BiConsumer;
 
 public class LootTableResultButton extends ClickableWidget {
     private static final Identifier ARROW_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/arrow.png");
@@ -33,8 +32,10 @@ public class LootTableResultButton extends ClickableWidget {
     private static final int width = 125;
     private static final int height = 25;
 
+    private final BiConsumer<LootTableResultButton, Throwable> callback;
     private final MinecraftClient client;
-    private final Identifier target;
+
+    private Identifier target;
     private TrackingGraph graph;
     private Identifier source;
     private int distance;
@@ -42,16 +43,24 @@ public class LootTableResultButton extends ClickableWidget {
     public LootTableGraphWidget graphWidget;
     public boolean graphOpen;
 
-    public LootTableResultButton(Identifier target) {
+    public LootTableResultButton(Identifier target, BiConsumer<LootTableResultButton, Throwable> callback) {
         super(0, 0, width, height, ScreenTexts.EMPTY);
         client = MinecraftClient.getInstance();
         this.target = target;
-        EXECUTOR_SERVICE.submit(() -> {
-            this.graph = TrackableCrawler.crawl(target);
-            Pair<Identifier, Integer> bestSource = GraphHelper.getBestSource(graph, graph.getVertex(target));
-            this.source = bestSource.a();
-            this.distance = bestSource.b();
-        });
+        this.callback = callback;
+        CompletableFuture.runAsync(() -> {
+            this.graph = Config.getInstance().invertSearch ? TrackableCrawler.crawlDown(target) : TrackableCrawler.crawlUp(target);
+            if(Config.getInstance().invertSearch) {
+                Pair<Identifier, Integer> furthestTarget = GraphHelper.getFurthestTarget(graph, graph.getVertex(target));
+                this.source = this.target;
+                this.target = furthestTarget.a();
+                this.distance = furthestTarget.b();
+            } else {
+                Pair<Identifier, Integer> bestSource = GraphHelper.getBestSource(graph, graph.getVertex(target));
+                this.source = bestSource.a();
+                this.distance = bestSource.b();
+            }
+        }, EXECUTOR_SERVICE).thenApply(a -> this).whenComplete(callback);
     }
 
     public static LootTableResultButton getLastClicked() {
@@ -96,11 +105,21 @@ public class LootTableResultButton extends ClickableWidget {
     }
 
     public void refresh() {
-        EXECUTOR_SERVICE.submit(() -> {
-            this.graph = TrackableCrawler.crawl(target);
+        CompletableFuture.runAsync(() -> {
+            this.graph = Config.getInstance().invertSearch ? TrackableCrawler.crawlDown(target) : TrackableCrawler.crawlUp(target);
+            if(Config.getInstance().invertSearch) {
+                Pair<Identifier, Integer> furthestTarget = GraphHelper.getFurthestTarget(graph, graph.getVertex(target));
+                this.source = this.target;
+                this.target = furthestTarget.a();
+                this.distance = furthestTarget.b();
+            } else {
+                Pair<Identifier, Integer> bestSource = GraphHelper.getBestSource(graph, graph.getVertex(target));
+                this.source = bestSource.a();
+                this.distance = bestSource.b();
+            }
             graphWidget.setGraph(graph);
-            this.graphWidget.refresh();
-        });
+            graphWidget.refresh();
+        }, EXECUTOR_SERVICE).thenApply(a -> this).whenComplete(callback);
     }
 
     @Override
@@ -160,6 +179,10 @@ public class LootTableResultButton extends ClickableWidget {
     @Override
     public int getHeight() {
         return height;
+    }
+
+    public boolean hasNoConnections() {
+        return distance == 0;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.bawnorton.randoassistant.tracking.graph;
 
 import com.bawnorton.randoassistant.RandoAssistant;
+import com.bawnorton.randoassistant.config.Config;
 import grapher.graph.drawing.Drawing;
 import grapher.graph.layout.GraphLayoutProperties;
 import grapher.graph.layout.LayoutAlgorithms;
@@ -34,7 +35,7 @@ public class GraphDrawer {
             layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTER_HIERARCHY_SPACING, heirarchyGap);
             layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTER_RANK_CELL_SPACING, levelGap);
             layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.INTRA_CELL_SPACING, nodeGap);
-            layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.ORIENTATION, SwingConstants.WEST);
+            layoutProperties.setProperty(PropertyEnums.HierarchicalProperties.ORIENTATION, Config.getInstance().invertSearch ? SwingConstants.EAST : SwingConstants.WEST);
 
             Set<TrackingGraph.Vertex> vertices = Collections.synchronizedSet(graph.vertexSet());
             Set<TrackingGraph.Edge> edges = Collections.synchronizedSet(graph.edgeSet());
