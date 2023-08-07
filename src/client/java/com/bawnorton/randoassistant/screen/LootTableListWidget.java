@@ -9,6 +9,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.registry.Registries;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
 
 // list of loot table buttons
 public class LootTableListWidget {
-    private final List<LootTableResultButton> buttons = new ArrayList<>();
+    private final List<LootTableResultButton> buttons = Collections.synchronizedList(new ArrayList<>());
     private int pageCount;
     private int currentPage;
 
@@ -56,12 +57,19 @@ public class LootTableListWidget {
                 case OTHER -> identifier.toString();
             }).toLowerCase().replace("^[a-z]", "");
             if(name.contains(searchText) || identifier.getPath().contains(searchText)) {
-                LootTableResultButton button = new LootTableResultButton(identifier);
+                LootTableResultButton button = new LootTableResultButton(identifier, (resultButton, throwable) -> {
+                    if(resultButton.hasNoConnections()) {
+                        buttons.remove(resultButton);
+                        updatePageCount(false);
+                    }
+                });
                 button.setX(this.x);
                 buttons.add(button);
             }
         });
-        buttons.sort(Comparator.comparing(LootTableResultButton::getTarget));
+        try {
+            buttons.sort(Comparator.comparing(LootTableResultButton::getTarget));
+        } catch (NullPointerException ignored) {}
         updatePageCount(resetPage);
     }
 

@@ -34,6 +34,17 @@ public class Config {
     @SerializedName("highlight_radius")
     public Integer highlightRadius;
 
+    @Expose
+    @SerializedName("enable_crafting")
+    public Boolean enableCrafting;
+
+    @Expose
+    @SerializedName("enable_interactions")
+    public Boolean enableInteractions;
+
+    @Expose
+    @SerializedName("invert_search")
+    public Boolean invertSearch;
 
     private Config() {
     }

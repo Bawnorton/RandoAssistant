@@ -69,4 +69,19 @@ public class GraphHelper {
         }
         return false;
     }
+
+    public static Pair<Identifier, Integer> getFurthestTarget(TrackingGraph graph, TrackingGraph.Vertex vertex) {
+        Set<TrackingGraph.Vertex> targets = new HashSet<>(graph.vertexSet());
+        int furthestDistance = Integer.MIN_VALUE;
+        TrackingGraph.Vertex furthestTarget = null;
+        for(TrackingGraph.Vertex target : targets) {
+            int distance = graph.distanceBetween(vertex, target);
+            if(distance > furthestDistance) {
+                furthestDistance = distance;
+                furthestTarget = target;
+            }
+        }
+        if(furthestTarget == null) return Pair.of(vertex.getContent(), 0);
+        return Pair.of(furthestTarget.getContent(), furthestDistance);
+    }
 }

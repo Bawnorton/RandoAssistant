@@ -16,26 +16,34 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.List;
+
 @Mixin(CraftingScreenHandler.class)
 public abstract class CraftingScreenHandlerMixin {
     @Shadow @Final private PlayerEntity player;
 
-    private final Item[] wobRecipe = new Item[] {
+    private final List<Item[]> wobRecipes = List.of(new Item[] {
         Items.STICK, Items.STRING, Items.AIR,
         Items.STICK, Items.AIR, Items.STRING,
         Items.STICK, Items.STRING, Items.AIR
-    };
+    }, new Item[]{
+        Items.AIR, Items.STRING, Items.STICK,
+        Items.STRING, Items.AIR, Items.STICK,
+        Items.AIR, Items.STRING, Items.STICK
+    });
 
     @Inject(method = "onContentChanged", at = @At("HEAD"))
     public void onContentChanged(Inventory inventory, CallbackInfo ci) {
         int size = inventory.size();
         boolean isWobRecipe = true;
-        if (size == 9) {
-            for (int i = 0; i < size; i++) {
-                ItemStack stack = inventory.getStack(i);
-                if(!stack.isOf(wobRecipe[i])) {
-                    isWobRecipe = false;
-                    break;
+        for(Item[] wobRecipe : wobRecipes) {
+            if (size == 9) {
+                for (int i = 0; i < size; i++) {
+                    ItemStack stack = inventory.getStack(i);
+                    if(!stack.isOf(wobRecipe[i])) {
+                        isWobRecipe = false;
+                        break;
+                    }
                 }
             }
         }
