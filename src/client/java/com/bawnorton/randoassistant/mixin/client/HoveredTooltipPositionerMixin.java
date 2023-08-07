@@ -1,7 +1,6 @@
 package com.bawnorton.randoassistant.mixin.client;
 
 import com.bawnorton.randoassistant.extend.HoveredTooltipPositionerExtender;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import org.joml.Vector2i;
 import org.spongepowered.asm.mixin.Mixin;

@@ -30,6 +30,7 @@ public class LootBookSettingsWidget {
 
     private final ToggleButtonWidget starIcons;
     private final ToggleButtonWidget silkTouchStarIcons;
+    private final ToggleButtonWidget autoToggle;
     private final ToggleButtonWidget enableOverride;
     private final ToggleButtonWidget invertSearch;
     private final ToggleButtonWidget enableCrafting;
@@ -68,6 +69,7 @@ public class LootBookSettingsWidget {
 
         starIcons = createButton("Unbroken Stars", "Display star icons on unbroken blocks", Config.getInstance().unbrokenBlockIcon);
         silkTouchStarIcons = createButton( "Silk-Touch Stars", "Display star icons on broken but not silk-touched blocks\n\nRequires §bUnbroken Stars", Config.getInstance().silktouchUnbrokenBlockIcon);
+        autoToggle = createButton( "Auto toggle", "Automatically hides the stars if no fasguy datapack is detected", Config.getInstance().silktouchUnbrokenBlockIcon);
         enableOverride = createButton("Enable Override", "Enable all undiscovered loot tables\n\n§7This is not permanent", Config.getInstance().enableOverride);
         searchDepth = createTextField("Search Depth", "The maximum number of steps to search for a path to the target item\n\n§6Warning: §rValues over §c15§r are not recommended!", String.valueOf(Config.getInstance().searchDepth));
         highlightRadius = createTextField("Highlight Radius", "The radius of the highlight effect when pressing \"" + EventManager.highlight.getBoundKeyLocalizedText().getString() + "\"\n\n§6Warning: §rValues over §c10§r are not recommended!", String.valueOf(Config.getInstance().highlightRadius));
@@ -194,6 +196,7 @@ public class LootBookSettingsWidget {
     public void onClose() {
         Config.getInstance().unbrokenBlockIcon = starIcons.isToggled();
         Config.getInstance().silktouchUnbrokenBlockIcon = silkTouchStarIcons.isToggled();
+        Config.getInstance().autoToggle = autoToggle.isToggled();
         Config.getInstance().enableOverride = enableOverride.isToggled();
         if(randomizeColours.isToggled() != Config.getInstance().randomizeColours) {
             client.worldRenderer.reload();

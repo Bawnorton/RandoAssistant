@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.mixin.client;
 
+import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.render.RenderingHelper;
 import com.bawnorton.randoassistant.stat.StatsManager;
@@ -8,7 +9,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.stat.StatHandler;
@@ -30,7 +30,8 @@ public abstract class HandledScreenMixin extends ScreenMixin {
 
     @Inject(method = "drawSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawItemInSlot(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", shift = At.Shift.AFTER))
     private void renderStar(DrawContext context, Slot slot, CallbackInfo ci) {
-        if(!Config.getInstance().unbrokenBlockIcon) return;
+        if (!Config.getInstance().unbrokenBlockIcon) return;
+        if (RandoAssistantClient.hideStar()) return;
 
         ItemStack stack = slot.getStack();
         Block block = Block.getBlockFromItem(stack.getItem());
