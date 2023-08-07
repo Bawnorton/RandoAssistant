@@ -53,5 +53,5 @@ The settings menu can be accessed by clicking the settings button in the top rig
     - Values over 10 are not recommended when surrounded by a lot of unbroken blocks as highlighting blocks is somewhat intensive
 
 ## Dependencies
-- [Minecraft Fabric 1.19.4](https://fabricmc.net/)
-- [Fabric API ≥ 0.80.0+1.19.4](https://modrinth.com/mod/fabric-api)
+- [Minecraft Fabric 1.20](https://fabricmc.net/)
+- [Fabric API ≥ 0.83.0+1.20](https://modrinth.com/mod/fabric-api)
