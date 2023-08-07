@@ -8,6 +8,7 @@
     "BiomeColorBlenderMixin",
     "BiomeMixin",
     "BlockColorsMixin",
+    "ClientAdvancementManagerMixin",
     "ClientPlayNetworkHandlerMixin",
     "CraftingScreenMixin",
     "GameRendererMixin",

@@ -20,6 +20,7 @@ public class ConfigManager {
         if (config.debug == null) config.debug = false;
         if (config.unbrokenBlockIcon == null) config.unbrokenBlockIcon = true;
         if (config.silktouchUnbrokenBlockIcon == null) config.silktouchUnbrokenBlockIcon = true;
+        if (config.autoToggle == null) config.autoToggle = true;
         if (config.enableOverride == null) config.enableOverride = false;
         if (config.randomizeColours == null) config.randomizeColours = false;
         if (config.searchDepth == null) config.searchDepth = 6;

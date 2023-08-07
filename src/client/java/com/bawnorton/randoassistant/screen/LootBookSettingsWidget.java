@@ -11,7 +11,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
@@ -24,6 +23,7 @@ public class LootBookSettingsWidget {
     private final ToggleButtonWidget backButton;
     private final ToggleButtonWidget starIcons;
     private final ToggleButtonWidget silkTouchStarIcons;
+    private final ToggleButtonWidget autoToggle;
     private final ToggleButtonWidget enableOverride;
     private final ToggleButtonWidget randomizeColours;
     private final TextFieldWidget searchDepth;
@@ -40,10 +40,11 @@ public class LootBookSettingsWidget {
         y += 40;
         starIcons = createButton(x, y, "Display star icons on unbroken blocks", Config.getInstance().unbrokenBlockIcon);
         silkTouchStarIcons = createButton(x, y + 20, "Display star icons on broken but not silk-touched blocks\n\nRequires §bUnbroken Stars", Config.getInstance().silktouchUnbrokenBlockIcon);
-        enableOverride = createButton(x, y + 40, "Enable all undiscovered loot tables\n\n§7This is not permanent", Config.getInstance().enableOverride);
-        randomizeColours = createButton(x, y + 60, "Randomize world and entity colours (Cosmetic)", Config.getInstance().randomizeColours);
+        autoToggle = createButton(x, y + 40, "Automatically enable the mod if a fasguy datapack is detected", Config.getInstance().autoToggle);
+        enableOverride = createButton(x, y + 60, "Enable all undiscovered loot tables\n\n§7This is not permanent", Config.getInstance().enableOverride);
+        randomizeColours = createButton(x, y + 80, "Randomize world and entity colours (Cosmetic)", Config.getInstance().randomizeColours);
 
-        searchDepth = new TextFieldWidget(client.textRenderer, x - 5, y + 80, 20, client.textRenderer.fontHeight + 3, Text.of(""));
+        searchDepth = new TextFieldWidget(client.textRenderer, x - 5, y + 100, 20, client.textRenderer.fontHeight + 3, Text.of(""));
         searchDepth.setChangedListener((text) -> {
             String filtered = text.replaceAll("[^0-9]", "");
             while (filtered.startsWith("0")) filtered = filtered.substring(1);
@@ -63,7 +64,7 @@ public class LootBookSettingsWidget {
         searchDepth.setText(String.valueOf(Config.getInstance().searchDepth));
         searchDepth.setTooltip(Tooltip.of(Text.of("The maximum number of steps to search for a path to the target item\n\n§6Warning: §rValues over §c15§r are not recommended!")));
 
-        highlightRadius = new TextFieldWidget(client.textRenderer, x - 5, y + 100, 20, client.textRenderer.fontHeight + 3, Text.of(""));
+        highlightRadius = new TextFieldWidget(client.textRenderer, x - 5, y + 120, 20, client.textRenderer.fontHeight + 3, Text.of(""));
         highlightRadius.setChangedListener((text) -> {
             String filtered = text.replaceAll("[^0-9]", "");
             while (filtered.startsWith("0")) filtered = filtered.substring(1);
@@ -98,6 +99,8 @@ public class LootBookSettingsWidget {
         context.drawText(client.textRenderer, Text.of("Unbroken Stars"), starIcons.getX() - 110, starIcons.getY() + 4, 0xFFFFFF, false);
         this.silkTouchStarIcons.render(context, mouseX, mouseY, delta);
         context.drawText(client.textRenderer, Text.of("Silk-Touch Stars"), silkTouchStarIcons.getX() - 110, silkTouchStarIcons.getY() + 4, 0xFFFFFF, false);
+        this.autoToggle.render(context, mouseX, mouseY, delta);
+        context.drawText(client.textRenderer, Text.of("Auto Toggle"), autoToggle.getX() - 110, autoToggle.getY() + 4, 0xFFFFFF, false);
         this.enableOverride.render(context, mouseX, mouseY, delta);
         context.drawText(client.textRenderer, Text.of("Enable Override"), enableOverride.getX() - 110, enableOverride.getY() + 4, 0xFFFFFF, false);
         this.randomizeColours.render(context, mouseX, mouseY, delta);
@@ -127,6 +130,10 @@ public class LootBookSettingsWidget {
             if(!starIcons.isToggled()) {
                 starIcons.setToggled(true);
             }
+            return true;
+        }
+        if(autoToggle.mouseClicked(mouseX, mouseY, button)) {
+            autoToggle.setToggled(!autoToggle.isToggled());
             return true;
         }
         if(enableOverride.mouseClicked(mouseX, mouseY, button)) {
@@ -165,6 +172,7 @@ public class LootBookSettingsWidget {
     public void onClose() {
         Config.getInstance().unbrokenBlockIcon = starIcons.isToggled();
         Config.getInstance().silktouchUnbrokenBlockIcon = silkTouchStarIcons.isToggled();
+        Config.getInstance().autoToggle = autoToggle.isToggled();
         Config.getInstance().enableOverride = enableOverride.isToggled();
         if(randomizeColours.isToggled() != Config.getInstance().randomizeColours) {
             client.worldRenderer.reload();

@@ -19,6 +19,10 @@ public class Config {
     public Boolean silktouchUnbrokenBlockIcon;
 
     @Expose
+    @SerializedName("auto_toggle")
+    public Boolean autoToggle;
+
+    @Expose
     @SerializedName("enable_override")
     public Boolean enableOverride;
 
