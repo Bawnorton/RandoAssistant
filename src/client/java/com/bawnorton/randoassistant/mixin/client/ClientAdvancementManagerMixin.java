@@ -21,7 +21,7 @@ public class ClientAdvancementManagerMixin {
         if (Config.getInstance().autoToggle) {
             RandoAssistantClient.datapackDetected = false;
             for (Map.Entry<Identifier, AdvancementProgress> entry : packet.getAdvancementsToProgress().entrySet()) {
-                if (entry.getKey().getNamespace().equals("fasguys_toolbox") && entry.getKey().getPath().startsWith("loot_table_randomizer")) {
+                if (entry.getKey().getNamespace().equals("fasguys_toolbox")) {
                     RandoAssistantClient.datapackDetected = true;
                     break;
                 }

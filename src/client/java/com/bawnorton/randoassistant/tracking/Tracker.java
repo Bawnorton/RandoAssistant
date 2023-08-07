@@ -93,7 +93,7 @@ public class Tracker {
     }
 
     @Nullable
-    public Set<Trackable<Identifier>> getSourgoces(Identifier id) {
+    public Set<Trackable<Identifier>> getSources(Identifier id) {
         return TRACKED_SOURCES.get(id);
     }
 
