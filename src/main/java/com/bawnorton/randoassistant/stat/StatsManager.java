@@ -19,7 +19,7 @@ public class StatsManager {
     private static <T> StatType<T> registerType(String id, Registry<T> registry) {
         MutableText text = Text.translatable("stat_type.randoassistant." + id);
         Identifier identifier = new Identifier(RandoAssistant.MOD_ID, id);
-        return Registry.register(Registries.STAT_TYPE, identifier, new StatType<T>(registry, text));
+        return Registry.register(Registries.STAT_TYPE, identifier, new StatType<>(registry, text));
     }
     
     public static void init() {

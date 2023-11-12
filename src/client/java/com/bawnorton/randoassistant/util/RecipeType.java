@@ -1,7 +1,6 @@
 package com.bawnorton.randoassistant.util;
 
 import net.minecraft.recipe.AbstractCookingRecipe;
-import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 
 public enum RecipeType {

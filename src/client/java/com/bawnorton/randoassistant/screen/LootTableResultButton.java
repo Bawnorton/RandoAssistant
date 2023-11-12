@@ -8,7 +8,6 @@ import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
 import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
 import com.bawnorton.randoassistant.util.IdentifierType;
 import com.bawnorton.randoassistant.util.tuples.Pair;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ButtonTextures;
