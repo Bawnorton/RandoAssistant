@@ -44,7 +44,7 @@ public class LootBookStatsWidget {
         this.y = y;
 
         backButton = new ToggleButtonWidget(x + 10, y + 10, 16, 16, false);
-        backButton.setTextureUV(206, 41, 0, 18, LootBookWidget.TEXTURE);
+        backButton.setTextures(LootBookSettingsWidget.BACK_TEXTURES);
         backButton.setTooltip(Tooltip.of(Text.of("Exit")));
 
         refresh();

@@ -19,7 +19,7 @@ import net.minecraft.block.CandleBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.Registries;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
@@ -37,7 +37,7 @@ public class Tracker {
 
     private final TrackableMap<Identifier> TRACKABLE_INTERACTED;
     private final TrackableMap<Identifier> TRACKABLE_LOOTED;
-    private final Map<Recipe<?>, Item> TRACKABLE_CRAFTED;
+    private final Map<RecipeEntry<?>, Item> TRACKABLE_CRAFTED;
 
     private final Map<Identifier, Set<Trackable<Identifier>>> TRACKED_SOURCES;
     private final Map<Identifier, Set<Trackable<Identifier>>> TRACKED_TARGETS;
@@ -87,7 +87,7 @@ public class Tracker {
     }
 
     public void track(SerializeableCrafting crafting) {
-        Recipe<?> recipe = crafting.getInput();
+        RecipeEntry<?> recipe = crafting.getInput();
         Item outputItem = crafting.getOutput();
         TRACKABLE_CRAFTED.put(recipe, outputItem);
     }
@@ -132,11 +132,11 @@ public class Tracker {
         return crafted;
     }
 
-    public boolean hasCrafted(Recipe<?> recipe) {
+    public boolean hasCrafted(RecipeEntry<?> recipe) {
         if(Config.getInstance().enableOverride) return true;
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if(player == null) throw new IllegalStateException("Player is null");
-        int count = player.getStatHandler().getStat(StatsManager.CRAFTED.getOrCreateStat(recipe.getId()));
+        int count = player.getStatHandler().getStat(StatsManager.CRAFTED.getOrCreateStat(recipe.id()));
         return count > 0;
     }
 

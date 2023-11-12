@@ -8,9 +8,9 @@ import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
 import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
 import com.bawnorton.randoassistant.util.IdentifierType;
 import com.bawnorton.randoassistant.util.tuples.Pair;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.item.ItemStack;
@@ -25,8 +25,12 @@ import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 
 public class LootTableResultButton extends ClickableWidget {
-    private static final Identifier ARROW_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/arrow.png");
-    private static final Identifier BACKGROUND_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/loot_book.png");
+    private static final Identifier ARROW_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "arrow");
+    public static final ButtonTextures RESULT_BUTTON_TEXTURES = new ButtonTextures(
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/result_button"),
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/result_button_focused")
+    );
+    
     private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(40, 40, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
     private static LootTableResultButton lastClicked;
     private static final int width = 125;
@@ -124,13 +128,7 @@ public class LootTableResultButton extends ClickableWidget {
 
     @Override
     public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-        RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
-        int u = 29;
-        int v = 206;
-        if(this.isHovered()) {
-            v += height;
-        }
-        context.drawTexture(BACKGROUND_TEXTURE, getX(), getY(), u, v, width, height);
+        context.drawGuiTexture(RESULT_BUTTON_TEXTURES.get(false, this.isHovered()), getX(), getY(), width, height);
         RenderingHelper.renderIdentifier(Objects.requireNonNullElse(source, Registries.ITEM.getId(Items.STRUCTURE_VOID)), context, 1, getX() + 4, getY() + 4, true);
         renderArrow(context, getX() + 24, getY() + 3);
         renderTarget(context, getX() + 104, getY() + 4);
@@ -142,7 +140,7 @@ public class LootTableResultButton extends ClickableWidget {
     }
 
     private void renderArrow(DrawContext context, int x, int y) {
-        drawTexture(context, ARROW_TEXTURE, x + 1, y, 0, 0, 0, 76, 17, 76, 17);
+        context.drawGuiTexture(ARROW_TEXTURE, x + 1, y, 76, 17);
         Text text = Text.of(String.valueOf(distance));
         int textWidth = client.textRenderer.getWidth(text);
         int textHeight = client.textRenderer.fontHeight;

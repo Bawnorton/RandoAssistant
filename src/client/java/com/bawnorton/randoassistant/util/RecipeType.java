@@ -1,14 +1,14 @@
 package com.bawnorton.randoassistant.util;
 
 import net.minecraft.recipe.AbstractCookingRecipe;
-import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeEntry;
 
 public enum RecipeType {
     CRAFTING,
     SMELTING;
 
-    public static RecipeType fromRecipe(Recipe<?> recipe) {
-        if(recipe instanceof AbstractCookingRecipe) {
+    public static RecipeType fromRecipe(RecipeEntry<?> recipe) {
+        if(recipe.value() instanceof AbstractCookingRecipe) {
             return SMELTING;
         }
         return CRAFTING;

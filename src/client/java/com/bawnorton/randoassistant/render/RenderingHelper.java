@@ -33,7 +33,8 @@ import org.joml.Vector3f;
 import java.awt.geom.Point2D;
 
 public class RenderingHelper {
-    private static final Identifier STAR = new Identifier(RandoAssistant.MOD_ID, "textures/gui/item_stars.png");
+    private static final Identifier STAR_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "item_star");
+    private static final Identifier STAR_SILKTOUCH_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "item_star_silktouch");
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
     public static void renderIdentifier(Identifier id, DrawContext context, double scale, int x, int y, boolean preferEntity) {
@@ -139,7 +140,7 @@ public class RenderingHelper {
         matrices.translate(-3, 0, 100);
 
         Box box = entity.getBoundingBox();
-        float entityScale = 1.0f / (float) (Math.max(box.getXLength(), Math.max(box.getYLength(), box.getZLength())));
+        float entityScale = 1.0f / (float) (Math.max(box.getLengthX(), Math.max(box.getLengthY(), box.getLengthZ())));
         matrices.scale(entityScale, entityScale, entityScale);
 
         if(entity instanceof SquidEntity) {
@@ -211,7 +212,7 @@ public class RenderingHelper {
         MatrixStack matrices = context.getMatrices();
         matrices.push();
         matrices.translate(0, -Easing.ease(0, 1, timeOffset), 300);
-        context.drawTexture(STAR, x, y, silkTouch ? 8 : 0, 0, 8, 8, 16, 16);
+        context.drawGuiTexture(silkTouch ? STAR_SILKTOUCH_TEXTURE : STAR_TEXTURE, x, y, 8, 8);
         matrices.pop();
     }
 

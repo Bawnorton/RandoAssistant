@@ -1,7 +1,7 @@
 package com.bawnorton.randoassistant.util;
 
 import com.bawnorton.randoassistant.RandoAssistant;
-import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -44,7 +44,7 @@ public enum LootAdvancement {
         MinecraftServer server = serverPlayer.getServer();
         if(server == null) return;
 
-        Advancement advancement = server.getAdvancementLoader().get(id());
+        AdvancementEntry advancement = server.getAdvancementLoader().get(id());
         if(advancement == null) return;
 
         AdvancementProgress progress = serverPlayer.getAdvancementTracker().getProgress(advancement);
