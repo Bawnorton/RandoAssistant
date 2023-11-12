@@ -8,9 +8,11 @@ import com.bawnorton.randoassistant.tracking.graph.TrackingGraph;
 import com.bawnorton.randoassistant.util.IdentifierType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import grapher.graph.drawing.Drawing;
+import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.advancement.AdvancementObtainedStatus;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
@@ -27,8 +29,12 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class LootTableGraphWidget {
-    private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
-    private static final Identifier BACKGROUND_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/graph.png");
+    private static final Identifier BACKGROUND_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "graph");
+    private static final Identifier UNOBTAINED_GOAL_TEXTURE = AdvancementObtainedStatus.UNOBTAINED.getFrameTexture(AdvancementFrame.GOAL);
+    private static final Identifier OBTAINED_GOAL_TEXTURE = AdvancementObtainedStatus.OBTAINED.getFrameTexture(AdvancementFrame.GOAL);
+    private static final Identifier UNOBTAINED_TASK_TEXTURE = AdvancementObtainedStatus.UNOBTAINED.getFrameTexture(AdvancementFrame.TASK);
+    private static final Identifier OBTAINED_CHALLENGE_TEXTURE = AdvancementObtainedStatus.OBTAINED.getFrameTexture(AdvancementFrame.CHALLENGE);
+    
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
     private static final int ABSOLUTE_SCALE = 2;
 
@@ -142,16 +148,16 @@ public class LootTableGraphWidget {
 
     private Set<Tooltip> renderSideBars(DrawContext context, int x, int y, double mouseX, double mouseY) {
         boolean hoverTarget = mouseX >= x && mouseX <= x + 26 && mouseY >= y && mouseY <= y + 26;
-        context.drawTexture(WIDGETS_TEXTURE, x, y, 52, 154, 26, 26);
+        context.drawGuiTexture(UNOBTAINED_GOAL_TEXTURE, x, y, 26, 26);
         RenderingHelper.renderIdentifier(target, context, 1, x + 5, y + 5, false);
         y += 30;
         boolean hoverCompass = mouseX >= x && mouseX <= x + 26 && mouseY >= y && mouseY <= y + 26;
-        context.drawTexture(WIDGETS_TEXTURE, x, y, 52, 154 - (hoverCompass ? 26 : 0), 26, 26);
+        context.drawGuiTexture(hoverCompass ? OBTAINED_GOAL_TEXTURE : UNOBTAINED_GOAL_TEXTURE, x, y, 26, 26);
         RenderingHelper.renderIdentifier(Registries.ITEM.getId(Items.COMPASS), context, 1, x + 5, y + 5, false);
         x += WIDTH + 34;
         y -= 26;
         boolean hoverClose = mouseX >= x && mouseX <= x + 18 && mouseY >= y && mouseY <= y + 18;
-        context.drawTexture(LootBookWidget.TEXTURE, x, y, 170, 41 - (hoverClose ? - 18 : 0), 18, 18);
+        context.drawGuiTexture(LootBookSettingsWidget.TOGGLE_TEXTURES.get(false, hoverClose), x, y, 18, 18);
 
         Set<Tooltip> tooltips = new HashSet<>();
         if(hoverTarget) {
@@ -170,7 +176,7 @@ public class LootTableGraphWidget {
     }
 
     private void renderBackground(DrawContext context, int x, int y) {
-        context.drawTexture(BACKGROUND_TEXTURE, x, y, 1, 1, WIDTH, HEIGHT, 512, 512);
+        context.drawGuiTexture(BACKGROUND_TEXTURE, x, y, WIDTH, HEIGHT);
     }
 
     private void renderPlaceholder(DrawContext context, int x, int y) {
@@ -192,15 +198,13 @@ public class LootTableGraphWidget {
             if(hovered && doesRender) {
                 tooltips.add(Tooltip.of(Text.of(IdentifierType.getName(identifier, !identifier.equals(target)))));
             }
-            int u = 0;
-            int v = 154;
+            Identifier nodeTexture = UNOBTAINED_TASK_TEXTURE;
             if (identifier.equals(target)) {
-                u += 26;
-                v -= 26;
+                nodeTexture = OBTAINED_CHALLENGE_TEXTURE;
             } else if (selected != null && selected.contains(identifier)) {
                 RenderSystem.setShaderColor(1, 0.1f, 0.1f, 1);
             }
-            context.drawTexture(WIDGETS_TEXTURE, posX, posY, u, v, 26, 26);
+            context.drawGuiTexture(nodeTexture, posX, posY, 26, 26);
             RenderSystem.setShaderColor(1, 1, 1, 1);
             RenderingHelper.renderIdentifier(identifier, context, scale, posX + 5, posY + 5, !identifier.equals(target));
         });
@@ -237,9 +241,9 @@ public class LootTableGraphWidget {
         return false;
     }
 
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if(mouseX >= x && mouseX <= x + WIDTH && mouseY >= y && mouseY <= y + HEIGHT) {
-            double scale = Math.pow(1.1, amount);
+            double scale = Math.pow(1.1, verticalAmount);
             if(scale(scale)) {
                 mouseX = mouseX - (double) WIDTH / 2;
                 mouseY = mouseY - (double) HEIGHT / 2;

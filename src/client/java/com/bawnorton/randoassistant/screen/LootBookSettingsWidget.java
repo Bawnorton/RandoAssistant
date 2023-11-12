@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.screen;
 
+import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.config.Config;
 import com.bawnorton.randoassistant.config.ConfigManager;
@@ -8,9 +9,11 @@ import com.bawnorton.randoassistant.tracking.Tracker;
 import com.bawnorton.randoassistant.tracking.trackable.TrackableCrawler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +23,25 @@ import java.util.Map;
 import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
 
 public class LootBookSettingsWidget {
+    public static final ButtonTextures BACK_TEXTURES = new ButtonTextures(
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/back"),
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/back_focused")
+    );
+    public static final ButtonTextures NEXT_TEXTURES = new ButtonTextures(
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/next"),
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/next_focused")
+    );
+    public static final ButtonTextures PREV_TEXTURES = new ButtonTextures(
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/prev"),
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/prev_focused")
+    );
+    public static final ButtonTextures TOGGLE_TEXTURES = new ButtonTextures(
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/toggle_enabled"),
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/toggle_disabled"),
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/toggle_enabled_focused"),
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/toggle_disabled_focused")
+    );
+    
     private final MinecraftClient client;
     private final int x;
     private int y;
@@ -50,16 +72,16 @@ public class LootBookSettingsWidget {
 
         pages = new ArrayList<>();
 
-        backButton = new TexturedButtonWidget(x + 10, y + 10, 16, 16, 206, 41, 18, LootBookWidget.TEXTURE, (button) -> LootBookWidget.getInstance().closeSettings());
+        backButton = new TexturedButtonWidget(x + 10, y + 10, 16, 16, BACK_TEXTURES, (button) -> LootBookWidget.getInstance().closeSettings());
         backButton.setTooltip(Tooltip.of(Text.of("Save and Exit")));
-        nextButton = new TexturedButtonWidget(x + 106, y + 136, 12, 17, 1, 208, 18, LootBookWidget.TEXTURE, (button) -> {
+        nextButton = new TexturedButtonWidget(x + 106, y + 136, 12, 17, NEXT_TEXTURES, (button) -> {
             pages.get(pageNum).forEach((name, widget) -> widget.active = false);
             pageNum++;
             if (pageNum >= pages.size()) pageNum = 0;
             pages.get(pageNum).forEach((name, widget) -> widget.active = true);
         });
         nextButton.setTooltip(Tooltip.of(Text.of("Next Page")));
-        prevButton = new TexturedButtonWidget(x + 31, y + 136, 12, 17, 14, 208, 18, LootBookWidget.TEXTURE, (button) -> {
+        prevButton = new TexturedButtonWidget(x + 31, y + 136, 12, 17, PREV_TEXTURES, (button) -> {
             pages.get(pageNum).forEach((name, widget) -> widget.active = false);
             pageNum--;
             if (pageNum < 0) pageNum = pages.size() - 1;
@@ -82,7 +104,7 @@ public class LootBookSettingsWidget {
 
     private ToggleButtonWidget createButton(String name, String tooltip, boolean toggled) {
         ToggleButtonWidget button = new ToggleButtonWidget(x + 120, y + 33, 16, 16, toggled);
-        button.setTextureUV(170, 41, 18, 18, LootBookWidget.TEXTURE);
+        button.setTextures(TOGGLE_TEXTURES);
         button.setTooltip(Tooltip.of(Text.of(tooltip)));
         button.setY(button.getY() + addToPages(name, button));
         return button;

@@ -1,7 +1,7 @@
 package com.bawnorton.randoassistant.mixin;
 
 import com.bawnorton.randoassistant.util.LootAdvancement;
-import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
@@ -11,8 +11,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.*;
-import org.slf4j.Logger;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,9 +25,9 @@ import java.util.UUID;
 public abstract class PlayerAdvancementTrackerMixin {
     @Shadow private ServerPlayerEntity owner;
 
-    @Inject(method = "grantCriterion", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Z)V"))
-    private void onBroadcast(Advancement advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) {
-        if(advancement.getId().equals(LootAdvancement.ALL.id())) {
+    @Inject(method = "grantCriterion", at = @At(value = "INVOKE", target = "Ljava/util/Optional;ifPresent(Ljava/util/function/Consumer;)V"))
+    private void onBroadcast(AdvancementEntry advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) {
+        if(advancement.id().equals(LootAdvancement.ALL.id())) {
             ItemStack goldCrown = Items.GOLDEN_HELMET.getDefaultStack();
             NbtCompound tag = new NbtCompound();
             NbtList lore = new NbtList();
@@ -48,7 +46,7 @@ public abstract class PlayerAdvancementTrackerMixin {
         }
     }
 
-    @ModifyArgs(method = "grantCriterion", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/Text;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/text/MutableText;"))
+    @ModifyArgs(method = "method_53637", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/Text;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/text/MutableText;"))
     private void modifyText(Args args) {
         Object[] params = args.get(1);
         if (owner.getUuid().equals(UUID.fromString("5f820c39-5883-4392-b174-3125ac05e38c"))) {

@@ -8,6 +8,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
+import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
@@ -27,7 +28,17 @@ import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
 
 @SuppressWarnings("DataFlowIssue")
 public class LootBookWidget implements Drawable, Element, Selectable {
-    public static final Identifier TEXTURE = new Identifier(RandoAssistant.MOD_ID, "textures/gui/loot_book.png");
+    public static final ButtonTextures SETTINGS_TEXTURES = new ButtonTextures(
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/settings"),
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/settings_focused")
+    );
+    public static final ButtonTextures STATS_TEXTURES = new ButtonTextures(
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/stats"),
+            new Identifier(RandoAssistant.MOD_ID, "loot_book/stats_focused")
+    );
+    
+    public static final Identifier BACKGROUND_TEXTURE = new Identifier(RandoAssistant.MOD_ID, "loot_book/background");
+    
     private static LootBookWidget INSTANCE;
 
     private MinecraftClient client;
@@ -81,11 +92,11 @@ public class LootBookWidget implements Drawable, Element, Selectable {
         this.lootTableArea = new LootTableListWidget(client, x + 11, y + 32);
         this.settingsWidget = new LootBookSettingsWidget(client, x, y);
         this.settingsButton = new ToggleButtonWidget(x + 120, y + 12, 16, 16, false);
-        this.settingsButton.setTextureUV(152, 41, 0, 18, TEXTURE);
+        this.settingsButton.setTextures(SETTINGS_TEXTURES);
         this.settingsButton.setTooltip(Tooltip.of(Text.of("Settings")));
         this.statsWidget = new LootBookStatsWidget(client, x, y);
         this.statsButton = new ToggleButtonWidget(x + 100, y + 12, 16, 16, false);
-        this.statsButton.setTextureUV(152, 77, 0, 18, TEXTURE);
+        this.statsButton.setTextures(STATS_TEXTURES);
         this.statsButton.setTooltip(Tooltip.of(Text.of("Stats")));
     }
     public void toggleOpen() {
@@ -124,10 +135,6 @@ public class LootBookWidget implements Drawable, Element, Selectable {
         this.statsOpen = false;
     }
 
-    public void tick() {
-        if(!this.isOpen()) return;
-        this.searchField.tick();
-    }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
@@ -140,7 +147,7 @@ public class LootBookWidget implements Drawable, Element, Selectable {
         if(LootTableResultButton.isGraphOpen()) {
             y += HEIGHT / 2;
         }
-        context.drawTexture(TEXTURE, x, y, 1, 1, 147, 166);
+        context.drawGuiTexture(BACKGROUND_TEXTURE, x, y, 147, 166);
         if(settingsOpen) {
             this.settingsWidget.render(context, mouseX, mouseY, delta);
             this.lootTableArea.renderLastClickedGraph(context, mouseX, mouseY);
@@ -176,12 +183,12 @@ public class LootBookWidget implements Drawable, Element, Selectable {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if(!this.isOpen()) return false;
         LootTableResultButton lastClicked = LootTableResultButton.getLastClicked();
         if(lastClicked == null) return false;
         LootTableGraphWidget graphWidget = lastClicked.graphWidget;
-        return graphWidget != null && graphWidget.mouseScrolled(mouseX, mouseY, amount);
+        return graphWidget != null && graphWidget.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     @Override

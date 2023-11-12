@@ -1,5 +1,6 @@
 package com.bawnorton.randoassistant.mixin.client;
 
+import com.bawnorton.randoassistant.RandoAssistant;
 import com.bawnorton.randoassistant.RandoAssistantClient;
 import com.bawnorton.randoassistant.extend.InventoryScreenExtender;
 import com.bawnorton.randoassistant.networking.client.Networking;
@@ -8,6 +9,7 @@ import com.bawnorton.randoassistant.screen.LootTableResultButton;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -18,6 +20,7 @@ import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -31,29 +34,27 @@ import static com.bawnorton.randoassistant.screen.LootTableGraphWidget.HEIGHT;
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin implements InventoryScreenExtender {
 
-    private static final Identifier LOOT_BUTTON_TEXTURE = new Identifier("randoassistant", "textures/gui/loot_button.png");
+    @Unique
+    private static final ButtonTextures LOOT_BUTTON_TEXTURES = new ButtonTextures(
+            new Identifier(RandoAssistant.MOD_ID, "loot_button"),
+            new Identifier(RandoAssistant.MOD_ID, "loot_button_focused")
+    );
+    
     @Shadow
     @Final
     private RecipeBookWidget recipeBook;
     @Shadow
     private boolean narrow;
 
-    @Shadow protected abstract void drawBackground(DrawContext context, float delta, int mouseX, int mouseY);
-
     private TexturedButtonWidget lootButton;
     private TexturedButtonWidget recipeButton;
-
-    @Inject(method = "handledScreenTick", at = @At("TAIL"))
-    private void onHandledScreenTick(CallbackInfo ci) {
-        LootBookWidget.getInstance().tick();
-    }
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/InventoryScreen;addDrawableChild(Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;", shift = At.Shift.AFTER))
     private void onInit(CallbackInfo ci) {
         LootBookWidget lootBook = LootBookWidget.getInstance();
         lootBook.initialise((InventoryScreen) (Object) this);
         Networking.requestStatsPacket();
-        lootButton = new TexturedButtonWidget(this.x + 126, this.height / 2 - 22, 20, 18, 0, 0, 19, LOOT_BUTTON_TEXTURE, (button) -> {
+        lootButton = new TexturedButtonWidget(this.x + 126, this.height / 2 - 22, 20, 18, LOOT_BUTTON_TEXTURES, (button) -> {
             if(!RandoAssistantClient.isInstalledOnServer) return;
             lootBook.toggleOpen();
             if (lootBook.isOpen() && recipeBook.isOpen()) {
@@ -116,7 +117,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
         return button;
     }
 
-    @ModifyArg(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TexturedButtonWidget;<init>(IIIIIIILnet/minecraft/util/Identifier;Lnet/minecraft/client/gui/widget/ButtonWidget$PressAction;)V"), index = 8)
+    @ModifyArg(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TexturedButtonWidget;<init>(IIIILnet/minecraft/client/gui/screen/ButtonTextures;Lnet/minecraft/client/gui/widget/ButtonWidget$PressAction;)V"), index = 5)
     private ButtonWidget.PressAction onAddDrawableChild(ButtonWidget.PressAction pressAction) {
         return (button) -> {
             recipeBook.toggleOpen();
@@ -136,11 +137,10 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
         };
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/InventoryScreen;renderBackground(Lnet/minecraft/client/gui/DrawContext;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;render(Lnet/minecraft/client/gui/DrawContext;IIF)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
     private void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         LootBookWidget lootBook = LootBookWidget.getInstance();
         if (lootBook.isOpen()) {
-            drawBackground(context, delta, mouseX, mouseY);
             lootBook.render(context, mouseX, mouseY, delta);
         }
     }
@@ -192,8 +192,8 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreenMixin 
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        return LootBookWidget.getInstance().mouseScrolled(mouseX, mouseY, amount);
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        return LootBookWidget.getInstance().mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     @Override

@@ -119,8 +119,8 @@ public class Networking {
     private static void sendAllRecipes(MinecraftServer server, ServerPlayerEntity player) {
         RecipeManager recipeManager = server.getRecipeManager();
         recipeManager.values().forEach(recipe -> {
-            if(recipe instanceof SmithingTrimRecipe) return;
-            Item output = recipe.getOutput(DynamicRegistryManager.of(Registries.REGISTRIES)).getItem();
+            if(recipe.value() instanceof SmithingTrimRecipe) return;
+            Item output = recipe.value().getResult(DynamicRegistryManager.of(Registries.REGISTRIES)).getItem();
             Networking.sendSerializeablePacket(player, SerializeableCrafting.of(recipe, output));
         });
     }

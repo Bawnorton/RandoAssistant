@@ -6,14 +6,22 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.StatType;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class StatsManager {
-    public static final StatType<Identifier> INTERACTED = Registry.register(Registries.STAT_TYPE, new Identifier("randoassistant", "interacted_with_block"), new StatType<>(Registries.CUSTOM_STAT));
-    public static final StatType<Identifier> LOOTED = Registry.register(Registries.STAT_TYPE, new Identifier("randoassistant", "looted_block"), new StatType<>(Registries.CUSTOM_STAT));
-    public static final StatType<Identifier> CRAFTED = Registry.register(Registries.STAT_TYPE, new Identifier("randoassistant", "crafted_item"), new StatType<>(Registries.CUSTOM_STAT));
-    public static final StatType<Block> SILK_TOUCHED = Registry.register(Registries.STAT_TYPE, new Identifier("randoassistant", "silk_touched_block"), new StatType<>(Registries.BLOCK));
+    public static final StatType<Identifier> INTERACTED = registerType("interacted_with_block", Registries.CUSTOM_STAT);
+    public static final StatType<Identifier> LOOTED = registerType("looted_block", Registries.CUSTOM_STAT);
+    public static final StatType<Identifier> CRAFTED = registerType("crafted_item", Registries.CUSTOM_STAT);
+    public static final StatType<Block> SILK_TOUCHED = registerType("silk_touched_block", Registries.BLOCK);
 
+    private static <T> StatType<T> registerType(String id, Registry<T> registry) {
+        MutableText text = Text.translatable("stat_type.randoassistant." + id);
+        Identifier identifier = new Identifier(RandoAssistant.MOD_ID, id);
+        return Registry.register(Registries.STAT_TYPE, identifier, new StatType<T>(registry, text));
+    }
+    
     public static void init() {
         RandoAssistant.LOGGER.debug("Initializing StatsManager");
     }

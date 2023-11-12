@@ -35,8 +35,8 @@ public class LootTableListWidget {
 
         this.nextPageButton = new ToggleButtonWidget(x + 95, y + 104, 12, 17, false);
         this.previousPageButton = new ToggleButtonWidget(x + 20, y + 104, 12, 17, true);
-        this.nextPageButton.setTextureUV(1, 208, 12, 18, LootBookWidget.TEXTURE);
-        this.previousPageButton.setTextureUV(2, 208, 12, 18, LootBookWidget.TEXTURE);
+        this.nextPageButton.setTextures(LootBookSettingsWidget.NEXT_TEXTURES);
+        this.previousPageButton.setTextures(LootBookSettingsWidget.PREV_TEXTURES);
 
         resetResults(false);
     }

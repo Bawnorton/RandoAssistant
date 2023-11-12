@@ -11,6 +11,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
@@ -45,7 +46,7 @@ public abstract class TrackableCrawler {
 
         getRecipe(target).ifPresent(recipe -> getRecipeId(recipe).ifPresent(recipeId -> {
             graph.connect(recipeId, target);
-            List<Item> items = recipe.getIngredients().stream().map(Ingredient::getMatchingStacks).flatMap(Arrays::stream).map(ItemStack::getItem).toList();
+            List<Item> items = recipe.value().getIngredients().stream().map(Ingredient::getMatchingStacks).flatMap(Arrays::stream).map(ItemStack::getItem).toList();
             for(Item item: items) {
                 if(!Tracker.getInstance().hasObtained(item)) continue;
                 Identifier itemId = Registries.ITEM.getId(item);
@@ -78,7 +79,7 @@ public abstract class TrackableCrawler {
         }
         getRecipe(target).ifPresent(recipe -> getRecipeId(recipe).ifPresent(recipeId -> {
             graph.connect(recipeId, target);
-            List<Item> items = recipe.getIngredients().stream().map(Ingredient::getMatchingStacks).flatMap(Arrays::stream).map(ItemStack::getItem).toList();
+            List<Item> items = recipe.value().getIngredients().stream().map(Ingredient::getMatchingStacks).flatMap(Arrays::stream).map(ItemStack::getItem).toList();
             for(Item item: items) {
                 if(!Tracker.getInstance().hasObtained(item)) continue;
                 Identifier itemId = Registries.ITEM.getId(item);
@@ -103,7 +104,7 @@ public abstract class TrackableCrawler {
         }).map(Trackable::getIdentifier).toList();
     }
 
-    private static Optional<? extends Recipe<?>> getRecipe(Identifier target) {
+    private static Optional<? extends RecipeEntry<?>> getRecipe(Identifier target) {
         ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
         if (networkHandler == null) return Optional.empty();
 
@@ -112,11 +113,11 @@ public abstract class TrackableCrawler {
 
     }
 
-    private static Optional<Identifier> getRecipeId(Recipe<?> recipe) {
+    private static Optional<Identifier> getRecipeId(RecipeEntry<?> recipe) {
         if (!Tracker.getInstance().hasCrafted(recipe) || !Config.getInstance().enableCrafting) return Optional.empty();
 
         RecipeType recipeType = RecipeType.fromRecipe(recipe);
-        return Optional.of(new Identifier(recipe.getId().getNamespace(), recipeType.getName() + recipe.getId().getPath()));
+        return Optional.of(new Identifier(recipe.id().getNamespace(), recipeType.getName() + recipe.id().getPath()));
     }
 
     public static void clearCache() {
