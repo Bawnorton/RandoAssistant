@@ -1,5 +1,7 @@
 # Random Drop Assistant
 
+## :warning: This is no longer maintained and has been merged into [TrulyRandom](https://github.com/Bawnorton/TrulyRandom)
+
 This is a mod that provides a hierarchical drop-tracking graph for Minecraft with random drops.
 
 [![Modrinth](https://img.shields.io/modrinth/dt/random-assistant?color=00AF5C&label=downloads&logo=modrinth)](https://modrinth.com/mod/random-assistant)
